@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { CopyrightYear } from "@/components/sections/CopyrightYear";
 
 /**
  * Nav links repeated from `Header` for footer-level wayfinding. Kept as a
@@ -35,8 +36,6 @@ const FOOTER_LINKS: { label: string; href: string }[] = [
  * described in `courseContent` (hero eyebrow, authority stats).
  */
 export function Footer() {
-  const year = new Date().getFullYear();
-
   return (
     <footer className="relative w-full overflow-hidden bg-brand-navy py-12 text-white lg:py-16">
       <div className="mx-auto flex max-w-7xl flex-col gap-10 px-6 lg:px-10">
@@ -74,8 +73,8 @@ export function Footer() {
 
         <div className="border-t border-white/15 pt-6">
           <p className="font-body text-xs text-white/50">
-            © {year} ABVCAP — Associação Brasileira de Private Equity e
-            Venture Capital. Todos os direitos reservados.
+            © <CopyrightYear /> ABVCAP — Associação Brasileira de Private
+            Equity e Venture Capital. Todos os direitos reservados.
           </p>
         </div>
       </div>
