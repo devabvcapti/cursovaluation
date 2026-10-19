@@ -10,3 +10,21 @@ import "@testing-library/jest-dom/vitest";
 afterEach(() => {
   cleanup();
 });
+
+// jsdom has no IntersectionObserver. Framer Motion's `useInView` needs one
+// to subscribe, so install an inert stub that never reports an intersection.
+// Tests that need "in view" mock `useInView` directly.
+if (typeof globalThis.IntersectionObserver === "undefined") {
+  class InertIntersectionObserver {
+    readonly root = null;
+    readonly rootMargin = "0px";
+    readonly thresholds: ReadonlyArray<number> = [];
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  }
+  globalThis.IntersectionObserver = InertIntersectionObserver as unknown as typeof IntersectionObserver;
+}

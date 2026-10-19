@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, type Variants } from "framer-motion";
+import { useRef, type CSSProperties } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { BandeiraShape } from "@/components/ui/BandeiraShape";
 import { Button } from "@/components/ui/Button";
 import { Section } from "@/components/ui/Section";
@@ -13,10 +13,11 @@ import { cn } from "@/lib/cn";
  * Motion tokens for the Hero — the one deliberately "bold but institutional"
  * motion moment on the page (design spec §8). Restraint is the brief:
  *
- * - EASE_OUT_EDITORIAL: a long-tail ease-out (close to easeOutQuint). Lines
- *   arrive quickly and then settle slowly, which reads as confident/
- *   editorial rather than bouncy. No springs/overshoot on purpose: overshoot
- *   reads as playful, wrong for a capital-markets institution.
+ * - Ease: cubic-bezier(0.22, 1, 0.36, 1), a long-tail ease-out (close to
+ *   easeOutQuint). Lines arrive quickly and then settle slowly, which reads
+ *   as confident/editorial rather than bouncy. No springs/overshoot on
+ *   purpose: overshoot reads as playful, wrong for a capital-markets
+ *   institution.
  * - Headline lines rise out of a clip mask (not a fade-from-nowhere), like
  *   type being set. 0.9s per line is above the 300ms micro-interaction band
  *   because this is a one-time page-load sequence, not UI feedback; the 0.12s
@@ -28,11 +29,13 @@ import { cn } from "@/lib/cn";
  * - Parallax: the bandeira travels further than the type over the hero's
  *   scroll range (≈140px vs ≈48px), so the depth split is perceptible but
  *   the page never "floats" — content still scrolls essentially 1:1.
+ *
+ * The entrance durations/easing live in globals.css (`.hero-enter-*`); only
+ * the per-element delays are set here, via the `--hero-enter-delay` custom
+ * property.
  */
-const EASE_OUT_EDITORIAL = [0.22, 1, 0.36, 1] as const;
-
-const LINE_DURATION_S = 0.9;
 const LINE_STAGGER_S = 0.12;
+const LINE_DURATION_S = 0.9;
 const SEQUENCE_DELAY_S = 0.15;
 // Supporting copy and CTAs land as the last headline line is settling.
 const SUPPORT_DELAY_S = SEQUENCE_DELAY_S + LINE_STAGGER_S * 2 + LINE_DURATION_S * 0.6;
@@ -41,36 +44,17 @@ const DRIFT_DURATION_S = 22;
 const BANDEIRA_PARALLAX_PX = 140;
 const CONTENT_PARALLAX_PX = 48;
 
-const headlineVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: LINE_STAGGER_S, delayChildren: SEQUENCE_DELAY_S },
-  },
-};
+const DRIFT_KEYFRAMES = { x: [0, -16, 0], y: [0, -10, 0], rotate: [0, -1.2, 0] };
+const DRIFT_TRANSITION = { duration: DRIFT_DURATION_S, ease: "easeInOut", repeat: Infinity } as const;
+// The rest pose equals the drift's first/last keyframe, so starting or
+// stopping the drift never jumps.
+const DRIFT_REST = { x: 0, y: 0, rotate: 0 };
+const DRIFT_STOP_TRANSITION = { duration: 0 } as const;
 
-const lineVariants: Variants = {
-  hidden: { y: "105%" },
-  visible: { y: "0%", transition: { duration: LINE_DURATION_S, ease: EASE_OUT_EDITORIAL } },
-};
+function enterDelay(seconds: number): CSSProperties {
+  return { "--hero-enter-delay": `${seconds}s` } as CSSProperties;
+}
 
-const supportVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: EASE_OUT_EDITORIAL, delay: SUPPORT_DELAY_S },
-  },
-};
-
-const eyebrowVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.6, ease: EASE_OUT_EDITORIAL } },
-};
-
-/*
- * Layout classes shared by both render paths, so the reduced-motion render
- * is exactly the full-motion layout at rest.
- */
 // Applied to the navy `Section`, which already owns bg/text color,
 // `relative overflow-hidden` and vertical padding.
 // Below `lg` the extra bottom padding reserves a band for the bandeira so
@@ -147,44 +131,33 @@ function Ctas() {
 }
 
 /**
- * Reduced-motion render: the final resting layout, with no Framer Motion
- * components at all — nothing to animate, no scroll listeners, no
- * infinite loops ticking in the background.
+ * Above-the-fold hero (design spec §8): navy field, oversized light
+ * headline entering line by line, a cropped green "bandeira" that drifts
+ * slowly and parallaxes on scroll, and the primary checkout CTA (its hover
+ * scale + glow lives in Button's `primary` variant).
+ *
+ * ONE persistent tree, never swapped by motion preference.
+ * `useReducedMotion()` reads `true` during SSR and hydration and switches to
+ * the real preference (usually `false`) a tick after mount. Swapping
+ * component types on that value would remount the hero and replay its
+ * entrance for most visitors. So the preference only changes props on
+ * elements that never unmount:
+ * - Drift: `animate` is the rest pose (reduced) or the drift loop (full).
+ *   The rest pose equals the loop's first keyframe, so the upgrade starts
+ *   seamlessly. `initial={false}` means there is no "enter" state.
+ * - Parallax: the `y` style is 0 (reduced) or the scroll-linked value (full).
+ *   At page top the scroll value is 0 anyway, so the upgrade is invisible.
+ * - Entrance: CSS keyframes (`.hero-enter-*` in globals.css), gated by
+ *   `@media (prefers-reduced-motion: no-preference)`. They play once from the
+ *   first paint of the server HTML and do not depend on the JS hook, so the
+ *   hook resolving can never hide content or restart them.
+ *
+ * The root always carries `data-testid="hero-root"` and
+ * `data-motion="reduced" | "full"`, matching AnimatedCounter's convention.
+ * The attribute changes in place. It does not remount anything.
  */
-function StaticHero() {
-  const { headlineLines, subheadline } = courseContent.hero;
-
-  return (
-    <div data-testid="hero-root" data-motion="reduced">
-      <Section tone="navy" id="top" className={SECTION_CLASSES}>
-        <div className={BANDEIRA_FRAME_CLASSES}>
-          <BandeiraShape tone="green" corner="bottom-right" className={BANDEIRA_FILL_CLASSES} />
-        </div>
-
-        <div className={CONTENT_CLASSES}>
-          <p className={EYEBROW_CLASSES}>
-            <EyebrowContent />
-          </p>
-          <h1 className={H1_CLASSES}>
-            {headlineLines.map((line, index) => (
-              <span key={line} className={cn("block", lineColorClass(index))}>
-                {line}{" "}
-              </span>
-            ))}
-          </h1>
-          <div className="mt-8 md:mt-10">
-            <p className={SUBHEADLINE_CLASSES}>{subheadline}</p>
-            <div className={CTA_ROW_CLASSES}>
-              <Ctas />
-            </div>
-          </div>
-        </div>
-      </Section>
-    </div>
-  );
-}
-
-function MotionHero() {
+export function Hero() {
+  const prefersReducedMotion = useReducedMotion();
   const { headlineLines, subheadline } = courseContent.hero;
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -198,58 +171,54 @@ function MotionHero() {
   const contentY = useTransform(scrollYProgress, [0, 1], [0, CONTENT_PARALLAX_PX]);
 
   return (
-    <div ref={sectionRef} data-testid="hero-root" data-motion="full">
+    <div ref={sectionRef} data-testid="hero-root" data-motion={prefersReducedMotion ? "reduced" : "full"}>
       <Section tone="navy" id="top" className={SECTION_CLASSES}>
         {/* Outer layer: scroll parallax. Inner layer: continuous drift. Kept
             separate so the two transforms compose instead of fighting. */}
-        <motion.div style={{ y: bandeiraY }} className={BANDEIRA_FRAME_CLASSES}>
+        <motion.div
+          data-testid="hero-bandeira-parallax"
+          style={{ y: prefersReducedMotion ? 0 : bandeiraY }}
+          className={BANDEIRA_FRAME_CLASSES}
+        >
           <motion.div
+            data-testid="hero-bandeira-drift"
             className="h-full w-full will-change-transform"
             style={{ transformOrigin: "100% 100%" }}
-            animate={{ x: [0, -16, 0], y: [0, -10, 0], rotate: [0, -1.2, 0] }}
-            transition={{ duration: DRIFT_DURATION_S, ease: "easeInOut", repeat: Infinity }}
+            initial={false}
+            animate={prefersReducedMotion ? DRIFT_REST : DRIFT_KEYFRAMES}
+            transition={prefersReducedMotion ? DRIFT_STOP_TRANSITION : DRIFT_TRANSITION}
           >
             <BandeiraShape tone="green" corner="bottom-right" className={BANDEIRA_FILL_CLASSES} />
           </motion.div>
         </motion.div>
 
-        <motion.div style={{ y: contentY }} className={CONTENT_CLASSES} initial="hidden" animate="visible">
-          <motion.p variants={eyebrowVariants} className={EYEBROW_CLASSES}>
+        <motion.div style={{ y: prefersReducedMotion ? 0 : contentY }} className={CONTENT_CLASSES}>
+          <p className={cn(EYEBROW_CLASSES, "hero-enter-eyebrow")}>
             <EyebrowContent />
-          </motion.p>
-          <motion.h1 variants={headlineVariants} className={H1_CLASSES}>
+          </p>
+          <h1 className={H1_CLASSES}>
             {headlineLines.map((line, index) => (
               // Clip mask: each line rises from just below its own baseline.
               // Small vertical padding keeps descenders from being clipped.
               <span key={line} className="-my-[0.08em] block overflow-hidden py-[0.08em]">
-                <motion.span variants={lineVariants} className={cn("block", lineColorClass(index))}>
+                <span
+                  data-testid="hero-headline-line"
+                  className={cn("hero-enter-line block", lineColorClass(index))}
+                  style={enterDelay(SEQUENCE_DELAY_S + LINE_STAGGER_S * index)}
+                >
                   {line}{" "}
-                </motion.span>
+                </span>
               </span>
             ))}
-          </motion.h1>
-          <motion.div variants={supportVariants} className="mt-8 md:mt-10">
+          </h1>
+          <div className="hero-enter-support mt-8 md:mt-10" style={enterDelay(SUPPORT_DELAY_S)}>
             <p className={SUBHEADLINE_CLASSES}>{subheadline}</p>
             <div className={CTA_ROW_CLASSES}>
               <Ctas />
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </Section>
     </div>
   );
-}
-
-/**
- * Above-the-fold hero (design spec §8): navy field, oversized light
- * headline entering line by line, a cropped green "bandeira" that drifts
- * slowly and parallaxes on scroll, and the primary checkout CTA (its hover
- * scale + glow lives in Button's `primary` variant).
- *
- * The root always carries `data-testid="hero-root"` and
- * `data-motion="reduced" | "full"`, matching AnimatedCounter's convention.
- */
-export function Hero() {
-  const prefersReducedMotion = useReducedMotion();
-  return prefersReducedMotion ? <StaticHero /> : <MotionHero />;
 }

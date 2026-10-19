@@ -27,3 +27,62 @@ body {
   color: var(--foreground);
   font-family: var(--font-body), sans-serif;
 }
+
+/*
+ * Hero page-load entrance (see Hero.tsx for timing rationale).
+ *
+ * These are plain CSS animations, not Framer Motion, on purpose:
+ * - They run from the first paint of the server HTML. They do not depend on
+ *   hydration or on the JS reduced-motion hook, which reads `true` until one
+ *   tick after mount. Nothing waits for JS, and JS never triggers a replay.
+ * - The browser applies the reduced-motion preference via this media query,
+ *   so reduced-motion visitors never get a frame of the entrance.
+ * - React never remounts these elements and never changes their classes, so
+ *   the animation plays exactly once per page load. `both` fill keeps each
+ *   element in its `from` state during its delay, then at rest for good.
+ *   Without JS the animation still finishes, so content is never stuck hidden.
+ */
+@keyframes hero-line-rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-enter-line {
+    animation: hero-line-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--hero-enter-delay, 0s);
+  }
+
+  .hero-enter-support {
+    animation: hero-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--hero-enter-delay, 0s);
+  }
+
+  .hero-enter-eyebrow {
+    animation: hero-fade 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
