@@ -72,7 +72,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-white/15 pt-6">
-          <p className="font-body text-xs text-white/50">
+          <p className="font-body text-xs text-white/60">
             © <CopyrightYear /> ABVCAP — Associação Brasileira de Private
             Equity e Venture Capital. Todos os direitos reservados.
           </p>

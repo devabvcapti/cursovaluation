@@ -17,6 +17,12 @@ const CARD_HEADING_CLASSES = "font-heading text-xl font-bold text-white";
 
 const CTA_WRAPPER_CLASSES = "flex flex-col items-start justify-center gap-6";
 
+// LeadCaptureForm's labels/inputs are styled for a light section (see
+// Hero.tsx's identical wrapper); `CARD_CLASSES` is a translucent navy
+// overlay (`bg-white/5`), so without this solid white panel the form's
+// `text-brand-navy` labels would render at ~1:1 contrast against it.
+const LEAD_FORM_WRAPPER_CLASSES = "mt-6 rounded-sm bg-white p-6 md:p-8";
+
 /**
  * Final conversion band: the primary matrícula CTA (checkout link) next to
  * `LeadCaptureForm` for visitors who want the ementa before committing.
@@ -41,7 +47,7 @@ export function FinalCTA() {
           </div>
           <div className={CARD_CLASSES}>
             <h3 className={CARD_HEADING_CLASSES}>{courseContent.hero.syllabusCtaLabel}</h3>
-            <div className="mt-6">
+            <div className={LEAD_FORM_WRAPPER_CLASSES}>
               <LeadCaptureForm />
             </div>
           </div>
