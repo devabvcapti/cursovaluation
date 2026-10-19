@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { BandeiraShape } from "@/components/ui/BandeiraShape";
 import { Button } from "@/components/ui/Button";
+import { LeadCaptureForm } from "@/components/ui/LeadCaptureForm";
 import { Section } from "@/components/ui/Section";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { courseContent } from "@/content/curso";
@@ -99,6 +100,10 @@ const SUBHEADLINE_CLASSES = "max-w-xl font-body text-base leading-relaxed text-w
 
 const CTA_ROW_CLASSES = "mt-8 flex flex-col gap-4 md:mt-10 sm:flex-row sm:items-center";
 
+// LeadCaptureForm's labels/inputs are styled for a light section; wrap it in
+// its own light card here since it's revealed on top of the navy hero.
+const LEAD_FORM_WRAPPER_CLASSES = "mt-6 max-w-md rounded-sm bg-white p-6 md:p-8";
+
 const SECONDARY_CTA_CLASSES = cn(
   "inline-flex min-h-11 items-center justify-center px-8 py-3.5",
   "border-2 border-white/40 bg-transparent text-white",
@@ -116,14 +121,22 @@ function EyebrowContent() {
   );
 }
 
-function Ctas() {
+interface CtasProps {
+  onSecondaryClick: () => void;
+}
+
+function Ctas({ onSecondaryClick }: CtasProps) {
   return (
     <>
       <Button href={courseContent.hero.checkoutUrl} variant="primary">
         Quero me matricular
       </Button>
-      {/* Inert on purpose: Task 14 wires this to open LeadCaptureForm. */}
-      <button type="button" data-testid="hero-secondary-cta" className={SECONDARY_CTA_CLASSES}>
+      <button
+        type="button"
+        data-testid="hero-secondary-cta"
+        onClick={onSecondaryClick}
+        className={SECONDARY_CTA_CLASSES}
+      >
         {courseContent.hero.syllabusCtaLabel}
       </button>
     </>
@@ -160,6 +173,11 @@ export function Hero() {
   const prefersReducedMotion = useReducedMotion();
   const { headlineLines, subheadline } = courseContent.hero;
   const sectionRef = useRef<HTMLDivElement>(null);
+  // Secondary CTA ("Baixar ementa completa") reveals `LeadCaptureForm`
+  // inline, right below the CTA row, instead of a modal — the hero's
+  // existing entrance/drift/parallax tree never changes shape, so this
+  // toggle only ever adds/removes a sibling block after it.
+  const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
 
   // 0 when the hero's top meets the viewport top, 1 when its bottom does —
   // i.e. the parallax only runs while the hero is scrolling out of view.
@@ -214,8 +232,16 @@ export function Hero() {
           <div className="hero-enter-support mt-8 md:mt-10" style={enterDelay(SUPPORT_DELAY_S)}>
             <p className={SUBHEADLINE_CLASSES}>{subheadline}</p>
             <div className={CTA_ROW_CLASSES}>
-              <Ctas />
+              <Ctas onSecondaryClick={() => setIsLeadFormOpen(true)} />
             </div>
+            {isLeadFormOpen ? (
+              <div className={LEAD_FORM_WRAPPER_CLASSES}>
+                <LeadCaptureForm
+                  className="max-w-full"
+                  onSuccess={() => setIsLeadFormOpen(false)}
+                />
+              </div>
+            ) : null}
           </div>
         </motion.div>
       </Section>
