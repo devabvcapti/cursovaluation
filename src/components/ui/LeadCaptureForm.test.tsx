@@ -13,7 +13,15 @@ describe("LeadCaptureForm", () => {
     render(<LeadCaptureForm />);
     await user.type(screen.getByLabelText(/nome/i), "Ana");
     await user.click(screen.getByRole("button", { name: /baixar ementa/i }));
-    expect(await screen.findByText(/e-mail/i)).toBeInTheDocument();
+    // Targets the rendered error text specifically (by its exact copy, tied
+    // to the email field via `aria-describedby="lead-email-error"`), not
+    // `/e-mail/i` generally — the field's own <label> ("E-mail") already
+    // matches that broader pattern and is present regardless of whether
+    // error rendering works, which would make the assertion a false
+    // positive (it'd pass even if `setErrors` were a no-op).
+    const emailInput = screen.getByLabelText(/e-mail/i);
+    expect(emailInput).toHaveAttribute("aria-describedby", "lead-email-error");
+    expect(await screen.findByText("Campo obrigatório.")).toHaveAttribute("id", "lead-email-error");
     expect(fetch).not.toHaveBeenCalled();
   });
 
