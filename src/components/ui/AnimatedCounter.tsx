@@ -106,7 +106,7 @@ export function AnimatedCounter({ to, suffix = "", durationMs = DEFAULT_DURATION
 
   return (
     <span ref={ref} data-motion={prefersReducedMotion ? "reduced" : "full"} className={cn(className)}>
-      {shown}
+      {shown.toLocaleString("pt-BR")}
       {suffix}
     </span>
   );

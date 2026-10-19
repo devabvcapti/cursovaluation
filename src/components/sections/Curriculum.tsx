@@ -18,8 +18,8 @@ const LESSON_LIST_CLASSES = "space-y-2";
  * and summary, content reveals its lessons list.
  */
 export function Curriculum() {
-  const items = courseContent.curriculumModules.map((module) => ({
-    id: module.title,
+  const items = courseContent.curriculumModules.map((module, index) => ({
+    id: `module-${index}`,
     trigger: (
       <>
         <span className={TRIGGER_TITLE_CLASSES}>{module.title}</span>

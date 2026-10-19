@@ -78,6 +78,13 @@ describe("courseContent pending data", () => {
     expect(courseContent.faq.length).toBeGreaterThanOrEqual(4);
   });
 
+  it("marks every authorityStats entry as unverified (pending real ABVCAP data)", () => {
+    expect(courseContent.authorityStats.length).toBeGreaterThan(0);
+    for (const stat of courseContent.authorityStats) {
+      expect(stat.verified).toBe(false);
+    }
+  });
+
   it("covers the required FAQ objections", () => {
     const joined = courseContent.faq.map((f) => f.question.toLowerCase()).join(" | ");
     expect(joined).toMatch(/certificado/);

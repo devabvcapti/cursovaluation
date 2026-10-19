@@ -8,7 +8,7 @@ export interface CourseContent {
     checkoutUrl: string;
     syllabusCtaLabel: string;
   };
-  authorityStats: { value: number; suffix: string; label: string }[];
+  authorityStats: { value: number; suffix: string; label: string; verified: boolean }[];
   audienceProfiles: { title: string; pain: string }[];
   learningOutcomes: string[];
   curriculumModules: { title: string; summary: string; lessons: string[] }[];
@@ -49,16 +49,19 @@ export const courseContent: CourseContent = {
       value: 20,
       suffix: "+",
       label: "anos de atuação institucional da ABVCAP no ecossistema de Private Equity e Venture Capital",
+      verified: false,
     },
     {
       value: 200,
       suffix: "+",
       label: "gestoras e investidores que compõem a comunidade ABVCAP",
+      verified: false,
     },
     {
       value: 1000,
       suffix: "+",
       label: "profissionais de M&A, PE/VC e finanças corporativas na rede ABVCAP",
+      verified: false,
     },
   ],
 

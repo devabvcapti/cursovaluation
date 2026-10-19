@@ -9,6 +9,8 @@ const VALUE_CLASSES = "font-heading text-5xl font-light text-brand-green md:text
 
 const LABEL_CLASSES = "mt-4 max-w-[22ch] font-body text-sm leading-relaxed text-white/80";
 
+const UNVERIFIED_MARKER_CLASSES = "mt-1 block font-body text-xs italic text-white/50";
+
 /**
  * Institutional authority band (design spec) right after the Hero: one
  * `AnimatedCounter` per `courseContent.authorityStats` entry, each paired
@@ -22,7 +24,12 @@ export function AuthorityStats() {
         {courseContent.authorityStats.map((stat) => (
           <div key={stat.label} data-testid="authority-stat" className="text-center sm:text-left">
             <AnimatedCounter to={stat.value} suffix={stat.suffix} className={VALUE_CLASSES} />
-            <p className={LABEL_CLASSES}>{stat.label}</p>
+            <p className={LABEL_CLASSES}>
+              {stat.label}
+              {!stat.verified ? (
+                <span className={UNVERIFIED_MARKER_CLASSES}>(número a confirmar)</span>
+              ) : null}
+            </p>
           </div>
         ))}
       </div>

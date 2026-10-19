@@ -13,8 +13,8 @@ const ANSWER_CLASSES = "font-body text-base leading-relaxed";
  * entry — trigger shows the question, content reveals the answer.
  */
 export function FAQ() {
-  const items = courseContent.faq.map((entry) => ({
-    id: entry.question,
+  const items = courseContent.faq.map((entry, index) => ({
+    id: `faq-${index}`,
     trigger: <span>{entry.question}</span>,
     content: <p className={ANSWER_CLASSES}>{entry.answer}</p>,
   }));
