@@ -8,7 +8,8 @@ const HEADING_CLASSES = "font-heading text-4xl font-light text-brand-navy md:tex
 
 const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-6 md:grid-cols-2";
 
-const CARD_CLASSES = "rounded-sm border border-brand-navy/10 bg-white p-8 shadow-sm";
+const CARD_CLASSES =
+  "rounded-sm border border-brand-navy/10 bg-white p-8 shadow-sm transition-colors duration-200 hover:border-brand-green/40 hover:bg-brand-green/5";
 
 const CARD_TITLE_CLASSES = "font-heading text-xl font-medium text-brand-navy";
 
