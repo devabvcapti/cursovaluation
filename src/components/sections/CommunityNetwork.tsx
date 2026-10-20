@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -14,10 +15,10 @@ const BODY_CLASSES = "mt-8 max-w-3xl font-body text-lg leading-relaxed text-whit
 export function CommunityNetwork() {
   return (
     <Section tone="navy">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>{courseContent.community.title}</h2>
         <p className={BODY_CLASSES}>{courseContent.community.body}</p>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

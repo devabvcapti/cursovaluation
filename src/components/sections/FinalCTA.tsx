@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { LeadCaptureForm } from "@/components/ui/LeadCaptureForm";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -34,7 +35,7 @@ const LEAD_FORM_WRAPPER_CLASSES = "mt-6 rounded-sm bg-white p-6 md:p-8";
 export function FinalCTA() {
   return (
     <Section tone="navy" id="matricula">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Pronto para dominar valuation?</h2>
         <p className={BODY_CLASSES}>
           Garanta sua vaga na próxima turma ou baixe a ementa completa para conhecer o programa em detalhes.
@@ -52,7 +53,7 @@ export function FinalCTA() {
             </div>
           </div>
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

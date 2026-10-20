@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { Accordion } from "@/components/ui/Accordion";
 import { courseContent } from "@/content/curso";
@@ -37,12 +38,12 @@ export function Curriculum() {
 
   return (
     <Section tone="white" id="programa">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Grade do curso</h2>
         <div className="mt-14">
           <Accordion items={items} />
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

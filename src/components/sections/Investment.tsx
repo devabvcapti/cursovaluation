@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/Button";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 import { formatInvestment } from "@/lib/format-investment";
@@ -41,7 +42,7 @@ export function Investment() {
 
   return (
     <Section tone="navy" id="investimento">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Investimento</h2>
         <div className={CARD_CLASSES}>
           <p className={PRICE_LABEL_CLASSES}>Valor do curso</p>
@@ -63,7 +64,7 @@ export function Investment() {
             Quero me matricular
           </Button>
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

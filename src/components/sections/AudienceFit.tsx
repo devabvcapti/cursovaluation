@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -20,7 +21,7 @@ const CARD_PAIN_CLASSES = "mt-4 font-body text-base leading-relaxed text-brand-n
 export function AudienceFit() {
   return (
     <Section tone="white" id="para-quem">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Para quem é este programa</h2>
         <div className={GRID_CLASSES}>
           {courseContent.audienceProfiles.map((profile) => (
@@ -30,7 +31,7 @@ export function AudienceFit() {
             </article>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

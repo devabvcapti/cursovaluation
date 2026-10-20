@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -20,7 +21,7 @@ const TEXT_CLASSES = "font-body text-base leading-relaxed text-white/85";
 export function LearningOutcomes() {
   return (
     <Section tone="navy" id="resultados">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>O que você vai aprender</h2>
         <ol className={LIST_CLASSES}>
           {courseContent.learningOutcomes.map((outcome, index) => (
@@ -32,7 +33,7 @@ export function LearningOutcomes() {
             </li>
           ))}
         </ol>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

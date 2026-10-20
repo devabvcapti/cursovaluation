@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { CopyrightYear } from "@/components/sections/CopyrightYear";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 /**
  * Nav links repeated from `Header` for footer-level wayfinding. Kept as a
@@ -38,7 +39,7 @@ const FOOTER_LINKS: { label: string; href: string }[] = [
 export function Footer() {
   return (
     <footer className="relative w-full overflow-hidden bg-brand-navy py-12 text-white lg:py-16">
-      <div className="mx-auto flex max-w-7xl flex-col gap-10 px-6 lg:px-10">
+      <ScrollReveal className="mx-auto flex max-w-7xl flex-col gap-10 px-6 lg:px-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex flex-col gap-4 lg:max-w-md">
             <Image
@@ -77,7 +78,7 @@ export function Footer() {
             Equity e Venture Capital. Todos os direitos reservados.
           </p>
         </div>
-      </div>
+      </ScrollReveal>
     </footer>
   );
 }

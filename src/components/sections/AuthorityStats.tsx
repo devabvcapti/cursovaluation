@@ -1,4 +1,5 @@
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -20,7 +21,7 @@ const UNVERIFIED_MARKER_CLASSES = "mt-1 block font-body text-xs italic text-whit
 export function AuthorityStats() {
   return (
     <Section tone="navy">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         {courseContent.authorityStats.map((stat) => (
           <div key={stat.label} data-testid="authority-stat" className="text-center sm:text-left">
             <AnimatedCounter to={stat.value} suffix={stat.suffix} className={VALUE_CLASSES} />
@@ -32,7 +33,7 @@ export function AuthorityStats() {
             </p>
           </div>
         ))}
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

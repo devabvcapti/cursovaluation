@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -27,7 +28,7 @@ const AUTHOR_ROLE_CLASSES = "font-body text-sm text-brand-navy/70";
 export function SocialProof() {
   return (
     <Section tone="white">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>O que dizem os alunos</h2>
         <div className={GRID_CLASSES}>
           {courseContent.testimonials.map((testimonial) => (
@@ -46,7 +47,7 @@ export function SocialProof() {
             </figure>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

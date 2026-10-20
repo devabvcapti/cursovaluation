@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -18,7 +19,7 @@ const BLOCK_BODY_CLASSES = "mt-4 font-body text-base leading-relaxed text-white/
 export function Methodology() {
   return (
     <Section tone="navy" id="metodologia">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Metodologia</h2>
         <div className={GRID_CLASSES}>
           {courseContent.methodology.map((block) => (
@@ -28,7 +29,7 @@ export function Methodology() {
             </div>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }

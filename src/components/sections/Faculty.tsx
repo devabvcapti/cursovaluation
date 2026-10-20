@@ -1,3 +1,4 @@
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
 
@@ -24,7 +25,7 @@ const BIO_CLASSES = "mt-4 font-body text-base leading-relaxed text-brand-navy/75
 export function Faculty() {
   return (
     <Section tone="white" id="professores">
-      <div className={CONTENT_CLASSES}>
+      <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Corpo docente</h2>
         <div className={GRID_CLASSES}>
           {courseContent.faculty.map((professor) => (
@@ -37,7 +38,7 @@ export function Faculty() {
             </article>
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </Section>
   );
 }
