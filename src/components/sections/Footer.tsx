@@ -32,9 +32,7 @@ const FOOTER_LINKS: { label: string; href: string }[] = [
  * No specific contact details (email/phone/address) are included: Task 1
  * never defined those fields in `courseContent`, and inventing new
  * placeholder-wrapped facts beyond what Task 1 established was explicitly
- * out of scope for this task. The copy below only restates ABVCAP's own
- * public institutional identity, consistent with how it's already
- * described in `courseContent` (hero eyebrow, authority stats).
+ * out of scope for this task.
  */
 export function Footer() {
   return (
@@ -47,16 +45,8 @@ export function Footer() {
               alt="ABVCAP"
               width={350}
               height={150}
-              className="h-10 w-auto"
+              className="h-10 w-auto self-start"
             />
-            <p className="font-body text-sm leading-relaxed text-white/70">
-              A ABVCAP — Associação Brasileira de Private Equity e Venture
-              Capital — é a entidade de referência do ecossistema de Private
-              Equity e Venture Capital no Brasil, reunindo gestoras,
-              investidores e profissionais de M&amp;A e finanças corporativas.
-              O curso Valuation é oferecido com a chancela institucional da
-              ABVCAP.
-            </p>
           </div>
 
           <nav aria-label="Links do rodapé" className="flex flex-wrap gap-x-8 gap-y-3">
