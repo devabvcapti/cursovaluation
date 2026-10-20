@@ -19,21 +19,31 @@ const CARD_HEADING_CLASSES = "font-heading text-xl font-bold text-white";
 
 // `h-full` + the grid's default (stretch) item alignment give this column
 // the same height as the form card beside it, so the bandeira mark below
-// has real room to anchor the otherwise-empty lower half.
-const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-center gap-6 overflow-hidden";
+// has real room to anchor the otherwise-empty lower half. No `overflow-
+// hidden` here on purpose — it previously lived on this wrapper and clipped
+// the primary button's hover glow (`Button`'s `motion-safe:hover:shadow-
+// [...]` extends past the button's own box), cutting the glow off wherever
+// the button sat close to this wrapper's edge. The clip now lives on
+// `BANDEIRA_FRAME_CLASSES` instead, scoped to just the image.
+const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-center gap-6";
 
 // Deliberate exception to the brand guide's "never the whole bandeira"
 // rule (see `BandeiraShape`'s doc comment) — confirmed with the user for
-// this one decorative accent. Faded down so it reads as a quiet background
-// element, not a competing focal point against the button above it.
-// `h-full` tracks `CTA_WRAPPER_CLASSES`'s own `h-full` (which already
-// matches the form card's height), so the mark never overflows above the
-// column it sits in. No z-index here on purpose: an unadorned positioned
-// element already paints below any sibling that has an explicit one (see
+// this one decorative accent. A dedicated absolutely-positioned frame
+// (rather than putting `overflow-hidden` on `CTA_WRAPPER_CLASSES`) keeps
+// the clip scoped to the image alone — see that constant's comment.
+const BANDEIRA_FRAME_CLASSES = "pointer-events-none absolute inset-0 overflow-hidden";
+
+// Faded down so it reads as a quiet background element, not a competing
+// focal point against the button above it. `h-full` tracks the frame's own
+// height (which matches `CTA_WRAPPER_CLASSES`, in turn matching the form
+// card's height), so the mark never overflows above the column it sits in.
+// No z-index here on purpose: an unadorned positioned element already
+// paints below any sibling that has an explicit one (see
 // `BUTTON_STACKING_CLASSES`) — a negative z-index on this element instead
 // escaped to behind the whole Section's solid background and erased the
 // mark entirely, which is why that approach was reverted.
-const BANDEIRA_ACCENT_CLASSES = "pointer-events-none absolute bottom-0 left-0 h-full w-auto opacity-20";
+const BANDEIRA_ACCENT_CLASSES = "absolute bottom-0 left-0 h-full w-auto opacity-20";
 
 // Keeps the primary CTA button painting above the bandeira mark beside it
 // (see `BANDEIRA_ACCENT_CLASSES`), now that both occupy the same column.
@@ -66,14 +76,16 @@ export function FinalCTA() {
             <Button href={courseContent.hero.checkoutUrl} variant="primary" className={BUTTON_STACKING_CLASSES}>
               Quero me matricular
             </Button>
-            <Image
-              src="/brand/bandeira-verde.png"
-              alt=""
-              aria-hidden="true"
-              width={217}
-              height={160}
-              className={BANDEIRA_ACCENT_CLASSES}
-            />
+            <div className={BANDEIRA_FRAME_CLASSES}>
+              <Image
+                src="/brand/bandeira-verde.png"
+                alt=""
+                aria-hidden="true"
+                width={217}
+                height={160}
+                className={BANDEIRA_ACCENT_CLASSES}
+              />
+            </div>
           </div>
           <div className={CARD_CLASSES}>
             <h3 className={CARD_HEADING_CLASSES}>{courseContent.hero.syllabusCtaLabel}</h3>
