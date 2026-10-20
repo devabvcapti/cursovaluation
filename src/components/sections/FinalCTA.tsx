@@ -1,4 +1,4 @@
-import { BandeiraShape } from "@/components/ui/BandeiraShape";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { LeadCaptureForm } from "@/components/ui/LeadCaptureForm";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
@@ -18,14 +18,15 @@ const CARD_CLASSES = "rounded-sm border border-white/15 bg-white/5 p-8 md:p-10";
 const CARD_HEADING_CLASSES = "font-heading text-xl font-bold text-white";
 
 // `h-full` + the grid's default (stretch) item alignment give this column
-// the same height as the form card beside it, so the bandeira fragment
-// below has real room to anchor the otherwise-empty lower half.
+// the same height as the form card beside it, so the bandeira mark below
+// has real room to anchor the otherwise-empty lower half.
 const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-center gap-6 overflow-hidden";
 
-// Sized and faded down from BandeiraShape's default (built for full-bleed
-// section backgrounds) so it reads as a quiet accent inside this narrower
-// column, not a competing focal point against the button above it.
-const BANDEIRA_ACCENT_CLASSES = "h-32 w-32 opacity-20 md:h-40 md:w-40";
+// Deliberate exception to the brand guide's "never the whole bandeira"
+// rule (see `BandeiraShape`'s doc comment) — confirmed with the user for
+// this one decorative accent. Faded down so it reads as a quiet background
+// element, not a competing focal point against the button above it.
+const BANDEIRA_ACCENT_CLASSES = "pointer-events-none absolute bottom-0 left-0 h-40 w-auto opacity-20 md:h-48";
 
 // LeadCaptureForm's labels/inputs are styled for a light section (see
 // Hero.tsx's identical wrapper); `CARD_CLASSES` is a translucent navy
@@ -54,7 +55,14 @@ export function FinalCTA() {
             <Button href={courseContent.hero.checkoutUrl} variant="primary">
               Quero me matricular
             </Button>
-            <BandeiraShape tone="green" corner="bottom-left" className={BANDEIRA_ACCENT_CLASSES} />
+            <Image
+              src="/brand/bandeira-verde.png"
+              alt=""
+              aria-hidden="true"
+              width={217}
+              height={160}
+              className={BANDEIRA_ACCENT_CLASSES}
+            />
           </div>
           <div className={CARD_CLASSES}>
             <h3 className={CARD_HEADING_CLASSES}>{courseContent.hero.syllabusCtaLabel}</h3>
