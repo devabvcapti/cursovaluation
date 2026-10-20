@@ -26,7 +26,12 @@ const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-c
 // rule (see `BandeiraShape`'s doc comment) — confirmed with the user for
 // this one decorative accent. Faded down so it reads as a quiet background
 // element, not a competing focal point against the button above it.
-const BANDEIRA_ACCENT_CLASSES = "pointer-events-none absolute bottom-0 left-0 h-64 w-auto opacity-20 md:h-80";
+// `h-full` tracks `CTA_WRAPPER_CLASSES`'s own `h-full` (which already
+// matches the form card's height), so the mark never overflows above the
+// column it sits in. `-z-10` keeps it behind the button now that it spans
+// the same vertical range (a positioned element would otherwise stack
+// above the button's unpositioned, in-flow box by default).
+const BANDEIRA_ACCENT_CLASSES = "pointer-events-none absolute bottom-0 left-0 -z-10 h-full w-auto opacity-20";
 
 // LeadCaptureForm's labels/inputs are styled for a light section (see
 // Hero.tsx's identical wrapper); `CARD_CLASSES` is a translucent navy
