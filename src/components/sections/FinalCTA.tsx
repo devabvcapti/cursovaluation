@@ -1,3 +1,4 @@
+import { BandeiraShape } from "@/components/ui/BandeiraShape";
 import { Button } from "@/components/ui/Button";
 import { LeadCaptureForm } from "@/components/ui/LeadCaptureForm";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
@@ -10,13 +11,21 @@ const HEADING_CLASSES = "font-heading text-4xl font-light text-white md:text-5xl
 
 const BODY_CLASSES = "mt-4 max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg";
 
-const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-start";
+const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-12 lg:grid-cols-2";
 
 const CARD_CLASSES = "rounded-sm border border-white/15 bg-white/5 p-8 md:p-10";
 
 const CARD_HEADING_CLASSES = "font-heading text-xl font-bold text-white";
 
-const CTA_WRAPPER_CLASSES = "flex flex-col items-start justify-center gap-6";
+// `h-full` + the grid's default (stretch) item alignment give this column
+// the same height as the form card beside it, so the bandeira fragment
+// below has real room to anchor the otherwise-empty lower half.
+const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-center gap-6 overflow-hidden";
+
+// Sized and faded down from BandeiraShape's default (built for full-bleed
+// section backgrounds) so it reads as a quiet accent inside this narrower
+// column, not a competing focal point against the button above it.
+const BANDEIRA_ACCENT_CLASSES = "h-32 w-32 opacity-20 md:h-40 md:w-40";
 
 // LeadCaptureForm's labels/inputs are styled for a light section (see
 // Hero.tsx's identical wrapper); `CARD_CLASSES` is a translucent navy
@@ -45,6 +54,7 @@ export function FinalCTA() {
             <Button href={courseContent.hero.checkoutUrl} variant="primary">
               Quero me matricular
             </Button>
+            <BandeiraShape tone="green" corner="bottom-left" className={BANDEIRA_ACCENT_CLASSES} />
           </div>
           <div className={CARD_CLASSES}>
             <h3 className={CARD_HEADING_CLASSES}>{courseContent.hero.syllabusCtaLabel}</h3>
