@@ -10,8 +10,12 @@ export interface SectionProps {
   id?: string;
 }
 
+// Navy is a diagonal gradient rather than a flat fill — eases toward black
+// (the third brand color) only in the final third of the diagonal, so most
+// of the section still reads as the brand's navy, with just a quiet depth
+// cue in the far corner rather than a visible band of color change.
 const TONE_STYLES: Record<SectionTone, string> = {
-  navy: "bg-brand-navy text-white",
+  navy: "bg-gradient-to-br from-brand-navy via-brand-navy via-65% to-black text-white",
   white: "bg-white text-brand-navy",
 };
 
