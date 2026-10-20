@@ -36,7 +36,7 @@ export interface CourseContent {
 
 export const courseContent: CourseContent = {
   hero: {
-    eyebrow: "Chancela institucional ABVCAP",
+    eyebrow: "Aprenda com quem faz",
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
       "Programa híbrido de avaliação de empresas para profissionais de M&A, Private Equity, Venture Capital e finanças corporativas — aulas presenciais e online, construídas a partir de casos reais de transações do mercado brasileiro.",
