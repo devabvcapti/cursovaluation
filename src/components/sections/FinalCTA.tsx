@@ -28,10 +28,16 @@ const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-c
 // element, not a competing focal point against the button above it.
 // `h-full` tracks `CTA_WRAPPER_CLASSES`'s own `h-full` (which already
 // matches the form card's height), so the mark never overflows above the
-// column it sits in. `-z-10` keeps it behind the button now that it spans
-// the same vertical range (a positioned element would otherwise stack
-// above the button's unpositioned, in-flow box by default).
-const BANDEIRA_ACCENT_CLASSES = "pointer-events-none absolute bottom-0 left-0 -z-10 h-full w-auto opacity-20";
+// column it sits in. No z-index here on purpose: an unadorned positioned
+// element already paints below any sibling that has an explicit one (see
+// `BUTTON_STACKING_CLASSES`) — a negative z-index on this element instead
+// escaped to behind the whole Section's solid background and erased the
+// mark entirely, which is why that approach was reverted.
+const BANDEIRA_ACCENT_CLASSES = "pointer-events-none absolute bottom-0 left-0 h-full w-auto opacity-20";
+
+// Keeps the primary CTA button painting above the bandeira mark beside it
+// (see `BANDEIRA_ACCENT_CLASSES`), now that both occupy the same column.
+const BUTTON_STACKING_CLASSES = "relative z-10";
 
 // LeadCaptureForm's labels/inputs are styled for a light section (see
 // Hero.tsx's identical wrapper); `CARD_CLASSES` is a translucent navy
@@ -57,7 +63,7 @@ export function FinalCTA() {
         </p>
         <div className={GRID_CLASSES}>
           <div className={CTA_WRAPPER_CLASSES}>
-            <Button href={courseContent.hero.checkoutUrl} variant="primary">
+            <Button href={courseContent.hero.checkoutUrl} variant="primary" className={BUTTON_STACKING_CLASSES}>
               Quero me matricular
             </Button>
             <Image
