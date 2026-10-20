@@ -10,12 +10,14 @@ export interface SectionProps {
   id?: string;
 }
 
-// Navy is a diagonal gradient rather than a flat fill — eases toward black
-// (the third brand color) only in the final third of the diagonal, so most
-// of the section still reads as the brand's navy, with just a quiet depth
-// cue in the far corner rather than a visible band of color change.
+// Navy is a vertical gradient rather than a flat fill — eases toward black
+// (the third brand color) only in the final third, so most of the section
+// still reads as navy with a quiet depth cue at the bottom. A diagonal
+// direction was tried first and reverted: it read as competing with the
+// page's existing diagonal accents (BandeiraShape), rather than adding
+// depth. Vertical has no such conflict.
 const TONE_STYLES: Record<SectionTone, string> = {
-  navy: "bg-gradient-to-br from-brand-navy via-brand-navy via-65% to-black text-white",
+  navy: "bg-gradient-to-b from-brand-navy via-brand-navy via-65% to-black text-white",
   white: "bg-white text-brand-navy",
 };
 
