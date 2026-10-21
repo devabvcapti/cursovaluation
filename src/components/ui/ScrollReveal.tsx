@@ -11,16 +11,17 @@ export interface ScrollRevealProps {
 }
 
 const REVEAL_DISTANCE_PX = 24;
-const REVEAL_DURATION_S = 0.6;
+const REVEAL_BLUR_PX = 8;
+const REVEAL_DURATION_S = 0.7;
 
-const VISIBLE = { opacity: 1, y: 0 };
-const HIDDEN = { opacity: 0, y: REVEAL_DISTANCE_PX };
+const VISIBLE = { opacity: 1, y: 0, filter: "blur(0px)" };
+const HIDDEN = { opacity: 0, y: REVEAL_DISTANCE_PX, filter: `blur(${REVEAL_BLUR_PX}px)` };
 
 type Decision = "undecided" | "reveal" | "static";
 
 /**
- * Fades a section's content up into place the first time it scrolls into
- * view.
+ * Fades and sharpens a section's content up into place (blur-to-sharp,
+ * translate-up) the first time it scrolls into view.
  *
  * Invariant: the visitor never sees a flash of hidden content. The server
  * and first client render always show the final (visible) state — same
