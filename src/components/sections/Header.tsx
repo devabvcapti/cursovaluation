@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { NavigationMenuWithActiveItem } from "@/components/ui/navigation-menu-05";
+import { MobileNavPanel, MobileNavToggle } from "@/components/ui/mobile-nav";
 import { courseContent } from "@/content/curso";
 
 /**
@@ -15,6 +19,8 @@ import { courseContent } from "@/content/curso";
  * role Task 15's page-assembly smoke test asserts on.
  */
 export function Header() {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-brand-navy/10 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-10">
@@ -40,14 +46,19 @@ export function Header() {
           <NavigationMenuWithActiveItem />
         </div>
 
-        <Button
-          href={courseContent.hero.checkoutUrl}
-          variant="primary"
-          className="shrink-0 px-5 py-2.5 text-xs"
-        >
-          Matricule-se
-        </Button>
+        <div className="flex shrink-0 items-center gap-3">
+          <Button
+            href={courseContent.hero.checkoutUrl}
+            variant="primary"
+            className="px-5 py-2.5 text-xs"
+          >
+            Matricule-se
+          </Button>
+          <MobileNavToggle open={mobileNavOpen} onToggle={() => setMobileNavOpen((prev) => !prev)} />
+        </div>
       </div>
+
+      <MobileNavPanel open={mobileNavOpen} onNavigate={() => setMobileNavOpen(false)} />
     </header>
   );
 }

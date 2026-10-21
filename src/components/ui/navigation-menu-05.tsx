@@ -1,9 +1,9 @@
 "use client";
 
-import { BookOpen, HelpCircle, Users, Wallet, Workflow } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useActiveSection } from "@/lib/hooks/use-active-section";
+import { NAV_ITEMS, NAV_SECTION_IDS } from "@/lib/nav-items";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -11,28 +11,18 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 
-const navigationMenuItems = [
-  { title: "Programa", href: "#programa", icon: BookOpen },
-  { title: "Metodologia", href: "#metodologia", icon: Workflow },
-  { title: "Professores", href: "#professores", icon: Users },
-  { title: "Investimento", href: "#investimento", icon: Wallet },
-  { title: "FAQ", href: "#faq", icon: HelpCircle },
-];
-
-const SECTION_IDS = navigationMenuItems.map((item) => item.href.slice(1));
-
 /**
  * In-page nav with an icon per item and a bottom bar that animates in on
  * hover/focus, staying visible for whichever section is currently in
  * view (`useActiveSection` scroll-spy) via Radix's `data-active` attribute.
  */
 export function NavigationMenuWithActiveItem() {
-  const activeId = useActiveSection(SECTION_IDS);
+  const activeId = useActiveSection(NAV_SECTION_IDS);
 
   return (
     <NavigationMenu aria-label="Seções da página">
       <NavigationMenuList className="space-x-8">
-        {navigationMenuItems.map((item) => (
+        {NAV_ITEMS.map((item) => (
           <NavigationMenuItem key={item.title}>
             <NavigationMenuLink
               active={activeId === item.href.slice(1)}
