@@ -1,21 +1,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
+import { NavigationMenuWithActiveItem } from "@/components/ui/navigation-menu-05";
 import { courseContent } from "@/content/curso";
-
-/**
- * Anchor targets for the in-page nav. These ids are a cross-task contract:
- * each matching section (Curriculum, Methodology, Faculty, Investment, FAQ)
- * must set the same `id` on its own `Section` wrapper for these links to
- * resolve. Tracked as an open coordination item for those tasks' dispatch
- * briefs (see Task 5 report).
- */
-const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Programa", href: "#programa" },
-  { label: "Metodologia", href: "#metodologia" },
-  { label: "Professores", href: "#professores" },
-  { label: "Investimento", href: "#investimento" },
-  { label: "FAQ", href: "#faq" },
-];
 
 /**
  * Fixed top bar, present at every scroll position (design spec §6.1 —
@@ -50,17 +36,9 @@ export function Header() {
           </span>
         </a>
 
-        <nav aria-label="Seções da página" className="hidden items-center gap-6 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="font-body text-sm font-medium text-brand-navy/80 transition-colors hover:text-brand-navy"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        <div className="hidden lg:flex">
+          <NavigationMenuWithActiveItem />
+        </div>
 
         <Button
           href={courseContent.hero.checkoutUrl}

@@ -13,6 +13,8 @@
   --color-brand-navy: #112468;
   --color-brand-green: #80c842;
   --color-brand-ink: #000000;
+  --color-primary: var(--color-brand-green);
+  --color-accent-foreground: var(--color-brand-navy);
 }
 
 body {
