@@ -1,6 +1,5 @@
 import { Header } from "@/components/sections/Header";
 import { Hero } from "@/components/sections/Hero";
-import { AuthorityStats } from "@/components/sections/AuthorityStats";
 import { AudienceFit } from "@/components/sections/AudienceFit";
 import { LearningOutcomes } from "@/components/sections/LearningOutcomes";
 import { Curriculum } from "@/components/sections/Curriculum";
@@ -17,7 +16,6 @@ export default function Page() {
     <>
       <Header />
       <Hero />
-      <AuthorityStats />
       <AudienceFit />
       <LearningOutcomes />
       <Curriculum />
