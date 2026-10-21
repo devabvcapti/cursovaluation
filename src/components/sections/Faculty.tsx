@@ -8,7 +8,8 @@ const HEADING_CLASSES = "font-heading text-4xl font-light text-brand-navy md:tex
 
 const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-6 md:grid-cols-3";
 
-const CARD_CLASSES = "flex flex-col rounded-sm border border-brand-navy/10 bg-white p-8 shadow-sm";
+const CARD_CLASSES =
+  "flex flex-col items-center text-center rounded-sm border border-brand-navy/10 bg-white p-8 shadow-sm";
 
 const PHOTO_CLASSES = "mb-6 h-40 w-40 rounded-full object-cover";
 
