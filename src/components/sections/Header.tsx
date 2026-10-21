@@ -37,9 +37,6 @@ export function Header() {
             priority
             className="h-8 w-auto lg:h-9"
           />
-          <span className="hidden font-heading text-sm font-bold uppercase tracking-[0.08em] text-brand-navy sm:inline">
-            Aprenda com quem faz
-          </span>
         </a>
 
         <div className="hidden lg:flex">
