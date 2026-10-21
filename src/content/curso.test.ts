@@ -3,10 +3,13 @@ import { courseContent } from "./curso";
 import { isPlaceholder } from "@/lib/placeholder";
 
 describe("courseContent pending data", () => {
-  it("marks checkout URL and next cohort date as placeholders", () => {
+  it("marks checkout URL as a placeholder", () => {
     expect(isPlaceholder(courseContent.investment.checkoutUrl)).toBe(true);
-    expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(true);
     expect(isPlaceholder(courseContent.hero.checkoutUrl)).toBe(true);
+  });
+
+  it("has a real (non-placeholder) next cohort date now that it's confirmed", () => {
+    expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(false);
   });
 
   it("has a real (non-placeholder) price now that it's confirmed", () => {
@@ -20,9 +23,21 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(courseContent.investment.workloadHours)).toBe(false);
   });
 
-  it("marks every faculty member's identifying fields as placeholders", () => {
-    expect(courseContent.faculty.length).toBeGreaterThan(0);
-    for (const member of courseContent.faculty) {
+  it("has real name, role and a symbolic placeholder photo for the confirmed professor", () => {
+    const [confirmed] = courseContent.faculty;
+    expect(isPlaceholder(confirmed.name)).toBe(false);
+    expect(isPlaceholder(confirmed.role)).toBe(false);
+    expect(isPlaceholder(confirmed.bio)).toBe(true);
+    // Photo is a real (renderable) image path, not bracketed placeholder
+    // text, but it's a generic stand-in graphic rather than a real photo.
+    expect(isPlaceholder(confirmed.photo)).toBe(false);
+    expect(confirmed.photo).toBe("/brand/placeholder-avatar.svg");
+  });
+
+  it("marks the remaining faculty members' identifying fields as placeholders", () => {
+    const [, ...pending] = courseContent.faculty;
+    expect(pending.length).toBeGreaterThan(0);
+    for (const member of pending) {
       expect(isPlaceholder(member.name)).toBe(true);
       expect(isPlaceholder(member.role)).toBe(true);
       expect(isPlaceholder(member.bio)).toBe(true);

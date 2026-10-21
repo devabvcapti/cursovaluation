@@ -20,10 +20,12 @@ const AUTHOR_NAME_CLASSES = "font-heading text-base font-medium text-brand-navy"
 
 const AUTHOR_ROLE_CLASSES = "font-body text-sm text-brand-navy/70";
 
+const VIDEO_CLASSES = "aspect-video w-full rounded-sm bg-brand-navy/5 object-cover";
+
 /**
  * "Depoimentos" band: one card per `courseContent.testimonials` entry,
- * showing quote, photo, author name, role and company. The photo value is
- * rendered as given.
+ * showing quote, photo, author name, role and company. When an entry has a
+ * `videoUrl`, the card plays that video instead of the quote/photo.
  */
 export function SocialProof() {
   return (
@@ -33,7 +35,18 @@ export function SocialProof() {
         <div className={GRID_CLASSES}>
           {courseContent.testimonials.map((testimonial) => (
             <figure key={testimonial.author} data-testid="testimonial" className={CARD_CLASSES}>
-              <blockquote className={QUOTE_CLASSES}>&ldquo;{testimonial.quote}&rdquo;</blockquote>
+              {testimonial.videoUrl ? (
+                <video
+                  controls
+                  preload="metadata"
+                  className={VIDEO_CLASSES}
+                  data-testid="testimonial-video"
+                >
+                  <source src={testimonial.videoUrl} />
+                </video>
+              ) : (
+                <blockquote className={QUOTE_CLASSES}>&ldquo;{testimonial.quote}&rdquo;</blockquote>
+              )}
               <figcaption className={AUTHOR_ROW_CLASSES}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- photo source is content-driven, not a static asset */}
                 <img src={testimonial.photo} alt={testimonial.author} className={PHOTO_CLASSES} />

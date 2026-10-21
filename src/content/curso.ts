@@ -21,6 +21,8 @@ export interface CourseContent {
     role: string;
     company: string;
     photo: string;
+    /** Optional video testimonial; when set, the card plays this instead of showing quote/photo. */
+    videoUrl?: string;
   }[];
   investment: {
     price: string;
@@ -174,10 +176,11 @@ export const courseContent: CourseContent = {
 
   faculty: [
     {
-      name: placeholder("NOME DO PROFESSOR 1"),
-      role: placeholder("CARGO E EMPRESA DO PROFESSOR 1"),
+      name: "Pedro Di Palma",
+      role: "Analista na UNBOX Capital",
       bio: placeholder("BIO DO PROFESSOR 1"),
-      photo: placeholder("FOTO DO PROFESSOR 1"),
+      // Symbolic placeholder — swap for a real photo once available.
+      photo: "/brand/placeholder-avatar.svg",
     },
     {
       name: placeholder("NOME DO PROFESSOR 2"),
@@ -205,6 +208,9 @@ export const courseContent: CourseContent = {
       role: placeholder("CARGO DO DEPOENTE 1"),
       company: placeholder("EMPRESA DO DEPOENTE 1"),
       photo: placeholder("FOTO DO DEPOENTE 1"),
+      // Temporary public-domain sample clip to preview the video-testimonial
+      // layout — swap for a real recorded testimonial before launch.
+      videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
     },
     {
       quote: placeholder("DEPOIMENTO 2"),
@@ -227,7 +233,7 @@ export const courseContent: CourseContent = {
     earlyBirdPrice: "6000",
     earlyBirdDeadline: "20 de dezembro de 2026",
     seatsLimit: "40 vagas",
-    nextCohortDate: placeholder("DATA DA PRÓXIMA TURMA"),
+    nextCohortDate: "16 de fevereiro de 2027",
     workloadHours: "36 horas",
     checkoutUrl: placeholder("URL DA PLATAFORMA DE VENDAS"),
   },
