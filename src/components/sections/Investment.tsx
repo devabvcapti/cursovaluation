@@ -17,7 +17,7 @@ const PRICE_CLASSES = "mt-2 font-heading text-4xl font-light text-white md:text-
 const EARLY_BIRD_CLASSES = "mt-6 font-body text-base text-white/80";
 
 const DETAILS_CLASSES =
-  "mt-10 flex flex-col gap-6 border-t border-white/15 pt-10 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-6";
+  "mt-10 flex flex-col items-center gap-6 border-t border-white/15 pt-10 text-center sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-10 sm:gap-y-6 sm:text-left";
 
 const DETAIL_ITEM_CLASSES = "sm:flex-none";
 
