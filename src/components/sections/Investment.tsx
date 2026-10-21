@@ -16,7 +16,10 @@ const PRICE_CLASSES = "mt-2 font-heading text-4xl font-light text-white md:text-
 
 const EARLY_BIRD_CLASSES = "mt-6 font-body text-base text-white/80";
 
-const DETAILS_CLASSES = "mt-10 grid grid-cols-1 gap-6 border-t border-white/15 pt-10 sm:grid-cols-2 lg:grid-cols-4";
+const DETAILS_CLASSES =
+  "mt-10 flex flex-col gap-6 border-t border-white/15 pt-10 sm:flex-row sm:flex-wrap sm:gap-x-10 sm:gap-y-6";
+
+const DETAIL_ITEM_CLASSES = "sm:flex-none";
 
 const DETAIL_LABEL_CLASSES = "font-body text-sm font-semibold uppercase tracking-[0.08em] text-white/60";
 
@@ -52,7 +55,7 @@ export function Investment() {
           </p>
           <dl className={DETAILS_CLASSES}>
             {DETAILS(investment).map((detail) => (
-              <div key={detail.label}>
+              <div key={detail.label} className={DETAIL_ITEM_CLASSES}>
                 <dt className={DETAIL_LABEL_CLASSES}>{detail.label}</dt>
                 <dd className={DETAIL_VALUE_CLASSES}>{detail.value}</dd>
               </div>
