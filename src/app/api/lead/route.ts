@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { validateLead } from "@/lib/validate-lead";
+import { sendLeadNotification } from "@/lib/send-lead-notification";
 
 /**
  * Lead capture endpoint for the secondary CTA ("Baixar ementa completa").
@@ -27,15 +28,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ errors: result.errors }, { status: 400 });
   }
 
-  // TODO(lead-delivery): wire a real integration (email/CRM/sheet) here —
-  // decision deferred by product owner on 2026-10-19. Until then, leads are
-  // only logged here (visible in server logs); nothing currently reaches the
-  // admissions team, so this gap must be closed before launch.
-  console.log("[lead] received lead, delivery integration pending:", {
-    name,
-    email,
-    receivedAt: new Date().toISOString(),
-  });
+  const delivery = await sendLeadNotification({ name, email });
+  if (!delivery.ok) {
+    console.error("[lead] notification delivery failed:", delivery.reason);
+    return NextResponse.json(
+      { errors: { name: "Não foi possível enviar seus dados agora." } },
+      { status: 502 },
+    );
+  }
 
   return NextResponse.json({ ok: true }, { status: 200 });
 }
