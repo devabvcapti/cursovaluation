@@ -3,18 +3,21 @@ import { courseContent } from "./curso";
 import { isPlaceholder } from "@/lib/placeholder";
 
 describe("courseContent pending data", () => {
-  it("marks price, checkout URL and next cohort date as placeholders", () => {
-    expect(isPlaceholder(courseContent.investment.price)).toBe(true);
+  it("marks checkout URL and next cohort date as placeholders", () => {
     expect(isPlaceholder(courseContent.investment.checkoutUrl)).toBe(true);
     expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(true);
     expect(isPlaceholder(courseContent.hero.checkoutUrl)).toBe(true);
   });
 
-  it("marks remaining investment fields as placeholders", () => {
-    expect(isPlaceholder(courseContent.investment.earlyBirdPrice)).toBe(true);
-    expect(isPlaceholder(courseContent.investment.earlyBirdDeadline)).toBe(true);
-    expect(isPlaceholder(courseContent.investment.seatsLimit)).toBe(true);
-    expect(isPlaceholder(courseContent.investment.workloadHours)).toBe(true);
+  it("has a real (non-placeholder) price now that it's confirmed", () => {
+    expect(isPlaceholder(courseContent.investment.price)).toBe(false);
+  });
+
+  it("has real (non-placeholder) values for the confirmed investment fields", () => {
+    expect(isPlaceholder(courseContent.investment.earlyBirdPrice)).toBe(false);
+    expect(isPlaceholder(courseContent.investment.earlyBirdDeadline)).toBe(false);
+    expect(isPlaceholder(courseContent.investment.seatsLimit)).toBe(false);
+    expect(isPlaceholder(courseContent.investment.workloadHours)).toBe(false);
   });
 
   it("marks every faculty member's identifying fields as placeholders", () => {

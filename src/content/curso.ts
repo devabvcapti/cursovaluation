@@ -223,12 +223,12 @@ export const courseContent: CourseContent = {
   ],
 
   investment: {
-    price: placeholder("PREÇO"),
-    earlyBirdPrice: placeholder("PREÇO EARLY BIRD"),
-    earlyBirdDeadline: placeholder("DATA LIMITE EARLY BIRD"),
-    seatsLimit: placeholder("NÚMERO DE VAGAS"),
+    price: "7000",
+    earlyBirdPrice: "6000",
+    earlyBirdDeadline: "20 de dezembro de 2026",
+    seatsLimit: "40 vagas",
     nextCohortDate: placeholder("DATA DA PRÓXIMA TURMA"),
-    workloadHours: placeholder("CARGA HORÁRIA"),
+    workloadHours: "36 horas",
     checkoutUrl: placeholder("URL DA PLATAFORMA DE VENDAS"),
   },
 
