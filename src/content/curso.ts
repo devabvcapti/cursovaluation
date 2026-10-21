@@ -14,7 +14,6 @@ export interface CourseContent {
   curriculumModules: { title: string; summary: string; lessons: string[] }[];
   methodology: { title: string; body: string }[];
   faculty: { name: string; role: string; bio: string; photo: string }[];
-  community: { title: string; body: string };
   testimonials: {
     quote: string;
     author: string;
@@ -195,11 +194,6 @@ export const courseContent: CourseContent = {
       photo: placeholder("FOTO DO PROFESSOR 3"),
     },
   ],
-
-  community: {
-    title: "Rede e comunidade ABVCAP",
-    body: "Ao concluir o curso, você passa a integrar a rede de relacionamento da ABVCAP — acesso a eventos, grupos de discussão e à comunidade de gestoras, investidores e profissionais de PE/VC que sustentam o ecossistema de M&A no Brasil.",
-  },
 
   testimonials: [
     {

@@ -91,8 +91,6 @@ describe("courseContent pending data", () => {
       expect(mod.lessons.length).toBeGreaterThan(0);
     }
     expect(courseContent.methodology.length).toBeGreaterThan(0);
-    expect(courseContent.community.title).not.toBe("");
-    expect(courseContent.community.body).not.toBe("");
     expect(courseContent.faq.length).toBeGreaterThanOrEqual(4);
   });
 

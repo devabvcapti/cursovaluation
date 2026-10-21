@@ -6,7 +6,6 @@ import { LearningOutcomes } from "@/components/sections/LearningOutcomes";
 import { Curriculum } from "@/components/sections/Curriculum";
 import { Methodology } from "@/components/sections/Methodology";
 import { Faculty } from "@/components/sections/Faculty";
-import { CommunityNetwork } from "@/components/sections/CommunityNetwork";
 import { SocialProof } from "@/components/sections/SocialProof";
 import { Investment } from "@/components/sections/Investment";
 import { FAQ } from "@/components/sections/FAQ";
@@ -24,7 +23,6 @@ export default function Page() {
       <Curriculum />
       <Methodology />
       <Faculty />
-      <CommunityNetwork />
       <SocialProof />
       <Investment />
       <FAQ />
