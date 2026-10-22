@@ -4,7 +4,7 @@ import { NavigationMenuWithActiveItem } from "./navigation-menu-05";
 
 const EXPECTED_LINKS = [
   { name: /programa/i, href: "#programa" },
-  { name: /metodologia/i, href: "#metodologia" },
+  { name: /diferenciais/i, href: "#metodologia" },
   { name: /professores/i, href: "#professores" },
   { name: /investimento/i, href: "#investimento" },
   { name: /faq/i, href: "#faq" },

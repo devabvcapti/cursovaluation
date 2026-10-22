@@ -13,8 +13,8 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(courseContent.socialLinks.youtube)).toBe(true);
   });
 
-  it("has a real (non-placeholder) next cohort date now that it's confirmed", () => {
-    expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(false);
+  it("marks the next cohort date as a placeholder (briefing leaves it 'a confirmar')", () => {
+    expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(true);
   });
 
   it("has a real (non-placeholder) price now that it's confirmed", () => {

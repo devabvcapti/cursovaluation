@@ -17,7 +17,7 @@ const SOCIAL_LINKS = [
  */
 const FOOTER_LINKS: { label: string; href: string }[] = [
   { label: "Programa", href: "#programa" },
-  { label: "Metodologia", href: "#metodologia" },
+  { label: "Diferenciais", href: "#metodologia" },
   { label: "Professores", href: "#professores" },
   { label: "Investimento", href: "#investimento" },
   { label: "FAQ", href: "#faq" },

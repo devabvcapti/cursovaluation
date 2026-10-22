@@ -54,7 +54,7 @@ export const courseContent: CourseContent = {
     eyebrow: "Aprenda com quem faz",
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
-      "Programa híbrido de avaliação de empresas para profissionais de M&A, Private Equity, Venture Capital e finanças corporativas — aulas presenciais e online, construídas a partir de casos reais de transações do mercado brasileiro.",
+      "Programa presencial de avaliação de empresas para profissionais de M&A, Private Equity, Venture Capital e finanças corporativas — 13 aulas construídas a partir de uma companhia aberta real, do histórico até o fechamento do modelo e a estruturação do deal.",
     checkoutUrl: placeholder("URL DA PLATAFORMA DE VENDAS"),
     syllabusCtaLabel: "Baixar ementa completa",
   },
@@ -100,90 +100,83 @@ export const courseContent: CourseContent = {
   ],
 
   learningOutcomes: [
-    "Construir e sustentar um modelo de fluxo de caixa descontado (DCF) completo, com premissas defensáveis.",
-    "Aplicar múltiplos de mercado e de transações comparáveis com critério, evitando armadilhas de comparabilidade.",
-    "Avaliar cenários de M&A, incluindo sinergias, estrutura de capital e seu impacto no valuation.",
-    "Conduzir e interpretar due diligence financeira sob a ótica de quem avalia, não apenas de quem auditoria.",
-    "Negociar valuation e cláusulas contratuais — earn-out, múltiplos de ajuste, garantias — com base técnica.",
-    "Identificar os principais vieses e armadilhas metodológicas que distorcem laudos e pareceres de avaliação.",
+    "Montar uma base histórica limpa e diagnosticar a saúde de uma empresa antes de projetá-la.",
+    "Construir um modelo de três demonstrações do zero, fechado e auditável.",
+    "Projetar receita e custos a partir dos drivers do negócio.",
+    "Projetar investimentos, endividamento, tributos, patrimônio líquido e capital de giro.",
+    "Montar o fluxo de caixa e fechar um balanço que não bate.",
+    "Calcular o custo de capital (WACC) com os ajustes do mercado brasileiro.",
+    "Chegar ao valor intrínseco da empresa pelo fluxo de caixa descontado (DCF).",
+    "Selecionar e ajustar empresas e transações comparáveis, e defender cada escolha.",
+    "Construir tabelas de sensibilidade e o football field.",
+    "Usar IA para acelerar a análise — e saber onde ela erra.",
+    "Estruturar um deal: preço por ação, oferta primária e secundária, diluição, prêmio de controle.",
+    "Modelar alavancagem viável no Brasil via seller's finance.",
+    "Calcular TIR e MOIC do fundo e decompor de onde vem o retorno.",
+    "Estruturar e defender uma recomendação de investimento ao comitê.",
   ],
 
   curriculumModules: [
     {
-      title: "Fundamentos de Valuation",
-      summary:
-        "Base conceitual e os princípios que sustentam qualquer avaliação, antes de abrir uma planilha.",
+      title: "Aula Zero — Boas práticas de modelagem no Excel",
+      summary: "Gravada e gratuita, disponível antes do início do curso.",
       lessons: [
-        "Valor x preço: a distinção que todo investidor profissional precisa dominar",
-        "Panorama das metodologias de avaliação e quando aplicar cada uma",
-        "Estrutura de capital, custo de capital e taxa de desconto",
-        "Fontes de dados e qualidade da informação em mercados emergentes",
+        "Organização do modelo, convenções e checks embutidos",
+        "Atalhos e os erros mais comuns que quebram um modelo",
+        "O resultado final esperado ao final do curso, e a companhia usada como caso",
       ],
     },
     {
-      title: "Fluxo de Caixa Descontado (DCF)",
-      summary: "Construção completa de um modelo de DCF, da projeção operacional ao valor presente.",
+      title: "Módulo 1 — Construção do modelo financeiro",
+      summary: "Aulas 1 a 9 · 27 horas em sala.",
       lessons: [
-        "Projeção de receita, margens e capital de giro",
-        "WACC: construção e sensibilidade das premissas",
-        "Valor terminal: métodos e armadilhas comuns",
-        "Stress test e análise de sensibilidade do modelo",
+        "Aula 1 — Por que se avalia, e a arquitetura do modelo",
+        "Aula 2 — Build-up de receita",
+        "Aula 3 — Build-up de custos e despesas",
+        "Aula 4 — D&A, imobilizado e capex",
+        "Aula 5 — Endividamento, impostos e patrimônio líquido",
+        "Aula 6 — Capital de giro",
+        "Aula 7 — Fluxo de caixa, revolver e caixa mínimo",
+        "Aula 8 — Fechamento do modelo e custo de capital",
+        "Aula 9 — FCFF, FCFE e o valor intrínseco",
       ],
     },
     {
-      title: "Múltiplos e Transações Comparáveis",
-      summary: "Avaliação relativa com rigor: como escolher, ajustar e defender comparáveis.",
-      lessons: [
-        "Critérios de seleção de empresas e transações comparáveis",
-        "Múltiplos de receita, EBITDA e lucro: quando cada um se aplica",
-        "Ajustes de comparabilidade e prêmios de controle",
-        "Combinando DCF e múltiplos em um valuation defensável",
-      ],
+      title: "Módulo 2 — Depois da unha",
+      summary: "Aula 10 · 3 horas · com professor convidado do mercado.",
+      lessons: ["Aula 10 — IA aplicada ao trabalho de análise"],
     },
     {
-      title: "Valuation em M&A",
-      summary: "Como a avaliação muda quando a transação está na mesa.",
+      title: "Módulo 3 — Do valor ao deal",
+      summary: "Aulas 11 a 13 · 9 horas.",
       lessons: [
-        "Sinergias operacionais e financeiras: quantificação e alocação",
-        "Estrutura de capital pós-transação e seu efeito no valuation",
-        "Earn-outs, múltiplos de ajuste e mecanismos de preço",
-        "Estudos de caso reais de M&A no mercado brasileiro",
-      ],
-    },
-    {
-      title: "Due Diligence Financeira",
-      summary: "A avaliação não termina no modelo — ela é testada na due diligence.",
-      lessons: [
-        "Qualidade de lucros (quality of earnings) e normalizações",
-        "Capital de giro normalizado e ajustes de caixa e dívida",
-        "Red flags financeiros que mudam o valuation",
-        "Integração entre due diligence e revisão do modelo de avaliação",
-      ],
-    },
-    {
-      title: "Negociação e Defesa do Valuation",
-      summary: "Levar a avaliação da planilha para a mesa de negociação.",
-      lessons: [
-        "Como apresentar e defender premissas de valuation a comitês e contrapartes",
-        "Negociação de cláusulas ligadas a valuation (earn-out, claw-back, garantias)",
-        "Comunicação de valuation para investidores e conselhos",
-        "Estudo de caso integrado: da avaliação ao fechamento da transação",
+        "Aula 11 — Múltiplos e comparáveis",
+        "Aula 12 — O deal: deal table e de onde vem o retorno",
+        "Aula 13 — Alavancagem à brasileira, o que destrói valor e a recomendação",
       ],
     },
   ],
 
   methodology: [
     {
-      title: "Formato híbrido, pensado para quem está no mercado",
-      body: "Aulas presenciais concentram discussão de casos e networking; o ambiente online aprofunda a construção técnica dos modelos — sem exigir que você se afaste da rotina profissional por semanas.",
+      title: "Você constrói o modelo inteiro, do zero",
+      body: "Nos cursos de referência do mercado, a planilha é pré-requisito ou fica de fora. Aqui ela é o centro do trabalho.",
     },
     {
-      title: "Casos reais de M&A e Private Equity",
-      body: "Cada módulo parte de transações e situações reais do mercado brasileiro de M&A e PE/VC, discutidas com as mesmas restrições de informação e tempo enfrentadas pelos profissionais envolvidos.",
+      title: "Não para no valor da empresa",
+      body: "Você monta o deal, calcula TIR e MOIC, decompõe de onde vem o retorno e defende uma recomendação ao comitê — etapa que nenhum curso comparável cobre.",
     },
     {
-      title: "Chancela e curadoria ABVCAP",
-      body: "Conteúdo, corpo docente e casos são curados sob a supervisão institucional da ABVCAP, associação de referência do mercado de Private Equity e Venture Capital no Brasil.",
+      title: "Alavancagem à brasileira",
+      body: "Em vez do LBO americano, o instrumento que de fato viabiliza alavancagem em deal no Brasil: o seller's finance.",
+    },
+    {
+      title: "Uma companhia aberta real como caso",
+      body: "Com fonte primária de verdade — RI, planilha interativa, prospecto, calls de resultado. Você consegue conferir, aprofundar e continuar sozinho depois do curso.",
+    },
+    {
+      title: "Primeiro na unha, depois a ferramenta",
+      body: "A aula de IA vem logo depois de fechar o valuation com as próprias mãos — você aplica a IA a um modelo que você mesmo construiu e entende.",
     },
   ],
 
@@ -240,12 +233,13 @@ export const courseContent: CourseContent = {
   ],
 
   investment: {
-    price: "7000",
-    earlyBirdPrice: "6000",
+    price: "10000",
+    earlyBirdPrice: "9000",
     earlyBirdDeadline: "20 de dezembro de 2026",
-    seatsLimit: "40 vagas",
-    nextCohortDate: "16 de fevereiro de 2027",
-    workloadHours: "36 horas",
+    seatsLimit: "Cerca de 20 vagas",
+    // Briefing (2026-10-21, base ementa v6) leaves this explicitly "a confirmar".
+    nextCohortDate: placeholder("DATA DA PRÓXIMA TURMA"),
+    workloadHours: "39h em sala + 23h em casa",
     checkoutUrl: placeholder("URL DA PLATAFORMA DE VENDAS"),
   },
 
@@ -258,7 +252,7 @@ export const courseContent: CourseContent = {
     {
       question: "Qual a dedicação de tempo exigida durante o curso?",
       answer:
-        "O formato híbrido foi desenhado para profissionais em atividade: encontros presenciais concentrados e módulos online com flexibilidade de horário. É possível conciliar o curso com uma rotina profissional intensa, sem abrir mão da profundidade técnica.",
+        "O curso soma cerca de 62 horas: 39 horas em sala (13 aulas de 3 horas, duas vezes por semana, ao longo de cerca de 7 semanas) e mais 23 horas em 8 entregas para fazer em casa. O apoio para essas entregas vai sendo retirado ao longo do curso — é uma dedicação intensa, mas compatível com uma rotina profissional ativa.",
     },
     {
       question: "Qual a diferença entre este curso e um MBA ou uma pós-graduação tradicional em finanças?",
@@ -276,9 +270,9 @@ export const courseContent: CourseContent = {
         "O curso pressupõe familiaridade básica com conceitos financeiros e contábeis. Não é necessário ter experiência prévia específica em valuation — o programa constrói o conhecimento técnico a partir dos fundamentos até os casos aplicados de M&A e PE/VC.",
     },
     {
-      question: "Como funciona o formato híbrido (presencial e online)?",
+      question: "O curso é presencial ou online?",
       answer:
-        "As aulas presenciais concentram discussão de casos, networking e sessões práticas; os módulos online aprofundam a construção dos modelos de avaliação, com flexibilidade para assistir no seu ritmo dentro do cronograma da turma.",
+        "O curso é 100% presencial: 13 aulas de 3 horas cada. Antes do início, uma Aula Zero gravada e gratuita apresenta boas práticas de modelagem no Excel e o resultado final esperado — útil também para quem ainda está decidindo se vai se inscrever.",
     },
   ],
 };

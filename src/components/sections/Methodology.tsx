@@ -16,14 +16,15 @@ const BLOCK_TITLE_CLASSES = "font-heading text-xl font-medium text-white";
 const BLOCK_BODY_CLASSES = "mt-4 font-body text-base leading-relaxed text-white/75";
 
 /**
- * "Metodologia" band: one static block per `courseContent.methodology`
- * entry, each with a title and body paragraph.
+ * "Metodologia" band (anchor id kept for nav compatibility): one static
+ * block per `courseContent.methodology` entry — the course's differentiators
+ * — each with a title and body paragraph.
  */
 export function Methodology() {
   return (
     <Section tone="navy" id="metodologia">
       <ScrollReveal className={CONTENT_CLASSES}>
-        <h2 className={HEADING_CLASSES}>Metodologia</h2>
+        <h2 className={HEADING_CLASSES}>O que diferencia o curso</h2>
         <div className={GRID_CLASSES}>
           {courseContent.methodology.map((block) => (
             <div key={block.title} className={CARD_CLASSES}>
