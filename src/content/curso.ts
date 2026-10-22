@@ -3,6 +3,8 @@ import { placeholder } from "@/lib/placeholder";
 export interface CourseContent {
   /** ABVCAP's WhatsApp Business number (digits only, with country+area code), used by the floating widget. Marked temporary by the client — swap when a permanent number is confirmed. */
   whatsappNumber: string;
+  /** Pre-filled message the floating widget opens the WhatsApp chat with. */
+  whatsappMessage: string;
   hero: {
     eyebrow: string;
     headlineLines: string[];
@@ -40,6 +42,8 @@ export interface CourseContent {
 export const courseContent: CourseContent = {
   // Temporary number provided by the client on 2026-10-21.
   whatsappNumber: "5511991480203",
+  whatsappMessage:
+    "Olá, tenho interesse em saber mais sobre o curso de Valuation. ABVCAP — Aprenda com quem faz.",
   hero: {
     eyebrow: "Aprenda com quem faz",
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],

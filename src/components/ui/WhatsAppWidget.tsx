@@ -7,7 +7,7 @@ const WHATSAPP_BRAND_GREEN = "#25D366";
  * WhatsApp chat with ABVCAP's Business number in a new tab.
  */
 export function WhatsAppWidget() {
-  const href = `https://wa.me/${courseContent.whatsappNumber}`;
+  const href = `https://wa.me/${courseContent.whatsappNumber}?text=${encodeURIComponent(courseContent.whatsappMessage)}`;
 
   return (
     <a
