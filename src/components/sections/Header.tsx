@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { NavigationMenuWithActiveItem } from "@/components/ui/navigation-menu-05";
 import { MobileNavPanel, MobileNavToggle } from "@/components/ui/mobile-nav";
@@ -24,10 +25,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-brand-navy/10 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3 lg:px-10">
-        <a
-          href="#top"
+        <Link
+          href="/"
           className="flex shrink-0 items-center gap-3"
-          aria-label="ABVCAP — topo da página"
+          aria-label="ABVCAP — página inicial"
         >
           <Image
             src="/brand/abvcap-logo-color.png"
@@ -37,7 +38,7 @@ export function Header() {
             priority
             className="h-8 w-auto lg:h-9"
           />
-        </a>
+        </Link>
 
         <div className="hidden lg:flex">
           <NavigationMenuWithActiveItem />

@@ -20,7 +20,7 @@ describe("Header", () => {
     await user.click(screen.getByRole("button", { name: /abrir menu/i }));
     const panel = screen.getByRole("navigation", { name: /menu mobile/i });
     const programaLink = within(panel).getByRole("link", { name: /programa/i });
-    expect(programaLink).toHaveAttribute("href", "#programa");
+    expect(programaLink).toHaveAttribute("href", "/#programa");
 
     await user.click(programaLink);
     expect(screen.queryByRole("navigation", { name: /menu mobile/i })).not.toBeInTheDocument();

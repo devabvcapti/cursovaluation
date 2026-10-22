@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { CopyrightYear } from "@/components/sections/CopyrightYear";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { LinkedinIcon, YoutubeIcon } from "@/components/ui/icons";
@@ -15,12 +16,14 @@ const SOCIAL_LINKS = [
  * private to that component; duplicating five short strings here is
  * cheaper than introducing a shared module for it.
  */
+// "/#id", not bare "#id" — see nav-items.ts for why (these also need to work
+// from /politica-de-privacidade and /termos-de-uso).
 const FOOTER_LINKS: { label: string; href: string }[] = [
-  { label: "Programa", href: "#programa" },
-  { label: "Diferenciais", href: "#metodologia" },
-  { label: "Professores", href: "#professores" },
-  { label: "Investimento", href: "#investimento" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Programa", href: "/#programa" },
+  { label: "Diferenciais", href: "/#metodologia" },
+  { label: "Professores", href: "/#professores" },
+  { label: "Investimento", href: "/#investimento" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 const LEGAL_LINKS: { label: string; href: string }[] = [
