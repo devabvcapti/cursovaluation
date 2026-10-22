@@ -17,7 +17,7 @@ export interface ButtonProps {
 const FALLBACK_HREF = "#";
 
 const BASE_STYLES = cn(
-  "inline-flex items-center justify-center min-h-11",
+  "inline-flex items-center justify-center min-h-11 rounded-md",
   "px-8 py-3.5",
   "font-heading text-sm font-bold uppercase tracking-[0.08em]",
   "transition-all duration-200 ease-out",
