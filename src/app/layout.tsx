@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import localFont from "next/font/local";
-import { Analytics } from "@vercel/analytics/next";
 import { courseContent } from "@/content/curso";
 import { WhatsAppWidget } from "@/components/ui/WhatsAppWidget";
+import { ConsentBanner } from "@/components/ui/ConsentBanner";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -59,7 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       >
         {children}
         <WhatsAppWidget />
-        <Analytics />
+        <ConsentBanner />
       </body>
     </html>
   );
