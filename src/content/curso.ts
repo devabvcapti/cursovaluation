@@ -55,7 +55,7 @@ export const courseContent: CourseContent = {
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
       "Programa presencial de avaliação de empresas para profissionais de M&A, Private Equity, Venture Capital e finanças corporativas — 13 aulas construídas a partir de uma companhia aberta real, do histórico até o fechamento do modelo e a estruturação do deal.",
-    checkoutUrl: placeholder("URL DA PLATAFORMA DE VENDAS"),
+    checkoutUrl: "https://abvcap.glueup.com/event/199072/register/",
     syllabusCtaLabel: "Baixar ementa completa",
   },
 
@@ -237,7 +237,7 @@ export const courseContent: CourseContent = {
     // Briefing (2026-10-21, base ementa v6) leaves this explicitly "a confirmar".
     nextCohortDate: placeholder("DATA DA PRÓXIMA TURMA"),
     workloadHours: "39h em sala + 23h em casa",
-    checkoutUrl: placeholder("URL DA PLATAFORMA DE VENDAS"),
+    checkoutUrl: "https://abvcap.glueup.com/event/199072/register/",
   },
 
   faq: [

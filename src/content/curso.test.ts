@@ -3,9 +3,11 @@ import { courseContent } from "./curso";
 import { isPlaceholder } from "@/lib/placeholder";
 
 describe("courseContent pending data", () => {
-  it("marks checkout URL as a placeholder", () => {
-    expect(isPlaceholder(courseContent.investment.checkoutUrl)).toBe(true);
-    expect(isPlaceholder(courseContent.hero.checkoutUrl)).toBe(true);
+  it("has a real (non-placeholder) checkout URL now that it's confirmed", () => {
+    expect(isPlaceholder(courseContent.investment.checkoutUrl)).toBe(false);
+    expect(isPlaceholder(courseContent.hero.checkoutUrl)).toBe(false);
+    expect(courseContent.investment.checkoutUrl).toBe("https://abvcap.glueup.com/event/199072/register/");
+    expect(courseContent.hero.checkoutUrl).toBe("https://abvcap.glueup.com/event/199072/register/");
   });
 
   it("marks the footer's social links as placeholders", () => {
