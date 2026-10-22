@@ -25,7 +25,7 @@ const CARD_HEADING_CLASSES = "font-heading text-xl font-bold text-white";
 // [...]` extends past the button's own box), cutting the glow off wherever
 // the button sat close to this wrapper's edge. The clip now lives on
 // `BANDEIRA_FRAME_CLASSES` instead, scoped to just the image.
-const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-start justify-center gap-6";
+const CTA_WRAPPER_CLASSES = "relative flex h-full flex-col items-center justify-center gap-6 lg:items-start";
 
 // Deliberate exception to the brand guide's "never the whole bandeira"
 // rule (see `BandeiraShape`'s doc comment) — confirmed with the user for
