@@ -10,9 +10,11 @@ describe("courseContent pending data", () => {
     expect(courseContent.hero.checkoutUrl).toBe("https://abvcap.glueup.com/event/199072/register/");
   });
 
-  it("marks the footer's social links as placeholders", () => {
-    expect(isPlaceholder(courseContent.socialLinks.linkedin)).toBe(true);
-    expect(isPlaceholder(courseContent.socialLinks.youtube)).toBe(true);
+  it("has real (non-placeholder) footer social links now that they're confirmed", () => {
+    expect(isPlaceholder(courseContent.socialLinks.linkedin)).toBe(false);
+    expect(isPlaceholder(courseContent.socialLinks.youtube)).toBe(false);
+    expect(courseContent.socialLinks.linkedin).toBe("https://www.linkedin.com/company/abvcap/");
+    expect(courseContent.socialLinks.youtube).toBe("https://www.youtube.com/@ABVCAPVideos");
   });
 
   it("marks the next cohort date as a placeholder (briefing leaves it 'a confirmar')", () => {

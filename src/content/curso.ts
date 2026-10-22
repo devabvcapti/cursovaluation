@@ -47,8 +47,8 @@ export const courseContent: CourseContent = {
   whatsappMessage:
     "Olá, tenho interesse em saber mais sobre o curso de Valuation. ABVCAP — Aprenda com quem faz.",
   socialLinks: {
-    linkedin: placeholder("LINKEDIN DA ABVCAP"),
-    youtube: placeholder("YOUTUBE DA ABVCAP"),
+    linkedin: "https://www.linkedin.com/company/abvcap/",
+    youtube: "https://www.youtube.com/@ABVCAPVideos",
   },
   hero: {
     eyebrow: "Aprenda com quem faz",
