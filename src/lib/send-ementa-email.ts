@@ -7,7 +7,7 @@ export interface EmentaEmailPayload {
   email: string;
 }
 
-const FROM_ADDRESS = "ABVCAP <onboarding@resend.dev>";
+const FROM_ADDRESS = "ABVCAP <contato@resend.abvcap.com.br>";
 const EMENTA_PATH = path.join(process.cwd(), "public", "docs", "ementa-valuation-abvcap.pdf");
 
 /**

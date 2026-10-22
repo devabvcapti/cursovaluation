@@ -5,7 +5,7 @@ export interface LeadNotificationPayload {
   email: string;
 }
 
-const FROM_ADDRESS = "ABVCAP Leads <onboarding@resend.dev>";
+const FROM_ADDRESS = "ABVCAP Leads <contato@resend.abvcap.com.br>";
 const DEFAULT_RECIPIENT = "ti@abvcap.com.br";
 
 function getRecipient(): string {
