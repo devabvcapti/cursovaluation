@@ -178,6 +178,10 @@ export const courseContent: CourseContent = {
       title: "Primeiro na unha, depois a ferramenta",
       body: "A aula de IA vem logo depois de fechar o valuation com as próprias mãos — você aplica a IA a um modelo que você mesmo construiu e entende.",
     },
+    {
+      title: "Chancela e curadoria ABVCAP",
+      body: "Conteúdo, corpo docente e caso são curados sob a supervisão institucional da ABVCAP, associação de referência do mercado de Private Equity e Venture Capital no Brasil.",
+    },
   ],
 
   faculty: [
