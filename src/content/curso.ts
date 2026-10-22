@@ -200,13 +200,6 @@ export const courseContent: CourseContent = {
       photo: placeholder("FOTO DO PROFESSOR 2"),
       linkedin: placeholder("LINKEDIN DO PROFESSOR 2"),
     },
-    {
-      name: placeholder("NOME DO PROFESSOR 3"),
-      role: placeholder("CARGO E EMPRESA DO PROFESSOR 3"),
-      bio: placeholder("BIO DO PROFESSOR 3"),
-      photo: placeholder("FOTO DO PROFESSOR 3"),
-      linkedin: placeholder("LINKEDIN DO PROFESSOR 3"),
-    },
   ],
 
   testimonials: [
