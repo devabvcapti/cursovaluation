@@ -97,6 +97,28 @@ function lineColorClass(index: number) {
   return index === 0 ? "text-brand-green" : "text-white";
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// A few words in the white headline lines get the brand-green accent too.
+const HIGHLIGHT_WORDS = ["método", "decisões", "capital"];
+const HIGHLIGHT_PATTERN = new RegExp(`(${HIGHLIGHT_WORDS.map(escapeRegExp).join("|")})`, "g");
+
+function renderHighlighted(text: string) {
+  return text
+    .split(HIGHLIGHT_PATTERN)
+    .map((segment, i) =>
+      HIGHLIGHT_WORDS.includes(segment) ? (
+        <span key={i} className="text-brand-green">
+          {segment}
+        </span>
+      ) : (
+        segment
+      ),
+    );
+}
+
 // Experiment (2026-10-21): cycles the opening word instead of a static
 // "Valuation" — easy to drop by reverting this constant/usage pair.
 const HEADLINE_CYCLE_WORDS = ["Valuation", "M&A", "Governança", "Estruturação"];
@@ -235,7 +257,7 @@ export function Hero() {
                     </>
                   ) : (
                     <>
-                      {line}{" "}
+                      {renderHighlighted(line)}{" "}
                     </>
                   )}
                 </span>
