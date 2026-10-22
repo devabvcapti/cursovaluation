@@ -105,7 +105,7 @@ const CTA_ROW_CLASSES = "mt-8 flex flex-col gap-4 md:mt-10 sm:flex-row sm:items-
 const LEAD_FORM_WRAPPER_CLASSES = "mt-6 max-w-md rounded-sm bg-white p-6 md:p-8";
 
 const SECONDARY_CTA_CLASSES = cn(
-  "inline-flex min-h-11 items-center justify-center px-8 py-3.5",
+  "inline-flex min-h-11 items-center justify-center rounded-md px-8 py-3.5",
   "border-2 border-white/40 bg-transparent text-white",
   "font-heading text-sm font-bold uppercase tracking-[0.08em]",
   "transition-colors duration-200 ease-out hover:border-white hover:bg-white/10",

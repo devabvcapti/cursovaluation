@@ -34,7 +34,7 @@ const DISMISS_BUTTON_CLASSES = cn(
 );
 
 const SUBMIT_BUTTON_CLASSES = cn(
-  "mt-2 inline-flex min-h-11 items-center justify-center px-8 py-3.5",
+  "mt-2 inline-flex min-h-11 items-center justify-center rounded-md px-8 py-3.5",
   "bg-brand-green text-brand-navy border-2 border-brand-green",
   "font-heading text-sm font-bold uppercase tracking-[0.08em]",
   "transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-60",
