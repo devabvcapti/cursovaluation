@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Resend } from "resend";
+import { courseContent } from "@/content/curso";
+import { formatInvestment } from "@/lib/format-investment";
 
 export interface EmentaEmailPayload {
   name: string;
@@ -9,6 +11,33 @@ export interface EmentaEmailPayload {
 
 const FROM_ADDRESS = "ABVCAP <contato@resend.abvcap.com.br>";
 const EMENTA_PATH = path.join(process.cwd(), "public", "docs", "ementa-valuation-abvcap.pdf");
+
+// Pulls price/deadline/checkout straight from courseContent so this email
+// never drifts out of sync with what the page itself promises.
+function buildEmailBody(name: string): string {
+  const { investment, hero } = courseContent;
+  return [
+    `Olá, ${name}!`,
+    "",
+    "Aqui está, como prometido: a ementa completa do curso de Valuation da ABVCAP.",
+    "",
+    "A maioria dos cursos de valuation do mercado termina no número. Este começa nele — você sai sabendo construir o modelo financeiro inteiro, do zero, e também montar o deal: calcular TIR e MOIC, decompor de onde vem o retorno e defender uma recomendação de investimento diante de um comitê.",
+    "",
+    "O que você leva:",
+    "- Um modelo completo, construído com as próprias mãos, a partir de uma companhia aberta real",
+    "- A estrutura de um deal de Private Equity, incluindo a alavancagem \"à brasileira\" (seller's finance)",
+    "- IA aplicada à análise — só depois de você já dominar o trabalho na unha",
+    `- Turma pequena (${investment.seatsLimit}), formato presencial, com a chancela institucional da ABVCAP`,
+    "",
+    `Condição de inscrição antecipada: ${formatInvestment(investment.earlyBirdPrice)} (de ${formatInvestment(investment.price)}) até ${investment.earlyBirdDeadline}.`,
+    "",
+    `Garanta sua vaga: ${hero.checkoutUrl}`,
+    "",
+    "Qualquer dúvida, é só responder este e-mail.",
+    "",
+    "ABVCAP — Aprenda com quem faz.",
+  ].join("\n");
+}
 
 /**
  * Delivers the course syllabus (ementa) PDF to the lead's own email —
@@ -37,8 +66,8 @@ export async function sendEmentaEmail(
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: [lead.email],
-    subject: "Ementa completa — Curso de Valuation ABVCAP",
-    text: `Olá, ${lead.name}!\n\nSegue em anexo a ementa completa do curso de Valuation da ABVCAP.\n\nQualquer dúvida, é só responder este e-mail.\n\nABVCAP — Aprenda com quem faz.`,
+    subject: "Sua ementa chegou — e a próxima turma de Valuation está com inscrições abertas",
+    text: buildEmailBody(lead.name),
     attachments: [
       {
         filename: "Ementa - Curso de Valuation ABVCAP.pdf",
