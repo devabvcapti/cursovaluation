@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { courseContent } from "@/content/curso";
+import { WhatsAppWidget } from "@/components/ui/WhatsAppWidget";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className={`${montserrat.variable} ${museoSans.variable} min-h-full flex flex-col`}
       >
         {children}
+        <WhatsAppWidget />
         <Analytics />
       </body>
     </html>
