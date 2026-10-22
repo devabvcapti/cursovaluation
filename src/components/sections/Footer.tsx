@@ -51,18 +51,13 @@ export function Footer() {
     <footer className="relative w-full overflow-hidden bg-brand-navy py-12 text-white lg:py-16">
       <ScrollReveal className="mx-auto flex max-w-7xl flex-col gap-10 px-6 lg:px-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex flex-wrap items-center gap-4">
-            <Image
-              src="/brand/abvcap-logo-white.png"
-              alt="ABVCAP"
-              width={350}
-              height={150}
-              className="h-10 w-auto"
-            />
-            <p className="font-heading text-xs font-bold uppercase tracking-[0.08em] text-white/60">
-              Siga a ABVCAP
-            </p>
-          </div>
+          <Image
+            src="/brand/abvcap-logo-white.png"
+            alt="ABVCAP"
+            width={350}
+            height={150}
+            className="h-10 w-auto"
+          />
 
           <div className="flex flex-col items-start gap-4 lg:items-end">
             <nav aria-label="Links do rodapé" className="flex flex-wrap gap-x-8 gap-y-3">
