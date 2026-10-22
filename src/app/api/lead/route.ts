@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateLead } from "@/lib/validate-lead";
 import { sendLeadNotification } from "@/lib/send-lead-notification";
+import { sendEmentaEmail } from "@/lib/send-ementa-email";
 
 /**
  * Lead capture endpoint for the secondary CTA ("Baixar ementa completa").
@@ -28,9 +29,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ errors: result.errors }, { status: 400 });
   }
 
-  const delivery = await sendLeadNotification({ name, email });
-  if (!delivery.ok) {
-    console.error("[lead] notification delivery failed:", delivery.reason);
+  const [notification, ementa] = await Promise.all([
+    sendLeadNotification({ name, email }),
+    sendEmentaEmail({ name, email }),
+  ]);
+
+  if (!notification.ok) {
+    console.error("[lead] admissions notification failed:", notification.reason);
+  }
+  if (!ementa.ok) {
+    console.error("[lead] ementa email failed:", ementa.reason);
+  }
+
+  // The visitor explicitly asked to receive the ementa — that's the one
+  // delivery that must succeed for this request to count as successful.
+  // The admissions notification failing is logged but doesn't block them.
+  if (!ementa.ok) {
     return NextResponse.json(
       { errors: { name: "Não foi possível enviar seus dados agora." } },
       { status: 502 },
