@@ -32,6 +32,7 @@ describe("courseContent pending data", () => {
     // text, but it's a generic stand-in graphic rather than a real photo.
     expect(isPlaceholder(confirmed.photo)).toBe(false);
     expect(confirmed.photo).toBe("/brand/placeholder-avatar.svg");
+    expect(isPlaceholder(confirmed.linkedin)).toBe(true);
   });
 
   it("marks the remaining faculty members' identifying fields as placeholders", () => {
@@ -42,6 +43,7 @@ describe("courseContent pending data", () => {
       expect(isPlaceholder(member.role)).toBe(true);
       expect(isPlaceholder(member.bio)).toBe(true);
       expect(isPlaceholder(member.photo)).toBe(true);
+      expect(isPlaceholder(member.linkedin)).toBe(true);
     }
   });
 

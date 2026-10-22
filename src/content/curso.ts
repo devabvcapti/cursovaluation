@@ -17,7 +17,7 @@ export interface CourseContent {
   learningOutcomes: string[];
   curriculumModules: { title: string; summary: string; lessons: string[] }[];
   methodology: { title: string; body: string }[];
-  faculty: { name: string; role: string; bio: string; photo: string }[];
+  faculty: { name: string; role: string; bio: string; photo: string; linkedin: string }[];
   testimonials: {
     quote: string;
     author: string;
@@ -188,18 +188,21 @@ export const courseContent: CourseContent = {
       bio: placeholder("BIO DO PROFESSOR 1"),
       // Symbolic placeholder — swap for a real photo once available.
       photo: "/brand/placeholder-avatar.svg",
+      linkedin: placeholder("LINKEDIN DO PROFESSOR 1"),
     },
     {
       name: placeholder("NOME DO PROFESSOR 2"),
       role: placeholder("CARGO E EMPRESA DO PROFESSOR 2"),
       bio: placeholder("BIO DO PROFESSOR 2"),
       photo: placeholder("FOTO DO PROFESSOR 2"),
+      linkedin: placeholder("LINKEDIN DO PROFESSOR 2"),
     },
     {
       name: placeholder("NOME DO PROFESSOR 3"),
       role: placeholder("CARGO E EMPRESA DO PROFESSOR 3"),
       bio: placeholder("BIO DO PROFESSOR 3"),
       photo: placeholder("FOTO DO PROFESSOR 3"),
+      linkedin: placeholder("LINKEDIN DO PROFESSOR 3"),
     },
   ],
 
