@@ -2,6 +2,7 @@
 
 import { useRef, useState, type CSSProperties } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { AnimatedTextCycle } from "@/components/ui/AnimatedTextCycle";
 import { BandeiraShape } from "@/components/ui/BandeiraShape";
 import { Button } from "@/components/ui/Button";
 import { LeadCaptureForm } from "@/components/ui/LeadCaptureForm";
@@ -95,6 +96,10 @@ const H1_CLASSES = cn(
 function lineColorClass(index: number) {
   return index === 0 ? "text-brand-green" : "text-white";
 }
+
+// Experiment (2026-10-21): cycles the opening word instead of a static
+// "Valuation" — easy to drop by reverting this constant/usage pair.
+const HEADLINE_CYCLE_WORDS = ["Valuation", "M&A", "Governança", "Estruturação"];
 
 const SUBHEADLINE_CLASSES = "max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg";
 
@@ -224,7 +229,15 @@ export function Hero() {
                   className={cn("hero-enter-line block", lineColorClass(index))}
                   style={enterDelay(SEQUENCE_DELAY_S + LINE_STAGGER_S * index)}
                 >
-                  {line}{" "}
+                  {index === 0 ? (
+                    <>
+                      <AnimatedTextCycle words={HEADLINE_CYCLE_WORDS} />:{" "}
+                    </>
+                  ) : (
+                    <>
+                      {line}{" "}
+                    </>
+                  )}
                 </span>
               </span>
             ))}
