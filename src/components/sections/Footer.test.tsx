@@ -15,4 +15,16 @@ describe("Footer", () => {
       courseContent.socialLinks.youtube,
     );
   });
+
+  it("renders the privacy policy and terms of use links", () => {
+    render(<Footer />);
+    expect(screen.getByRole("link", { name: "Política de Privacidade" })).toHaveAttribute(
+      "href",
+      "/politica-de-privacidade",
+    );
+    expect(screen.getByRole("link", { name: "Termos de Uso" })).toHaveAttribute(
+      "href",
+      "/termos-de-uso",
+    );
+  });
 });

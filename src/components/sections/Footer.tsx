@@ -23,6 +23,11 @@ const FOOTER_LINKS: { label: string; href: string }[] = [
   { label: "FAQ", href: "#faq" },
 ];
 
+const LEGAL_LINKS: { label: string; href: string }[] = [
+  { label: "Política de Privacidade", href: "/politica-de-privacidade" },
+  { label: "Termos de Uso", href: "/termos-de-uso" },
+];
+
 /**
  * Institutional footer (design spec §6.13 — "rodapé institucional").
  * Static content, no dedicated test: nothing here is conditional or
@@ -88,11 +93,22 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="border-t border-white/15 pt-6">
+        <div className="flex flex-col gap-4 border-t border-white/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-body text-xs text-white/60">
             © <CopyrightYear /> ABVCAP — Associação Brasileira de Private
             Equity e Venture Capital. Todos os direitos reservados.
           </p>
+          <nav aria-label="Links legais" className="flex flex-wrap gap-x-6 gap-y-2">
+            {LEGAL_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="font-body text-xs text-white/60 transition-colors hover:text-white"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
         </div>
       </ScrollReveal>
     </footer>
