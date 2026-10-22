@@ -8,6 +8,11 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(courseContent.hero.checkoutUrl)).toBe(true);
   });
 
+  it("marks the footer's social links as placeholders", () => {
+    expect(isPlaceholder(courseContent.socialLinks.linkedin)).toBe(true);
+    expect(isPlaceholder(courseContent.socialLinks.youtube)).toBe(true);
+  });
+
   it("has a real (non-placeholder) next cohort date now that it's confirmed", () => {
     expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(false);
   });

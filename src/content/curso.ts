@@ -5,6 +5,8 @@ export interface CourseContent {
   whatsappNumber: string;
   /** Pre-filled message the floating widget opens the WhatsApp chat with. */
   whatsappMessage: string;
+  /** ABVCAP's official social profiles, linked from the footer's "Siga a ABVCAP" block. */
+  socialLinks: { linkedin: string; youtube: string };
   hero: {
     eyebrow: string;
     headlineLines: string[];
@@ -44,6 +46,10 @@ export const courseContent: CourseContent = {
   whatsappNumber: "5511991480203",
   whatsappMessage:
     "Olá, tenho interesse em saber mais sobre o curso de Valuation. ABVCAP — Aprenda com quem faz.",
+  socialLinks: {
+    linkedin: placeholder("LINKEDIN DA ABVCAP"),
+    youtube: placeholder("YOUTUBE DA ABVCAP"),
+  },
   hero: {
     eyebrow: "Aprenda com quem faz",
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],

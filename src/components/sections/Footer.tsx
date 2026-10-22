@@ -1,6 +1,13 @@
 import Image from "next/image";
 import { CopyrightYear } from "@/components/sections/CopyrightYear";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { LinkedinIcon, YoutubeIcon } from "@/components/ui/icons";
+import { courseContent } from "@/content/curso";
+
+const SOCIAL_LINKS = [
+  { label: "LinkedIn", href: courseContent.socialLinks.linkedin, Icon: LinkedinIcon },
+  { label: "YouTube", href: courseContent.socialLinks.youtube, Icon: YoutubeIcon },
+];
 
 /**
  * Nav links repeated from `Header` for footer-level wayfinding. Kept as a
@@ -47,6 +54,25 @@ export function Footer() {
               height={150}
               className="h-10 w-auto self-start"
             />
+            <div className="flex flex-col gap-3">
+              <p className="font-heading text-xs font-bold uppercase tracking-[0.08em] text-white/60">
+                Siga a ABVCAP
+              </p>
+              <div className="flex gap-3">
+                {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-white/80 transition-colors hover:border-white hover:text-white"
+                  >
+                    <Icon className="h-4 w-4 fill-current" />
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
 
           <nav aria-label="Links do rodapé" className="flex flex-wrap gap-x-8 gap-y-3">
