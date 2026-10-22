@@ -56,7 +56,7 @@ export function Footer() {
             alt="ABVCAP"
             width={350}
             height={150}
-            className="h-10 w-auto"
+            className="h-10 w-auto self-start"
           />
 
           <div className="flex flex-col items-start gap-4 lg:items-end">
