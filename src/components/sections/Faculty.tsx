@@ -31,9 +31,6 @@ const COMPANIES_ROW_CLASSES = "mt-8 flex flex-wrap items-center gap-4 border-t b
 const COMPANY_PLACEHOLDER_CLASSES =
   "flex h-10 items-center rounded-sm border border-dashed border-brand-navy/25 px-4 font-body text-xs font-medium uppercase tracking-[0.04em] text-brand-navy/40 grayscale";
 
-const ENDORSEMENT_CLASSES =
-  "mt-8 border-t border-brand-navy/10 pt-6 text-center font-body text-sm font-medium uppercase tracking-[0.06em] text-brand-navy/60";
-
 /**
  * "Professor": a single editorial profile block (photo + bio), not a
  * card grid — the course currently has one confirmed instructor, so a
@@ -75,7 +72,6 @@ export function Faculty() {
             </div>
           </div>
         </div>
-        <p className={ENDORSEMENT_CLASSES}>Conteúdo e caso com curadoria e chancela ABVCAP</p>
       </ScrollReveal>
     </Section>
   );

@@ -37,14 +37,15 @@ describe("courseContent pending data", () => {
     const [confirmed] = courseContent.faculty;
     expect(isPlaceholder(confirmed.name)).toBe(false);
     expect(isPlaceholder(confirmed.role)).toBe(false);
-    expect(isPlaceholder(confirmed.bio)).toBe(true);
+    expect(isPlaceholder(confirmed.bio)).toBe(false);
+    expect(confirmed.bio).toMatch(/\[.+\]/);
     expect(isPlaceholder(confirmed.photo)).toBe(false);
     expect(confirmed.photo).toBe("/brand/pedro-di-palma.jpg");
     expect(isPlaceholder(confirmed.linkedin)).toBe(false);
     expect(confirmed.linkedin).toBe(
       "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
     );
-    expect(isPlaceholder(confirmed.quote)).toBe(true);
+    expect(isPlaceholder(confirmed.quote)).toBe(false);
     expect(confirmed.companies.length).toBeGreaterThan(0);
     for (const company of confirmed.companies) {
       expect(isPlaceholder(company)).toBe(true);
