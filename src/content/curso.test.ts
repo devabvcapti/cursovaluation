@@ -44,6 +44,11 @@ describe("courseContent pending data", () => {
     expect(confirmed.linkedin).toBe(
       "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
     );
+    expect(isPlaceholder(confirmed.quote)).toBe(true);
+    expect(confirmed.companies.length).toBeGreaterThan(0);
+    for (const company of confirmed.companies) {
+      expect(isPlaceholder(company)).toBe(true);
+    }
   });
 
   it("marks every testimonial's fields as placeholders", () => {

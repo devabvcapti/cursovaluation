@@ -19,7 +19,16 @@ export interface CourseContent {
   learningOutcomes: string[];
   curriculumModules: { title: string; summary: string; lessons: string[] }[];
   methodology: { title: string; body: string }[];
-  faculty: { name: string; role: string; bio: string; photo: string; linkedin: string }[];
+  faculty: {
+    name: string;
+    role: string;
+    bio: string;
+    photo: string;
+    linkedin: string;
+    quote: string;
+    /** Names of companies he's worked at — rendered as grayscale logo placeholders until real logo files exist. */
+    companies: string[];
+  }[];
   testimonials: {
     quote: string;
     author: string;
@@ -191,6 +200,8 @@ export const courseContent: CourseContent = {
       bio: placeholder("BIO DO PROFESSOR 1"),
       photo: "/brand/pedro-di-palma.jpg",
       linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
+      quote: placeholder("CITAÇÃO DO PROFESSOR 1"),
+      companies: [placeholder("LOGO EMPRESA 1"), placeholder("LOGO EMPRESA 2")],
     },
   ],
 

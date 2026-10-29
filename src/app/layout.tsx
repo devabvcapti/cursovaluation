@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import { courseContent } from "@/content/curso";
 import { WhatsAppWidget } from "@/components/ui/WhatsAppWidget";
@@ -8,6 +8,13 @@ import "./globals.css";
 
 const montserrat = Montserrat({
   variable: "--font-heading",
+  subsets: ["latin"],
+});
+
+// Used only for the Faculty section's featured quote.
+const playfairDisplay = Playfair_Display({
+  variable: "--font-quote",
+  style: ["italic"],
   subsets: ["latin"],
 });
 
@@ -55,7 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className="h-full antialiased">
       <body
-        className={`${montserrat.variable} ${museoSans.variable} min-h-full flex flex-col`}
+        className={`${montserrat.variable} ${museoSans.variable} ${playfairDisplay.variable} min-h-full flex flex-col`}
       >
         {children}
         <WhatsAppWidget />

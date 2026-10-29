@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
+  --font-quote: var(--font-quote);
   --color-brand-navy: #112468;
   --color-brand-green: #80c842;
   --color-brand-ink: #000000;

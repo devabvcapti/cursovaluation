@@ -1,28 +1,33 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { Faculty } from "./Faculty";
 import { courseContent } from "@/content/curso";
 
 describe("Faculty", () => {
-  it("renders one card per instructor", () => {
+  it("renders the professor's name, role, bio and quote, always visible", () => {
+    const [professor] = courseContent.faculty;
     render(<Faculty />);
-    expect(screen.getAllByTestId("faculty-card")).toHaveLength(courseContent.faculty.length);
+
+    expect(screen.getByRole("heading", { name: professor.name })).toBeInTheDocument();
+    expect(screen.getByText(professor.role)).toBeInTheDocument();
+    expect(screen.getByText(professor.bio)).toBeVisible();
+    expect(screen.getByText(professor.quote, { exact: false })).toBeInTheDocument();
   });
 
-  it("starts collapsed and reveals the bio and LinkedIn button on click", async () => {
-    const user = userEvent.setup();
+  it("links to the professor's LinkedIn", () => {
+    const [professor] = courseContent.faculty;
     render(<Faculty />);
-    const [first] = courseContent.faculty;
+    expect(screen.getByRole("link", { name: /linkedin/i })).toHaveAttribute(
+      "href",
+      professor.linkedin,
+    );
+  });
 
-    const trigger = screen.getByRole("button", { name: new RegExp(first.name) });
-    expect(trigger).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText(first.bio)).not.toBeVisible();
-
-    await user.click(trigger);
-
-    expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText(first.bio)).toBeVisible();
-    expect(screen.getByRole("link", { name: /linkedin/i })).toHaveAttribute("href", first.linkedin);
+  it("renders one placeholder per company", () => {
+    const [professor] = courseContent.faculty;
+    render(<Faculty />);
+    for (const company of professor.companies) {
+      expect(screen.getByText(company)).toBeInTheDocument();
+    }
   });
 });
