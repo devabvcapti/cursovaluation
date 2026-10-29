@@ -16,7 +16,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { title: "Programa", href: "/#programa", icon: BookOpen },
   { title: "Diferenciais", href: "/#metodologia", icon: Workflow },
-  { title: "Professores", href: "/#professores", icon: Users },
+  { title: "Professor", href: "/#professores", icon: Users },
   { title: "Investimento", href: "/#investimento", icon: Wallet },
   { title: "FAQ", href: "/#faq", icon: HelpCircle },
 ];

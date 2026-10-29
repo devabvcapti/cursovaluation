@@ -35,7 +35,7 @@ const ENDORSEMENT_CLASSES =
   "mt-8 border-t border-brand-navy/10 pt-6 text-center font-body text-sm font-medium uppercase tracking-[0.06em] text-brand-navy/60";
 
 /**
- * "Corpo docente": a single editorial profile block (photo + bio), not a
+ * "Professor": a single editorial profile block (photo + bio), not a
  * card grid — the course currently has one confirmed instructor, so a
  * multi-card grid with empty slots would undersell him instead of reading
  * as thin. Stacks photo-over-bio on mobile (`flex-col`), splits ~40/60 on
@@ -47,7 +47,7 @@ export function Faculty() {
   return (
     <Section tone="white" id="professores">
       <ScrollReveal className={CONTENT_CLASSES}>
-        <h2 className={HEADING_CLASSES}>Corpo docente</h2>
+        <h2 className={HEADING_CLASSES}>Professor</h2>
         <div className={PROFILE_ROW_CLASSES}>
           <div className={PHOTO_WRAPPER_CLASSES}>
             {/* eslint-disable-next-line @next/next/no-img-element -- photo source is content-driven, not a static asset */}
