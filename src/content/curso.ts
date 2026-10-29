@@ -191,14 +191,7 @@ export const courseContent: CourseContent = {
       bio: placeholder("BIO DO PROFESSOR 1"),
       // Symbolic placeholder — swap for a real photo once available.
       photo: "/brand/placeholder-avatar.svg",
-      linkedin: placeholder("LINKEDIN DO PROFESSOR 1"),
-    },
-    {
-      name: placeholder("NOME DO PROFESSOR 2"),
-      role: placeholder("CARGO E EMPRESA DO PROFESSOR 2"),
-      bio: placeholder("BIO DO PROFESSOR 2"),
-      photo: placeholder("FOTO DO PROFESSOR 2"),
-      linkedin: placeholder("LINKEDIN DO PROFESSOR 2"),
+      linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
     },
   ],
 

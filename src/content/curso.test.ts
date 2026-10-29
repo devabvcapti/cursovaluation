@@ -32,7 +32,8 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(courseContent.investment.workloadHours)).toBe(false);
   });
 
-  it("has real name, role and a symbolic placeholder photo for the confirmed professor", () => {
+  it("has real name, role, photo and LinkedIn for the sole confirmed professor", () => {
+    expect(courseContent.faculty).toHaveLength(1);
     const [confirmed] = courseContent.faculty;
     expect(isPlaceholder(confirmed.name)).toBe(false);
     expect(isPlaceholder(confirmed.role)).toBe(false);
@@ -41,19 +42,10 @@ describe("courseContent pending data", () => {
     // text, but it's a generic stand-in graphic rather than a real photo.
     expect(isPlaceholder(confirmed.photo)).toBe(false);
     expect(confirmed.photo).toBe("/brand/placeholder-avatar.svg");
-    expect(isPlaceholder(confirmed.linkedin)).toBe(true);
-  });
-
-  it("marks the remaining faculty members' identifying fields as placeholders", () => {
-    const [, ...pending] = courseContent.faculty;
-    expect(pending.length).toBeGreaterThan(0);
-    for (const member of pending) {
-      expect(isPlaceholder(member.name)).toBe(true);
-      expect(isPlaceholder(member.role)).toBe(true);
-      expect(isPlaceholder(member.bio)).toBe(true);
-      expect(isPlaceholder(member.photo)).toBe(true);
-      expect(isPlaceholder(member.linkedin)).toBe(true);
-    }
+    expect(isPlaceholder(confirmed.linkedin)).toBe(false);
+    expect(confirmed.linkedin).toBe(
+      "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
+    );
   });
 
   it("marks every testimonial's fields as placeholders", () => {

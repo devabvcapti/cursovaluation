@@ -13,7 +13,7 @@ const CONTENT_CLASSES = "relative mx-auto w-full max-w-6xl px-6 lg:px-10";
 
 const HEADING_CLASSES = "font-heading text-4xl font-light text-brand-navy md:text-5xl";
 
-const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 md:max-w-3xl md:mx-auto";
+const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-6 max-w-sm mx-auto";
 
 const CARD_CLASSES = "rounded-sm border border-brand-navy/10 bg-white shadow-sm";
 
