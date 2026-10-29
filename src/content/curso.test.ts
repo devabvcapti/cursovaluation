@@ -38,10 +38,8 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(confirmed.name)).toBe(false);
     expect(isPlaceholder(confirmed.role)).toBe(false);
     expect(isPlaceholder(confirmed.bio)).toBe(true);
-    // Photo is a real (renderable) image path, not bracketed placeholder
-    // text, but it's a generic stand-in graphic rather than a real photo.
     expect(isPlaceholder(confirmed.photo)).toBe(false);
-    expect(confirmed.photo).toBe("/brand/placeholder-avatar.svg");
+    expect(confirmed.photo).toBe("/brand/pedro-di-palma.jpg");
     expect(isPlaceholder(confirmed.linkedin)).toBe(false);
     expect(confirmed.linkedin).toBe(
       "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",

@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Foto pendente">
-  <rect width="200" height="200" fill="#112468" />
-  <circle cx="100" cy="78" r="38" fill="#ffffff" fill-opacity="0.35" />
-  <path d="M30 185c8-45 42-70 70-70s62 25 70 70z" fill="#ffffff" fill-opacity="0.35" />
-  <text x="100" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#ffffff" fill-opacity="0.8">FOTO PENDENTE</text>
-</svg>

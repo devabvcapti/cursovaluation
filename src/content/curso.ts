@@ -187,10 +187,9 @@ export const courseContent: CourseContent = {
   faculty: [
     {
       name: "Pedro Di Palma",
-      role: "Analista na UNBOX Capital",
+      role: "Investidor buy-side sênior",
       bio: placeholder("BIO DO PROFESSOR 1"),
-      // Symbolic placeholder — swap for a real photo once available.
-      photo: "/brand/placeholder-avatar.svg",
+      photo: "/brand/pedro-di-palma.jpg",
       linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
     },
   ],
