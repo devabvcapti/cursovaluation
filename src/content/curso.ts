@@ -187,7 +187,7 @@ export const courseContent: CourseContent = {
   faculty: [
     {
       name: "Pedro Di Palma",
-      role: "Investidor buy-side sênior",
+      role: "Diretor de Investimentos",
       bio: placeholder("BIO DO PROFESSOR 1"),
       photo: "/brand/pedro-di-palma.jpg",
       linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
