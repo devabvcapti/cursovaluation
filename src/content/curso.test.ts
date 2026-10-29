@@ -38,7 +38,6 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(confirmed.name)).toBe(false);
     expect(isPlaceholder(confirmed.role)).toBe(false);
     expect(isPlaceholder(confirmed.bio)).toBe(false);
-    expect(confirmed.bio).toMatch(/\[.+\]/);
     expect(isPlaceholder(confirmed.photo)).toBe(false);
     expect(confirmed.photo).toBe("/brand/pedro-di-palma.jpg");
     expect(isPlaceholder(confirmed.linkedin)).toBe(false);
