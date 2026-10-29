@@ -39,7 +39,7 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(confirmed.role)).toBe(false);
     expect(isPlaceholder(confirmed.bio)).toBe(false);
     expect(isPlaceholder(confirmed.photo)).toBe(false);
-    expect(confirmed.photo).toBe("/brand/pedro-di-palma.jpg");
+    expect(confirmed.photo).toBe("/brand/pedro-di-palma.png");
     expect(isPlaceholder(confirmed.linkedin)).toBe(false);
     expect(confirmed.linkedin).toBe(
       "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",

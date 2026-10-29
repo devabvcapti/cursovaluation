@@ -198,7 +198,7 @@ export const courseContent: CourseContent = {
       name: "Pedro Henrique Di Palma, CGA, CGE",
       role: "Diretor e sócio da Unbox Capital",
       bio: "Pedro é diretor e sócio da Unbox Capital, gestora de investimentos de growth com cerca de R$ 1 bilhão sob gestão. No dia a dia, avalia companhias, estrutura investimentos e defende teses no comitê: exatamente o percurso que você vai fazer nas 13 aulas do programa. É certificado pela ANBIMA como gestor de recursos (CGA) e de fundos estruturados (CGE).",
-      photo: "/brand/pedro-di-palma.jpg",
+      photo: "/brand/pedro-di-palma.png",
       linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
       quote:
         "Valuation não é uma fórmula: é uma tese que precisa resistir ao comitê. Por isso começamos na unha.",
