@@ -32,7 +32,8 @@ const COMPANY_PLACEHOLDER_CLASSES =
   "flex h-10 items-center rounded-sm border border-dashed border-brand-navy/25 px-4 font-body text-xs font-medium uppercase tracking-[0.04em] text-brand-navy/40 grayscale";
 
 /**
- * "Professor": a single editorial profile block (photo + bio), not a
+ * "Quem vai construir o modelo com você": a single editorial profile
+ * block (photo + bio), not a
  * card grid — the course currently has one confirmed instructor, so a
  * multi-card grid with empty slots would undersell him instead of reading
  * as thin. Stacks photo-over-bio on mobile (`flex-col`), splits ~40/60 on
@@ -44,7 +45,7 @@ export function Faculty() {
   return (
     <Section tone="white" id="professores">
       <ScrollReveal className={CONTENT_CLASSES}>
-        <h2 className={HEADING_CLASSES}>Professor</h2>
+        <h2 className={HEADING_CLASSES}>Quem vai construir o modelo com você</h2>
         <div className={PROFILE_ROW_CLASSES}>
           <div className={PHOTO_WRAPPER_CLASSES}>
             {/* eslint-disable-next-line @next/next/no-img-element -- photo source is content-driven, not a static asset */}
