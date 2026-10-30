@@ -22,7 +22,7 @@ const ROLE_CLASSES = "mt-1 font-body text-base font-semibold text-brand-navy/70"
 
 const BIO_CLASSES = "mt-5 font-body text-base leading-relaxed text-brand-navy/80";
 
-const QUOTE_CLASSES = "mt-6 font-quote text-2xl italic text-brand-green md:text-3xl";
+const QUOTE_CLASSES = "mt-6 font-quote text-2xl italic text-[#4E8A1F] md:text-3xl";
 
 const LINKEDIN_LINK_CLASSES = "mt-6 inline-flex";
 
