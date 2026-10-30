@@ -238,8 +238,7 @@ export const courseContent: CourseContent = {
     earlyBirdPrice: "9000",
     earlyBirdDeadline: "20 de dezembro de 2026",
     seatsLimit: "Cerca de 20 vagas",
-    // Briefing (2026-10-21, base ementa v6) leaves this explicitly "a confirmar".
-    nextCohortDate: placeholder("DATA DA PRÓXIMA TURMA"),
+    nextCohortDate: "16 de fevereiro de 2027",
     workloadHours: "39h em sala + 23h em casa",
     checkoutUrl: "https://abvcap.glueup.com/event/199072/register/",
   },

@@ -17,8 +17,9 @@ describe("courseContent pending data", () => {
     expect(courseContent.socialLinks.youtube).toBe("https://www.youtube.com/@ABVCAPVideos");
   });
 
-  it("marks the next cohort date as a placeholder (briefing leaves it 'a confirmar')", () => {
-    expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(true);
+  it("has a real (non-placeholder) next cohort date now that it's confirmed", () => {
+    expect(isPlaceholder(courseContent.investment.nextCohortDate)).toBe(false);
+    expect(courseContent.investment.nextCohortDate).toBe("16 de fevereiro de 2027");
   });
 
   it("has a real (non-placeholder) price now that it's confirmed", () => {
