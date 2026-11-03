@@ -19,7 +19,14 @@ export async function GET(
     .eq("id", id)
     .maybeSingle();
 
-  if (error || !pedido) {
+  if (error) {
+    return NextResponse.json(
+      { errors: { nome: "Não foi possível consultar o pedido agora." } },
+      { status: 500 },
+    );
+  }
+
+  if (!pedido) {
     return NextResponse.json(
       { errors: { nome: "Pedido não encontrado." } },
       { status: 404 },

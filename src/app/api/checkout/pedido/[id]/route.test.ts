@@ -49,7 +49,7 @@ describe("GET /api/checkout/pedido/[id]", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns 404 when the query errors", async () => {
+  it("returns 500 when the query errors", async () => {
     maybeSingleMock.mockResolvedValue({
       data: null,
       error: { message: "boom" },
@@ -57,6 +57,6 @@ describe("GET /api/checkout/pedido/[id]", () => {
 
     const res = await call("pedido-1");
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(500);
   });
 });
