@@ -61,6 +61,59 @@ describe("createMpPayment", () => {
     });
   });
 
+  it('passes through a "pending" status with pix QR data (what a real fresh Pix charge returns)', async () => {
+    createMock.mockResolvedValue({
+      id: 789,
+      status: "pending",
+      status_detail: "pending_waiting_transfer",
+      point_of_interaction: { transaction_data: { qr_code: "000...", qr_code_base64: "iVBORw0K..." } },
+    });
+    const { createMpPayment } = await import("./mercadopago-client");
+    const result = await createMpPayment({ ...INPUT, formData: { payment_method_id: "pix" } });
+    expect(result).toEqual({
+      ok: true,
+      mpPaymentId: "789",
+      status: "pending",
+      pix: { qrCode: "000...", qrCodeBase64: "iVBORw0K..." },
+    });
+  });
+
+  it("never lets formData override transaction_amount, external_reference or payer, and forwards only payment-method fields", async () => {
+    createMock.mockResolvedValue({ id: 1, status: "approved" });
+    const { createMpPayment } = await import("./mercadopago-client");
+    await createMpPayment({
+      ...INPUT,
+      formData: {
+        token: "tok",
+        payment_method_id: "visa",
+        installments: 3,
+        issuer_id: "24",
+        // Tampered, browser-controlled values — must all be ignored:
+        transaction_amount: 1,
+        external_reference: "someone-elses-pedido",
+        payer: { email: "attacker@evil.com", identification: { type: "CPF", number: "00000000000" } },
+        additional_info: { items: [] },
+        notification_url: "https://evil.example/hook",
+      },
+    });
+
+    expect(createMock).toHaveBeenCalledTimes(1);
+    const { body } = createMock.mock.calls[0][0];
+    expect(body).toEqual({
+      token: "tok",
+      payment_method_id: "visa",
+      installments: 3,
+      issuer_id: "24",
+      transaction_amount: 9000,
+      external_reference: "pedido-1",
+      payer: {
+        email: "ana@example.com",
+        first_name: "Ana",
+        identification: { type: "CPF", number: "11144477735" },
+      },
+    });
+  });
+
   it("returns ok:false when the SDK throws", async () => {
     createMock.mockRejectedValue(new Error("mp down"));
     const { createMpPayment } = await import("./mercadopago-client");
@@ -75,15 +128,33 @@ describe("getMpPayment", () => {
     process.env.MERCADOPAGO_ACCESS_TOKEN = "test-token";
   });
 
-  it("fetches a payment by id and maps its status", async () => {
-    getMock.mockResolvedValue({ id: 123, status: "approved" });
+  it("fetches a payment by id and maps its status and external_reference", async () => {
+    getMock.mockResolvedValue({ id: 123, status: "approved", external_reference: "pedido-1" });
     const { getMpPayment } = await import("./mercadopago-client");
-    expect(await getMpPayment("123")).toEqual({ ok: true, status: "approved" });
+    expect(await getMpPayment("123")).toEqual({
+      ok: true,
+      status: "approved",
+      externalReference: "pedido-1",
+    });
   });
 
-  it("passes through a cancelled status (e.g. an expired Pix charge)", async () => {
+  it("passes through a cancelled status (e.g. an expired Pix charge), with a null externalReference when absent", async () => {
     getMock.mockResolvedValue({ id: 123, status: "cancelled" });
     const { getMpPayment } = await import("./mercadopago-client");
-    expect(await getMpPayment("123")).toEqual({ ok: true, status: "cancelled" });
+    expect(await getMpPayment("123")).toEqual({
+      ok: true,
+      status: "cancelled",
+      externalReference: null,
+    });
+  });
+
+  it('passes through a "pending" status (an unpaid Pix charge)', async () => {
+    getMock.mockResolvedValue({ id: 123, status: "pending", external_reference: "pedido-1" });
+    const { getMpPayment } = await import("./mercadopago-client");
+    expect(await getMpPayment("123")).toEqual({
+      ok: true,
+      status: "pending",
+      externalReference: "pedido-1",
+    });
   });
 });

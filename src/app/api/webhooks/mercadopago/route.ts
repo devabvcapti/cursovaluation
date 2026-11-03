@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { verifyMpWebhookSignature } from "@/lib/verify-mp-webhook-signature";
 import { getMpPayment } from "@/lib/mercadopago-client";
+import { applyPedidoStatus } from "@/lib/apply-payment-status";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
-import { incrementCupomUso } from "@/lib/cupons";
-import { sendOrderConfirmationEmail } from "@/lib/send-order-confirmation-email";
-import { sendOrderNotificationEmail } from "@/lib/send-order-notification-email";
-import type { PedidoRow, PedidoStatus } from "@/lib/supabase/types";
+import type { PedidoRow } from "@/lib/supabase/types";
 
 /**
  * Mercado Pago webhook — notifies us of payment status changes.
@@ -18,26 +16,21 @@ import type { PedidoRow, PedidoStatus } from "@/lib/supabase/types";
  * verification: an invalid signature returns `401` so Mercado Pago treats it
  * as a rejection, not a transient failure to retry.
  *
- * Mercado Pago delivers webhooks at-least-once, so the same `data.id` can
- * arrive multiple times for the same payment. The idempotency guard below
- * compares the row's CURRENT status to the NEWLY MAPPED status (mapping
- * "in_process" -> "pending", since `pedidos.status` has no "in_process"
- * member — same mapping as the /api/checkout/pagamento route). If they're
- * already equal, we return 200 without touching the row, incrementing any
- * coupon, or sending any email. Side effects (coupon increment + both
- * emails) only fire on an actual transition INTO "approved", never merely
- * because the row happens to already be "approved".
+ * The status write itself, its idempotency/race-safety (conditional update
+ * on the status we read + affected-row check), and the side effects that
+ * fire only on a genuine transition into "approved" (cupom increment + both
+ * emails) all live in `applyPedidoStatus` — shared with
+ * `/api/checkout/pagamento`, so whichever of the two sees the approval first
+ * performs it exactly once.
  *
- * That read-then-compare guard alone isn't enough against truly concurrent
- * (overlapping, not just sequential) redeliveries: two requests could both
- * read the row while it's still "pending" and both pass the equality check.
- * So the write itself is conditioned on the row still having the status we
- * read (`.eq("status", pedidoRow.status)` alongside `.eq("id", ...)`), and we
- * check how many rows that update actually touched. If it's zero, another
- * concurrent delivery already won the race and updated the row first — we
- * treat that exactly like the idempotent no-op case and skip the side
- * effects. We also skip them if the update call itself errored, so we never
- * send emails / increment a coupon against an unconfirmed DB state.
+ * Row lookup: first by `mp_payment_id`. If nothing matches, fall back to the
+ * payment's `external_reference` (our pedido id) — this covers a webhook that
+ * beats pagamento's own write, and a payment whose `mp_payment_id` was
+ * overwritten by a later attempt on the same pedido (e.g. the buyer generated
+ * a Pix, then tried again, then paid the first Pix). A fallback match only
+ * ever applies an "approved" status — a stale non-approved notification for a
+ * superseded payment must not overwrite the status of the current attempt —
+ * and records this payment's id on the row.
  */
 export async function POST(request: Request) {
   const xSignature = request.headers.get("x-signature") ?? "";
@@ -78,64 +71,64 @@ export async function POST(request: Request) {
     .eq("mp_payment_id", dataId)
     .maybeSingle();
 
-  if (fetchError || !pedido) {
+  if (fetchError) {
+    console.error("[webhooks/mercadopago] failed to look up pedido by mp_payment_id:", fetchError);
+    return NextResponse.json({ ok: true }, { status: 200 });
+  }
+
+  if (pedido) {
+    await applyPedidoStatus(pedido as PedidoRow, paymentResult.status);
+    return NextResponse.json({ ok: true }, { status: 200 });
+  }
+
+  // Fallback: no row carries this mp_payment_id — match by external_reference.
+  const externalReference = paymentResult.externalReference;
+  if (!externalReference) {
     console.warn("[webhooks/mercadopago] no pedidos row for mp_payment_id:", dataId);
     return NextResponse.json({ ok: true }, { status: 200 });
   }
 
-  const pedidoRow = pedido as PedidoRow;
-
-  // DB-safe status: our schema has no "in_process", so an unsettled Pix
-  // charge maps to "pending" — matching what /api/checkout/pagamento stores.
-  const nextStatus: PedidoStatus =
-    paymentResult.status === "in_process" ? "pending" : paymentResult.status;
-
-  if (pedidoRow.status === nextStatus) {
-    // Idempotency guard: nothing changed, so no update, no coupon
-    // increment, no emails — this is also what makes a redelivered
-    // "in_process" notification against an already-"pending" row a no-op.
-    return NextResponse.json({ ok: true }, { status: 200 });
-  }
-
-  // Conditional write: only succeeds if the row's status hasn't moved since
-  // we read it. `.select("id")` lets us see how many rows actually matched —
-  // zero means a concurrent delivery already won this race.
-  const { data: updatedRows, error: updateError } = await client
+  const { data: fallbackPedido, error: fallbackError } = await client
     .from("pedidos")
-    .update({ status: nextStatus })
-    .eq("id", pedidoRow.id)
-    .eq("status", pedidoRow.status)
-    .select("id");
+    .select("*")
+    .eq("id", externalReference)
+    .maybeSingle();
 
-  if (updateError) {
-    console.error("[webhooks/mercadopago] failed to update pedido status:", updateError);
+  if (fallbackError || !fallbackPedido) {
+    console.warn(
+      "[webhooks/mercadopago] no pedidos row for mp_payment_id or external_reference:",
+      dataId,
+      externalReference,
+    );
     return NextResponse.json({ ok: true }, { status: 200 });
   }
 
-  if (!updatedRows || updatedRows.length === 0) {
-    // Lost the race to a concurrent delivery (or the row changed between our
-    // read and write for some other reason) — treat like the idempotent
-    // no-op case: no coupon increment, no emails.
+  if (paymentResult.status !== "approved") {
+    console.warn(
+      "[webhooks/mercadopago] ignoring non-approved status for a payment not recorded on its pedido:",
+      dataId,
+      paymentResult.status,
+    );
     return NextResponse.json({ ok: true }, { status: 200 });
   }
 
-  if (nextStatus === "approved") {
-    if (pedidoRow.cupom_codigo) {
-      await incrementCupomUso(pedidoRow.cupom_codigo);
-    }
+  const fallbackRow = fallbackPedido as PedidoRow;
 
-    const [confirmation, notification] = await Promise.all([
-      sendOrderConfirmationEmail(pedidoRow),
-      sendOrderNotificationEmail(pedidoRow),
-    ]);
-
-    if (!confirmation.ok) {
-      console.error("[webhooks/mercadopago] order confirmation email failed:", confirmation.reason);
-    }
-    if (!notification.ok) {
-      console.error("[webhooks/mercadopago] order notification email failed:", notification.reason);
-    }
+  if (fallbackRow.status === "approved") {
+    // The pedido was already paid by a DIFFERENT Mercado Pago payment, and now
+    // this one was approved too — a real double payment that needs a manual
+    // refund. Leave the row (and its recorded payment id) alone and flag it.
+    console.error(
+      "[webhooks/mercadopago] possible double payment: pedido already approved, extra approved payment:",
+      fallbackRow.id,
+      dataId,
+    );
+    return NextResponse.json({ ok: true }, { status: 200 });
   }
+
+  await applyPedidoStatus(fallbackRow, paymentResult.status, {
+    mp_payment_id: dataId,
+  });
 
   return NextResponse.json({ ok: true }, { status: 200 });
 }

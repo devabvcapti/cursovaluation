@@ -267,6 +267,91 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(updateMock).not.toHaveBeenCalled();
   });
 
+  it('on "pending" (a real unpaid Pix) against an already-"pending" row, updates nothing and sends no emails', async () => {
+    const pedidoRow = buildPedidoRow({ status: "pending" });
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "pending", externalReference: "pedido-1" });
+
+    const { POST } = await import("./route");
+    const response = await POST(buildRequest({ action: "payment.updated", data: { id: "mp-123" } }));
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+  });
+
+  it("never downgrades an already-approved row (e.g. a late rejected notification)", async () => {
+    const pedidoRow = buildPedidoRow({ status: "approved" });
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "rejected", externalReference: "pedido-1" });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const response = await POST(buildRequest({ action: "payment.updated", data: { id: "mp-123" } }));
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    warnSpy.mockRestore();
+  });
+
+  it("falls back to external_reference when no row has this mp_payment_id, applies an approval, records the payment id and fires the side effects", async () => {
+    // Row whose mp_payment_id was overwritten by a later attempt (mp-later),
+    // while the buyer actually paid the earlier Pix (mp-123).
+    const pedidoRow = buildPedidoRow({ status: "pending", mp_payment_id: "mp-later", cupom_codigo: "PROMO10" });
+    maybeSingleMock
+      .mockResolvedValueOnce({ data: null, error: null }) // by mp_payment_id
+      .mockResolvedValueOnce({ data: pedidoRow, error: null }); // by id = external_reference
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "approved", externalReference: "pedido-1" });
+
+    const { POST } = await import("./route");
+    const response = await POST(buildRequest({ action: "payment.updated", data: { id: "mp-123" } }));
+
+    expect(eqSelectMock).toHaveBeenNthCalledWith(1, "mp_payment_id", "mp-123");
+    expect(eqSelectMock).toHaveBeenNthCalledWith(2, "id", "pedido-1");
+    expect(updateMock).toHaveBeenCalledWith({ status: "approved", mp_payment_id: "mp-123" });
+    expect(eqUpdateStatusMock).toHaveBeenCalledWith("status", "pending");
+    expect(incrementCupomUsoMock).toHaveBeenCalledWith("PROMO10");
+    expect(sendOrderConfirmationEmailMock).toHaveBeenCalledWith(pedidoRow);
+    expect(sendOrderNotificationEmailMock).toHaveBeenCalledWith(pedidoRow);
+    expect(response.status).toBe(200);
+  });
+
+  it("on an external_reference fallback match, ignores a non-approved status (stale notification for a superseded payment)", async () => {
+    const pedidoRow = buildPedidoRow({ status: "pending", mp_payment_id: "mp-later" });
+    maybeSingleMock
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: pedidoRow, error: null });
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "cancelled", externalReference: "pedido-1" });
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const response = await POST(buildRequest({ action: "payment.updated", data: { id: "mp-123" } }));
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    warnSpy.mockRestore();
+  });
+
+  it("on an external_reference fallback match against an already-approved row, flags a possible double payment and changes nothing", async () => {
+    const pedidoRow = buildPedidoRow({ status: "approved", mp_payment_id: "mp-other" });
+    maybeSingleMock
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: pedidoRow, error: null });
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "approved", externalReference: "pedido-1" });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const response = await POST(buildRequest({ action: "payment.updated", data: { id: "mp-123" } }));
+
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(incrementCupomUsoMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    errorSpy.mockRestore();
+  });
+
   it("returns 200 and logs a warning when no pedidos row matches the payment", async () => {
     maybeSingleMock.mockResolvedValue({ data: null, error: null });
     getMpPaymentMock.mockResolvedValue({ ok: true, status: "approved" });

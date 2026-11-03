@@ -9,14 +9,32 @@ const maybeSingleMock = vi.fn();
 const eqSelectMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
 const selectMock = vi.fn().mockReturnValue({ eq: eqSelectMock });
 
-const eqUpdateMock = vi.fn().mockResolvedValue({ data: null, error: null });
-const updateMock = vi.fn().mockReturnValue({ eq: eqUpdateMock });
+// Chain (via applyPedidoStatus): .update({...}).eq("id", id).eq("status", s).select("id")
+const updateSelectMock = vi.fn().mockResolvedValue({ data: [{ id: "pedido-1" }], error: null });
+const eqUpdateStatusMock = vi.fn().mockReturnValue({ select: updateSelectMock });
+const eqUpdateIdMock = vi.fn().mockReturnValue({ eq: eqUpdateStatusMock });
+const updateMock = vi.fn().mockReturnValue({ eq: eqUpdateIdMock });
 
 const fromMock = vi.fn().mockReturnValue({ select: selectMock, update: updateMock });
 const serviceClientMock = { from: fromMock };
 
 vi.mock("@/lib/supabase/service-client", () => ({
   getSupabaseServiceClient: () => serviceClientMock,
+}));
+
+const incrementCupomUsoMock = vi.fn();
+vi.mock("@/lib/cupons", () => ({
+  incrementCupomUso: incrementCupomUsoMock,
+}));
+
+const sendOrderConfirmationEmailMock = vi.fn();
+vi.mock("@/lib/send-order-confirmation-email", () => ({
+  sendOrderConfirmationEmail: sendOrderConfirmationEmailMock,
+}));
+
+const sendOrderNotificationEmailMock = vi.fn();
+vi.mock("@/lib/send-order-notification-email", () => ({
+  sendOrderNotificationEmail: sendOrderNotificationEmailMock,
 }));
 
 const pedidoRow = {
@@ -37,38 +55,62 @@ const pedidoRow = {
   updated_at: "2026-01-01T00:00:00.000Z",
 };
 
+function buildRequest(body: unknown) {
+  return new Request("http://localhost/api/checkout/pagamento", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
 describe("POST /api/checkout/pagamento", () => {
   beforeEach(() => {
     createMpPaymentMock.mockReset();
     maybeSingleMock.mockReset();
     eqSelectMock.mockClear();
     selectMock.mockClear();
-    eqUpdateMock.mockClear();
-    eqUpdateMock.mockResolvedValue({ data: null, error: null });
+    updateSelectMock.mockClear();
+    updateSelectMock.mockResolvedValue({ data: [{ id: "pedido-1" }], error: null });
+    eqUpdateStatusMock.mockClear();
+    eqUpdateIdMock.mockClear();
     updateMock.mockClear();
     fromMock.mockClear();
+    incrementCupomUsoMock.mockReset();
+    incrementCupomUsoMock.mockResolvedValue(undefined);
+    sendOrderConfirmationEmailMock.mockReset();
+    sendOrderConfirmationEmailMock.mockResolvedValue({ ok: true });
+    sendOrderNotificationEmailMock.mockReset();
+    sendOrderNotificationEmailMock.mockResolvedValue({ ok: true });
   });
 
   it("returns 404 and never calls Mercado Pago for an unknown pedidoId", async () => {
     maybeSingleMock.mockResolvedValue({ data: null, error: null });
 
     const { POST } = await import("./route");
-    const request = new Request("http://localhost/api/checkout/pagamento", {
-      method: "POST",
-      body: JSON.stringify({
-        pedidoId: "unknown-id",
-        formData: {},
-        paymentMethodId: "pix",
-      }),
-    });
-    const response = await POST(request);
+    const response = await POST(
+      buildRequest({ pedidoId: "unknown-id", formData: {}, paymentMethodId: "pix" }),
+    );
 
     expect(response.status).toBe(404);
     expect(createMpPaymentMock).not.toHaveBeenCalled();
     expect(updateMock).not.toHaveBeenCalled();
   });
 
-  it("fetches the pedido, calls createMpPayment, updates the row, and returns 200 with the approved status", async () => {
+  it("never charges an already-approved pedido again: returns approved without calling Mercado Pago or writing", async () => {
+    maybeSingleMock.mockResolvedValue({ data: { ...pedidoRow, status: "approved" }, error: null });
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData: { token: "tok" }, paymentMethodId: "visa" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: "approved" });
+    expect(createMpPaymentMock).not.toHaveBeenCalled();
+    expect(updateMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+  });
+
+  it("fetches the pedido, calls createMpPayment with server-side amount/payer, conditionally updates the row, and returns 200 with the approved status", async () => {
     maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
     createMpPaymentMock.mockResolvedValue({
       ok: true,
@@ -78,18 +120,11 @@ describe("POST /api/checkout/pagamento", () => {
 
     const formData = { token: "card-token-abc", installments: 1 };
     const { POST } = await import("./route");
-    const request = new Request("http://localhost/api/checkout/pagamento", {
-      method: "POST",
-      body: JSON.stringify({
-        pedidoId: pedidoRow.id,
-        formData,
-        paymentMethodId: "visa",
-      }),
-    });
-    const response = await POST(request);
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData, paymentMethodId: "visa" }),
+    );
 
     expect(fromMock).toHaveBeenCalledWith("pedidos");
-    expect(selectMock).toHaveBeenCalled();
     expect(eqSelectMock).toHaveBeenCalledWith("id", pedidoRow.id);
 
     expect(createMpPaymentMock).toHaveBeenCalledWith({
@@ -104,15 +139,84 @@ describe("POST /api/checkout/pagamento", () => {
     });
 
     expect(updateMock).toHaveBeenCalledWith({
-      mp_payment_id: "mp-123",
       status: "approved",
+      mp_payment_id: "mp-123",
       payment_method: "credit_card",
     });
-    expect(eqUpdateMock).toHaveBeenCalledWith("id", pedidoRow.id);
+    expect(eqUpdateIdMock).toHaveBeenCalledWith("id", pedidoRow.id);
+    expect(eqUpdateStatusMock).toHaveBeenCalledWith("status", "pending");
 
     expect(response.status).toBe(200);
-    const body = await response.json();
-    expect(body).toEqual({ status: "approved" });
+    expect(await response.json()).toEqual({ status: "approved" });
+  });
+
+  it("a card approved synchronously fires both emails and the cupom increment from THIS route (no webhook needed)", async () => {
+    const rowWithCupom = { ...pedidoRow, cupom_codigo: "PROMO10" };
+    maybeSingleMock.mockResolvedValue({ data: rowWithCupom, error: null });
+    createMpPaymentMock.mockResolvedValue({ ok: true, mpPaymentId: "mp-123", status: "approved" });
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData: { token: "tok" }, paymentMethodId: "visa" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(incrementCupomUsoMock).toHaveBeenCalledWith("PROMO10");
+    expect(sendOrderConfirmationEmailMock).toHaveBeenCalledWith(rowWithCupom);
+    expect(sendOrderNotificationEmailMock).toHaveBeenCalledWith(rowWithCupom);
+  });
+
+  it("still reports approved to the buyer (200) when an email sender throws after the charge", async () => {
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    createMpPaymentMock.mockResolvedValue({ ok: true, mpPaymentId: "mp-123", status: "approved" });
+    sendOrderConfirmationEmailMock.mockRejectedValue(new Error("resend down"));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData: {}, paymentMethodId: "visa" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: "approved" });
+    expect(sendOrderNotificationEmailMock).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it("sends no emails when the conditional write lost the race (e.g. the webhook already approved the row) — no duplicate side effects", async () => {
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    createMpPaymentMock.mockResolvedValue({ ok: true, mpPaymentId: "mp-123", status: "approved" });
+    updateSelectMock.mockResolvedValue({ data: [], error: null });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData: {}, paymentMethodId: "visa" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(incrementCupomUsoMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(sendOrderNotificationEmailMock).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it("checks the update result: logs and sends no emails when the DB write errors", async () => {
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    createMpPaymentMock.mockResolvedValue({ ok: true, mpPaymentId: "mp-123", status: "approved" });
+    updateSelectMock.mockResolvedValue({ data: null, error: { message: "db unavailable" } });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData: {}, paymentMethodId: "visa" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 
   it("sets payment_method to pix only when paymentMethodId is \"pix\"", async () => {
@@ -124,56 +228,45 @@ describe("POST /api/checkout/pagamento", () => {
     });
 
     const { POST } = await import("./route");
-    const request = new Request("http://localhost/api/checkout/pagamento", {
-      method: "POST",
-      body: JSON.stringify({
-        pedidoId: pedidoRow.id,
-        formData: {},
-        paymentMethodId: "pix",
-      }),
-    });
-    await POST(request);
+    await POST(buildRequest({ pedidoId: pedidoRow.id, formData: {}, paymentMethodId: "pix" }));
 
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({ payment_method: "pix" }),
     );
   });
 
-  it('maps an "in_process" result to a stored "pending" status while the JSON response still reports "in_process", and includes the pix payload', async () => {
-    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
-    createMpPaymentMock.mockResolvedValue({
-      ok: true,
-      mpPaymentId: "mp-789",
-      status: "in_process",
-      pix: { qrCode: "00020126...", qrCodeBase64: "iVBORw0KGgo=" },
-    });
+  it.each(["pending", "in_process"])(
+    'stores a "%s" Pix result as "pending" (recording mp_payment_id), sends no emails, and responds with the raw status plus the pix payload',
+    async (rawStatus) => {
+      maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+      createMpPaymentMock.mockResolvedValue({
+        ok: true,
+        mpPaymentId: "mp-789",
+        status: rawStatus,
+        pix: { qrCode: "00020126...", qrCodeBase64: "iVBORw0KGgo=" },
+      });
 
-    const { POST } = await import("./route");
-    const request = new Request("http://localhost/api/checkout/pagamento", {
-      method: "POST",
-      body: JSON.stringify({
-        pedidoId: pedidoRow.id,
-        formData: {},
-        paymentMethodId: "pix",
-      }),
-    });
-    const response = await POST(request);
+      const { POST } = await import("./route");
+      const response = await POST(
+        buildRequest({ pedidoId: pedidoRow.id, formData: {}, paymentMethodId: "pix" }),
+      );
 
-    // Stored value must be the DB-safe "pending" — our pedidos.status column
-    // has no "in_process" member.
-    expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "pending" }),
-    );
+      // Status unchanged (pending -> pending) but the payment id/method are
+      // still written, through the same conditional update.
+      expect(updateMock).toHaveBeenCalledWith({
+        status: "pending",
+        mp_payment_id: "mp-789",
+        payment_method: "pix",
+      });
+      expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
 
-    // Responded value must be the RAW, unmapped "in_process" — Task 16's
-    // Pix-waiting UI switches on this exact value.
-    expect(response.status).toBe(200);
-    const body = await response.json();
-    expect(body).toEqual({
-      status: "in_process",
-      pix: { qrCode: "00020126...", qrCodeBase64: "iVBORw0KGgo=" },
-    });
-  });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({
+        status: rawStatus,
+        pix: { qrCode: "00020126...", qrCodeBase64: "iVBORw0KGgo=" },
+      });
+    },
+  );
 
   it("returns 502 and leaves the pedido's status untouched when createMpPayment fails", async () => {
     maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
@@ -183,19 +276,12 @@ describe("POST /api/checkout/pagamento", () => {
     });
 
     const { POST } = await import("./route");
-    const request = new Request("http://localhost/api/checkout/pagamento", {
-      method: "POST",
-      body: JSON.stringify({
-        pedidoId: pedidoRow.id,
-        formData: {},
-        paymentMethodId: "pix",
-      }),
-    });
-    const response = await POST(request);
+    const response = await POST(
+      buildRequest({ pedidoId: pedidoRow.id, formData: {}, paymentMethodId: "pix" }),
+    );
 
     expect(response.status).toBe(502);
-    const body = await response.json();
-    expect(body).toEqual({
+    expect(await response.json()).toEqual({
       errors: { nome: "Não foi possível processar o pagamento agora." },
     });
     expect(updateMock).not.toHaveBeenCalled();
