@@ -42,6 +42,9 @@ export interface CourseContent {
     price: string;
     earlyBirdPrice: string;
     earlyBirdDeadline: string;
+    earlyBirdDeadlineISO: string;
+    associadoPrice: string;
+    associadoEarlyBirdPrice: string;
     seatsLimit: string;
     nextCohortDate: string;
     workloadHours: string;
@@ -64,7 +67,7 @@ export const courseContent: CourseContent = {
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
       "Programa presencial de avaliação de empresas para profissionais de M&A, Private Equity, Venture Capital e finanças corporativas — 13 aulas construídas a partir de uma companhia aberta real, do histórico até o fechamento do modelo e a estruturação do deal.",
-    checkoutUrl: "https://abvcap.glueup.com/event/199072/register/",
+    checkoutUrl: "/inscricao",
     syllabusCtaLabel: "Baixar ementa completa",
   },
 
@@ -237,10 +240,13 @@ export const courseContent: CourseContent = {
     price: "10000",
     earlyBirdPrice: "9000",
     earlyBirdDeadline: "20 de dezembro de 2026",
+    earlyBirdDeadlineISO: "2026-12-20",
+    associadoPrice: placeholder("PREÇO ASSOCIADO"),
+    associadoEarlyBirdPrice: placeholder("PREÇO ASSOCIADO EARLY BIRD"),
     seatsLimit: "Cerca de 20 vagas",
     nextCohortDate: "16 de fevereiro de 2027",
     workloadHours: "39h em sala + 23h em casa",
-    checkoutUrl: "https://abvcap.glueup.com/event/199072/register/",
+    checkoutUrl: "/inscricao",
   },
 
   faq: [

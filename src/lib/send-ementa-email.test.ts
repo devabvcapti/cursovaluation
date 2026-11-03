@@ -52,4 +52,12 @@ describe("sendEmentaEmail", () => {
     const result = await sendEmentaEmail({ name: "Ana", email: "ana@example.com" });
     expect(result).toEqual({ ok: false, reason: "domain not verified" });
   });
+
+  it("builds the checkout link as an absolute URL", async () => {
+    sendMock.mockResolvedValue({ data: { id: "1" }, error: null });
+    const { sendEmentaEmail } = await import("./send-ementa-email");
+    await sendEmentaEmail({ name: "Ana", email: "ana@example.com" });
+    const call = sendMock.mock.calls[0][0];
+    expect(call.text).toMatch(/https?:\/\/.*\/inscricao/);
+  });
 });

@@ -11,6 +11,7 @@ export interface EmentaEmailPayload {
 
 const FROM_ADDRESS = "ABVCAP <contato@resend.abvcap.com.br>";
 const EMENTA_PATH = path.join(process.cwd(), "public", "docs", "ementa-valuation-abvcap.pdf");
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://curso-valuation.vercel.app";
 
 // Pulls price/deadline/checkout straight from courseContent so this email
 // never drifts out of sync with what the page itself promises.
@@ -31,7 +32,7 @@ function buildEmailBody(name: string): string {
     "",
     `Condição de inscrição antecipada: ${formatInvestment(investment.earlyBirdPrice)} (de ${formatInvestment(investment.price)}) até ${investment.earlyBirdDeadline}.`,
     "",
-    `Garanta sua vaga: ${hero.checkoutUrl}`,
+    `Garanta sua vaga: ${SITE_URL}${hero.checkoutUrl}`,
     "",
     "Qualquer dúvida, é só responder este e-mail.",
     "",

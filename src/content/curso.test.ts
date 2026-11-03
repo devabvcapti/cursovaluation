@@ -3,11 +3,18 @@ import { courseContent } from "./curso";
 import { isPlaceholder } from "@/lib/placeholder";
 
 describe("courseContent pending data", () => {
-  it("has a real (non-placeholder) checkout URL now that it's confirmed", () => {
-    expect(isPlaceholder(courseContent.investment.checkoutUrl)).toBe(false);
-    expect(isPlaceholder(courseContent.hero.checkoutUrl)).toBe(false);
-    expect(courseContent.investment.checkoutUrl).toBe("https://abvcap.glueup.com/event/199072/register/");
-    expect(courseContent.hero.checkoutUrl).toBe("https://abvcap.glueup.com/event/199072/register/");
+  it("points the checkout URL at the internal /inscricao route", () => {
+    expect(courseContent.investment.checkoutUrl).toBe("/inscricao");
+    expect(courseContent.hero.checkoutUrl).toBe("/inscricao");
+  });
+
+  it("marks the associado price fields as pending", () => {
+    expect(isPlaceholder(courseContent.investment.associadoPrice)).toBe(true);
+    expect(isPlaceholder(courseContent.investment.associadoEarlyBirdPrice)).toBe(true);
+  });
+
+  it("has a machine-readable early-bird deadline matching the display date", () => {
+    expect(courseContent.investment.earlyBirdDeadlineISO).toBe("2026-12-20");
   });
 
   it("has real (non-placeholder) footer social links now that they're confirmed", () => {
