@@ -23,6 +23,17 @@ O formulário de captura de lead existente (baixar ementa por e-mail, `LeadCaptu
 - **Cupons de desconto percentuais**, com área de **admin no próprio site** (não só gerenciado direto no Supabase), protegida por login **e-mail/senha via Supabase Auth**.
 - Toda criação de cupom registra **quem criou** (`criado_por`, e-mail do admin logado).
 
+## Preços
+
+`src/content/curso.ts` ganha dois campos novos em `investment`, espelhando o padrão que `price`/`earlyBirdPrice` já usam (string numérica, ou `placeholder(...)` enquanto o valor real não é definido):
+
+- `associadoPrice` — preço cheio para associado. Valor real ainda não definido → fica como `placeholder("PREÇO ASSOCIADO")` até a ABVCAP confirmar.
+- `associadoEarlyBirdPrice` — preço early-bird para associado (mesma janela/data limite do early-bird de não associado: 20 de dezembro de 2026). Também `placeholder("PREÇO ASSOCIADO EARLY BIRD")` por enquanto.
+
+Também é adicionado `earlyBirdDeadlineISO: "2026-12-20"` — gêmeo machine-readable de `earlyBirdDeadline` (que continua só para exibição, em português), necessário porque o cálculo de preço em código precisa comparar a data atual com o prazo do early-bird, o que o texto livre atual não permite fazer de forma confiável.
+
+Enquanto `associadoPrice`/`associadoEarlyBirdPrice` forem placeholders, uma compra marcada como associada cai de volta no preço de não associado (cheio ou early-bird, conforme a data) em vez de falhar — com um aviso no log do servidor —, já que negar desconto por um valor ainda não definido é mais seguro do que travar a venda.
+
 ## Modelo de dados (Supabase)
 
 ### `associados`
@@ -52,8 +63,7 @@ Carregada por upload manual de CSV (fora do app — processo operacional, não u
 | Campo | Tipo | Observação |
 |---|---|---|
 | `id` | uuid | |
-| `mp_preference_id` | texto | id da preference no Mercado Pago |
-| `mp_payment_id` | texto | nullable até o pagamento ser criado/confirmado |
+| `mp_payment_id` | texto | id do pagamento no Mercado Pago; nullable até o Brick ser submetido e `POST /api/checkout/pagamento` efetivar a cobrança |
 | `nome`, `email`, `cpf`, `telefone` | texto | dados do comprador |
 | `cnpj_informado` | texto | nullable |
 | `is_associado` | boolean | resultado do lookup em `associados` no momento da compra |
@@ -70,17 +80,16 @@ Preço e condição de associado ficam congelados no pedido para que mudanças f
 
 1. Visitante clica em "Quero me matricular" (Hero e seção `Investment`) → navega para `/inscricao` (rota nova, em vez do link externo da Glueup).
 2. **Passo 1 — dados do comprador:** nome, e-mail, CPF, telefone, CNPJ (opcional), cupom (opcional). Ao preencher o CNPJ e/ou cupom, o frontend chama o backend para recalcular o preço mostrado (base → associado/não associado → desconto do cupom), para o comprador ver o valor final antes de pagar.
-3. Ao confirmar o passo 1, o frontend chama `POST /api/checkout/preference`, que:
+3. Ao confirmar o passo 1, o frontend chama `POST /api/checkout/pedido`, que:
    - resolve `is_associado` (lookup em `associados`) e `cupom` (validação de vigência/limite de uso),
    - calcula `valor_base` e `valor_cobrado`,
    - grava o registro em `pedidos` com `status: pending`,
-   - cria a *preference* no Mercado Pago,
-   - devolve os dados necessários para o Brick renderizar.
-4. **Passo 2 — pagamento:** o Payment Brick do Mercado Pago é renderizado na própria página `/inscricao`, oferecendo cartão (com parcelamento) ou Pix (QR code). Nenhum dado sensível de cartão passa pelo nosso servidor — tokenização acontece no navegador via SDK do Mercado Pago.
+   - devolve o `pedidoId` e o `valor_cobrado`, usados para inicializar o Brick com o valor correto.
+4. **Passo 2 — pagamento:** o Payment Brick do Mercado Pago (componente oficial, **não** o modelo "Checkout Pro"/preference com redirecionamento) é renderizado na própria página `/inscricao`, oferecendo cartão (com parcelamento) ou Pix (QR code). O Brick tokeniza o cartão (ou monta os dados do Pix) inteiramente no navegador — nenhum dado sensível passa pelo nosso servidor — e devolve esse payload tokenizado (`formData`) para o site via callback `onSubmit`. O site então envia esse `formData` + o `pedidoId` para `POST /api/checkout/pagamento`, que chama a API de Pagamentos do Mercado Pago (`POST /v1/payments`, com `external_reference` = `pedidoId`) para efetivar a cobrança e atualiza `pedidos` com o resultado imediato (`approved`/`in_process`/`rejected`) e o `mp_payment_id`. Para Pix, a resposta dessa chamada também traz o QR code a ser exibido.
 5. Resultado do pagamento é tratado **na mesma rota**, via query param (`/inscricao?status=approved&pedido=...`, etc.), sem páginas separadas de sucesso/erro/pendente.
    - Cartão: aprovação quase imediata.
    - Pix: UI mostra "aguardando confirmação do Pix" e faz polling leve em `GET /api/checkout/pedido/:id` até o webhook confirmar ou o Pix expirar.
-6. `POST /api/webhooks/mercadopago` recebe as notificações assíncronas do Mercado Pago (fonte de verdade), valida a assinatura (`MERCADOPAGO_WEBHOOK_SECRET`), localiza o pedido pelo `mp_payment_id`/`mp_preference_id`, atualiza `status`. Quando o novo status é `approved`:
+6. `POST /api/webhooks/mercadopago` recebe as notificações assíncronas do Mercado Pago (fonte de verdade — importante sobretudo para Pix, cuja confirmação não é imediata), valida a assinatura (`MERCADOPAGO_WEBHOOK_SECRET`), localiza o pedido pelo `mp_payment_id`, atualiza `status`. Quando o novo status é `approved`:
    - incrementa `usos_atuais` do cupom, se houver,
    - dispara e-mail de confirmação ao aluno e notificação interna à ABVCAP (reaproveitando a infraestrutura de e-mail já existente via Resend).
    - Idempotente: reprocessar o mesmo `mp_payment_id` não duplica e-mails nem incrementa o cupom duas vezes.
@@ -96,12 +105,12 @@ Preço e condição de associado ficam congelados no pedido para que mudanças f
 
 - Seção `Investment` (`src/components/sections/Investment.tsx`) e Hero: CTA passa a apontar para `/inscricao`, não mais para a URL da Glueup.
 - FAQ: a resposta sobre política de cancelamento/reembolso hoje remete à "política comercial da plataforma de matrícula" (Glueup) — precisa ser reescrita para refletir a política direta da ABVCAP/Mercado Pago.
-- `termos-de-uso` e `politica-de-privacidade`: precisam mencionar a coleta de CPF/telefone/dados de pagamento e o processamento via Mercado Pago.
+- `termos-de-uso` e `politica-de-privacidade`: já são páginas "em elaboração" (placeholder), sem texto jurídico real hoje — ficam como estão; redigir a política real (incluindo processamento de pagamento via Mercado Pago) é trabalho jurídico fora do escopo deste plano de engenharia.
 - `src/content/curso.ts`: preço, preço de associado e qualquer texto que hoje assuma o fluxo via Glueup.
 
 ## Variáveis de ambiente novas
 
-- `MERCADOPAGO_ACCESS_TOKEN` — secreta, servidor, cria *preferences* e consulta pagamentos.
+- `MERCADOPAGO_ACCESS_TOKEN` — secreta, servidor, usada para chamar a API de Pagamentos do Mercado Pago e consultar pagamentos.
 - `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY` — pública, inicializa o Brick no navegador.
 - `MERCADOPAGO_WEBHOOK_SECRET` — valida assinatura das notificações recebidas.
 - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — servidor, acesso a `associados`/`pedidos`/`cupons` (nunca expostas ao cliente).
