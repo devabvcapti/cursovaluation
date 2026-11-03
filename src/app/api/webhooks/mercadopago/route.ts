@@ -27,6 +27,17 @@ import type { PedidoRow, PedidoStatus } from "@/lib/supabase/types";
  * coupon, or sending any email. Side effects (coupon increment + both
  * emails) only fire on an actual transition INTO "approved", never merely
  * because the row happens to already be "approved".
+ *
+ * That read-then-compare guard alone isn't enough against truly concurrent
+ * (overlapping, not just sequential) redeliveries: two requests could both
+ * read the row while it's still "pending" and both pass the equality check.
+ * So the write itself is conditioned on the row still having the status we
+ * read (`.eq("status", pedidoRow.status)` alongside `.eq("id", ...)`), and we
+ * check how many rows that update actually touched. If it's zero, another
+ * concurrent delivery already won the race and updated the row first — we
+ * treat that exactly like the idempotent no-op case and skip the side
+ * effects. We also skip them if the update call itself errored, so we never
+ * send emails / increment a coupon against an unconfirmed DB state.
  */
 export async function POST(request: Request) {
   const xSignature = request.headers.get("x-signature") ?? "";
@@ -86,7 +97,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 200 });
   }
 
-  await client.from("pedidos").update({ status: nextStatus }).eq("id", pedidoRow.id);
+  // Conditional write: only succeeds if the row's status hasn't moved since
+  // we read it. `.select("id")` lets us see how many rows actually matched —
+  // zero means a concurrent delivery already won this race.
+  const { data: updatedRows, error: updateError } = await client
+    .from("pedidos")
+    .update({ status: nextStatus })
+    .eq("id", pedidoRow.id)
+    .eq("status", pedidoRow.status)
+    .select("id");
+
+  if (updateError) {
+    console.error("[webhooks/mercadopago] failed to update pedido status:", updateError);
+    return NextResponse.json({ ok: true }, { status: 200 });
+  }
+
+  if (!updatedRows || updatedRows.length === 0) {
+    // Lost the race to a concurrent delivery (or the row changed between our
+    // read and write for some other reason) — treat like the idempotent
+    // no-op case: no coupon increment, no emails.
+    return NextResponse.json({ ok: true }, { status: 200 });
+  }
 
   if (nextStatus === "approved") {
     if (pedidoRow.cupom_codigo) {

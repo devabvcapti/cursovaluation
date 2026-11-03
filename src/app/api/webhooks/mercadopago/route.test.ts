@@ -14,8 +14,13 @@ const maybeSingleMock = vi.fn();
 const eqSelectMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
 const selectMock = vi.fn().mockReturnValue({ eq: eqSelectMock });
 
-const eqUpdateMock = vi.fn().mockResolvedValue({ data: null, error: null });
-const updateMock = vi.fn().mockReturnValue({ eq: eqUpdateMock });
+// Chain: .update({...}).eq("id", id).eq("status", status).select("id")
+// Resolves with the rows the conditional update actually matched — an empty
+// array simulates "another concurrent delivery already won the race".
+const updateSelectMock = vi.fn().mockResolvedValue({ data: [{ id: "pedido-1" }], error: null });
+const eqUpdateStatusMock = vi.fn().mockReturnValue({ select: updateSelectMock });
+const eqUpdateIdMock = vi.fn().mockReturnValue({ eq: eqUpdateStatusMock });
+const updateMock = vi.fn().mockReturnValue({ eq: eqUpdateIdMock });
 
 const fromMock = vi.fn().mockReturnValue({ select: selectMock, update: updateMock });
 const serviceClientMock = { from: fromMock };
@@ -80,8 +85,10 @@ describe("POST /api/webhooks/mercadopago", () => {
     maybeSingleMock.mockReset();
     eqSelectMock.mockClear();
     selectMock.mockClear();
-    eqUpdateMock.mockClear();
-    eqUpdateMock.mockResolvedValue({ data: null, error: null });
+    updateSelectMock.mockClear();
+    updateSelectMock.mockResolvedValue({ data: [{ id: "pedido-1" }], error: null });
+    eqUpdateStatusMock.mockClear();
+    eqUpdateIdMock.mockClear();
     updateMock.mockClear();
     fromMock.mockClear();
     incrementCupomUsoMock.mockReset();
@@ -118,7 +125,8 @@ describe("POST /api/webhooks/mercadopago", () => {
 
     expect(eqSelectMock).toHaveBeenCalledWith("mp_payment_id", "mp-123");
     expect(updateMock).toHaveBeenCalledWith({ status: "approved" });
-    expect(eqUpdateMock).toHaveBeenCalledWith("id", pedidoRow.id);
+    expect(eqUpdateIdMock).toHaveBeenCalledWith("id", pedidoRow.id);
+    expect(eqUpdateStatusMock).toHaveBeenCalledWith("status", "pending");
     expect(incrementCupomUsoMock).toHaveBeenCalledWith("PROMO10");
     expect(sendOrderConfirmationEmailMock).toHaveBeenCalledWith(pedidoRow);
     expect(sendOrderNotificationEmailMock).toHaveBeenCalledWith(pedidoRow);
@@ -153,6 +161,51 @@ describe("POST /api/webhooks/mercadopago", () => {
     expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
     expect(sendOrderNotificationEmailMock).not.toHaveBeenCalled();
     expect(response.status).toBe(200);
+  });
+
+  it("loses a concurrent race: the conditional update matches zero rows (status moved under it), so it skips the coupon increment and both emails", async () => {
+    // Simulates two overlapping deliveries: both read the row while it was
+    // still "pending" (so both pass the pre-write equality check), but by
+    // the time THIS request's conditional update runs, another delivery has
+    // already flipped the row's status — the `.eq("status", "pending")`
+    // filter on the update matches nothing, so the mocked update resolves
+    // with an empty row array even though the pre-read mock showed "pending".
+    const pedidoRow = buildPedidoRow({ status: "pending", cupom_codigo: "PROMO10" });
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "approved" });
+    updateSelectMock.mockResolvedValue({ data: [], error: null });
+
+    const { POST } = await import("./route");
+    const request = buildRequest({ action: "payment.updated", data: { id: "mp-123" } });
+    const response = await POST(request);
+
+    expect(updateMock).toHaveBeenCalledWith({ status: "approved" });
+    expect(eqUpdateIdMock).toHaveBeenCalledWith("id", pedidoRow.id);
+    expect(eqUpdateStatusMock).toHaveBeenCalledWith("status", "pending");
+    expect(incrementCupomUsoMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(sendOrderNotificationEmailMock).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+  });
+
+  it("skips the coupon increment and both emails when the conditional update itself errors", async () => {
+    const pedidoRow = buildPedidoRow({ status: "pending", cupom_codigo: "PROMO10" });
+    maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
+    getMpPaymentMock.mockResolvedValue({ ok: true, status: "approved" });
+    updateSelectMock.mockResolvedValue({ data: null, error: { message: "db unavailable" } });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { POST } = await import("./route");
+    const request = buildRequest({ action: "payment.updated", data: { id: "mp-123" } });
+    const response = await POST(request);
+
+    expect(incrementCupomUsoMock).not.toHaveBeenCalled();
+    expect(sendOrderConfirmationEmailMock).not.toHaveBeenCalled();
+    expect(sendOrderNotificationEmailMock).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
+    expect(response.status).toBe(200);
+
+    errorSpy.mockRestore();
   });
 
   it('on "rejected", updates status to rejected, sends no emails, and returns 200', async () => {
