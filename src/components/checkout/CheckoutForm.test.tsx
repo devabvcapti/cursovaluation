@@ -79,6 +79,54 @@ describe("CheckoutForm", () => {
     expect(await screen.findByText(/R\$\s*1\.000,00/)).toBeInTheDocument();
   });
 
+  it("does not flash a stale preview when the cnpj changes before the new fetch resolves", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { cnpj?: string }) : {};
+          if (parsedBody.cnpj === "99888777000166") {
+            return jsonResponse({
+              isAssociado: false,
+              cupomAplicado: null,
+              valorBase: 500,
+              valorCobrado: 500,
+            });
+          }
+          return jsonResponse({
+            isAssociado: false,
+            cupomAplicado: null,
+            valorBase: 1000,
+            valorCobrado: 1000,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 1000 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+    const cnpjInput = screen.getByLabelText(/cnpj.*opcional/i);
+
+    // Resolve a preview for the first cnpj.
+    await user.type(cnpjInput, "11222333000181");
+    await waitFor(() => expect(screen.getByText(/R\$\s*1\.000,00/)).toBeInTheDocument(), {
+      timeout: 2000,
+    });
+
+    // Clear the field and start typing a different cnpj. The new fetch is
+    // still debounced (hasn't fired/resolved yet), but the old, now-stale
+    // R$ 1.000,00 preview must not still be shown in the meantime.
+    await user.clear(cnpjInput);
+    await user.type(cnpjInput, "99888777000166");
+    expect(screen.queryByText(/R\$\s*1\.000,00/)).not.toBeInTheDocument();
+
+    // Once the new fetch resolves, the new preview does show.
+    await waitFor(() => expect(screen.getByText(/R\$\s*500,00/)).toBeInTheDocument(), {
+      timeout: 2000,
+    });
+  });
+
   it("shows inline errors and never calls /api/checkout/pedido when the form is invalid", async () => {
     const user = userEvent.setup();
     const onPedidoCreated = vi.fn();

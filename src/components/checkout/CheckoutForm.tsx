@@ -78,6 +78,12 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [preview, setPreview] = useState<PricePreview | null>(null);
+  // The cnpj/cupom pair `preview` was actually fetched for. Rendering gates
+  // on this matching the *current* `queryKey` (not just on `preview` being
+  // non-null) so a resolved preview from an earlier, now-superseded
+  // cnpj/cupom pair can never be shown as if it were current — see the
+  // `queryKey` comment below for why this matters.
+  const [previewQueryKey, setPreviewQueryKey] = useState<string | null>(null);
 
   // True only for a genuine network/server failure after client validation
   // passed (errors were cleared right before the fetch attempt). A client
@@ -85,31 +91,42 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   // case is excluded here and keeps showing its own inline field errors.
   const isServerError = status === "error" && Object.keys(errors).length === 0;
 
-  const hasPreviewQuery = cnpj.trim() !== "" || cupom.trim() !== "";
+  const trimmedCnpj = cnpj.trim();
+  const trimmedCupom = cupom.trim();
+  const hasPreviewQuery = trimmedCnpj !== "" || trimmedCupom !== "";
+  // Identifies "what cnpj/cupom pair is the user currently asking about",
+  // recomputed every render (no debounce). Comparing `previewQueryKey` to
+  // this current value is what hides a stale preview the instant the user
+  // edits cnpj/cupom again, even though the *fetch* for the new pair is
+  // still debounced and hasn't resolved yet (reproduction: resolve a
+  // preview for cnpj A, clear the field, start typing cnpj B — on B's very
+  // first keystroke this key changes, so A's resolved price stops matching
+  // and is hidden immediately, instead of flashing until B's fetch lands).
+  const queryKey = `${trimmedCnpj}::${trimmedCupom}`;
 
   // Debounced price preview: recomputed from cnpj/cupom only, so it never
   // fires on mount while both are still blank (nothing has changed yet).
-  // Clearing to blank doesn't reset `preview` synchronously here — the
-  // render below gates on `hasPreviewQuery` instead, so there's no stale
-  // preview flash and no setState-in-effect for the "nothing to fetch" case.
   useEffect(() => {
     if (!hasPreviewQuery) {
       return;
     }
+
+    const fetchedForKey = queryKey;
 
     const timer = setTimeout(() => {
       fetch("/api/checkout/preco", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cnpj: cnpj.trim() === "" ? undefined : cnpj,
-          cupom: cupom.trim() === "" ? undefined : cupom,
+          cnpj: trimmedCnpj === "" ? undefined : cnpj,
+          cupom: trimmedCupom === "" ? undefined : cupom,
         }),
       })
         .then((response) => (response.ok ? response.json() : null))
         .then((body: PricePreview | null) => {
           if (body) {
             setPreview(body);
+            setPreviewQueryKey(fetchedForKey);
           }
         })
         .catch(() => {
@@ -119,7 +136,9 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
     }, PRICE_PREVIEW_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [cnpj, cupom, hasPreviewQuery]);
+  }, [cnpj, cupom, hasPreviewQuery, queryKey, trimmedCnpj, trimmedCupom]);
+
+  const showPreview = preview !== null && previewQueryKey === queryKey;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -275,7 +294,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
         />
       </div>
 
-      {preview && hasPreviewQuery ? (
+      {showPreview && preview ? (
         <div className="mt-5">
           <p className="font-body text-base font-semibold text-brand-navy">
             Valor: {formatInvestment(String(preview.valorCobrado))}
