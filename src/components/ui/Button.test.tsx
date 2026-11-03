@@ -19,4 +19,11 @@ describe("Button", () => {
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
+  it("navigates in-place for an internal href, without opening a new tab", () => {
+    render(<Button href="/inscricao" variant="primary">Quero me matricular</Button>);
+    const link = screen.getByRole("link", { name: "Quero me matricular" });
+    expect(link).toHaveAttribute("href", "/inscricao");
+    expect(link).not.toHaveAttribute("target");
+    expect(link).not.toHaveAttribute("rel");
+  });
 });

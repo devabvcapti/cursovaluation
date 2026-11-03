@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/cn";
 
 export type ButtonVariant = "primary" | "secondary";
@@ -45,19 +46,30 @@ const VARIANT_STYLES: Record<ButtonVariant, string> = {
 };
 
 /**
- * Brand CTA link. Always renders an `<a>` — there is no in-app checkout, so
- * every button on this page points either to the external sales platform
- * or to another external resource, and always opens safely in a new tab.
+ * Brand CTA link. An `href` starting with `"/"` is an internal route (e.g.
+ * the in-app checkout at `/inscricao`) and renders via `next/link`'s `Link`,
+ * navigating in-place with no `target`/`rel`. Any other `href` is treated as
+ * external — another resource outside this app — and renders a plain `<a>`
+ * that always opens safely in a new tab.
  */
 export function Button({ href, variant, children, className }: ButtonProps) {
   const safeHref = href && href.trim() !== "" ? href : FALLBACK_HREF;
+  const linkClassName = cn(BASE_STYLES, VARIANT_STYLES[variant], className);
+
+  if (safeHref.startsWith("/")) {
+    return (
+      <Link href={safeHref} className={linkClassName}>
+        {children}
+      </Link>
+    );
+  }
 
   return (
     <a
       href={safeHref}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn(BASE_STYLES, VARIANT_STYLES[variant], className)}
+      className={linkClassName}
     >
       {children}
     </a>
