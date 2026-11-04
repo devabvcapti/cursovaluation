@@ -1,52 +1,69 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LoginPage from "./page";
 
-const pushMock = vi.fn();
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: pushMock }),
-}));
-
-const signInWithPasswordMock = vi.fn();
+const signInWithOAuthMock = vi.fn();
 vi.mock("@/lib/supabase/browser-client", () => ({
   getSupabaseBrowserClient: () => ({
-    auth: { signInWithPassword: signInWithPasswordMock },
+    auth: { signInWithOAuth: signInWithOAuthMock },
   }),
 }));
 
 describe("admin login page", () => {
+  const originalLocation = window.location;
+
   beforeEach(() => {
-    pushMock.mockReset();
-    signInWithPasswordMock.mockReset();
-  });
-
-  it("signs in and navigates to /admin/cupons on success", async () => {
-    signInWithPasswordMock.mockResolvedValue({ error: null });
-    const user = userEvent.setup();
-    render(<LoginPage />);
-
-    await user.type(screen.getByLabelText(/e-mail/i), "ti@abvcap.com.br");
-    await user.type(screen.getByLabelText(/senha/i), "hunter2");
-    await user.click(screen.getByRole("button", { name: /entrar/i }));
-
-    expect(signInWithPasswordMock).toHaveBeenCalledWith({
-      email: "ti@abvcap.com.br",
-      password: "hunter2",
+    signInWithOAuthMock.mockReset();
+    // `signInWithOAuth` reads `window.location.origin`/`search` — give the
+    // test full control over both without a real navigation.
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: new URL("http://localhost/admin/login"),
     });
-    await vi.waitFor(() => expect(pushMock).toHaveBeenCalledWith("/admin/cupons"));
   });
 
-  it("shows an inline error and does not navigate on failed sign-in", async () => {
-    signInWithPasswordMock.mockResolvedValue({ error: { message: "Credenciais inválidas." } });
+  afterEach(() => {
+    Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
+  });
+
+  it("starts Microsoft sign-in with the callback redirect on click", async () => {
+    signInWithOAuthMock.mockResolvedValue({ error: null });
     const user = userEvent.setup();
     render(<LoginPage />);
 
-    await user.type(screen.getByLabelText(/e-mail/i), "ti@abvcap.com.br");
-    await user.type(screen.getByLabelText(/senha/i), "wrong-password");
-    await user.click(screen.getByRole("button", { name: /entrar/i }));
+    await user.click(screen.getByRole("button", { name: /entrar com microsoft/i }));
 
-    expect(await screen.findByText("Credenciais inválidas.")).toBeInTheDocument();
-    expect(pushMock).not.toHaveBeenCalled();
+    expect(signInWithOAuthMock).toHaveBeenCalledWith({
+      provider: "azure",
+      options: { scopes: "email", redirectTo: "http://localhost/auth/callback" },
+    });
+  });
+
+  it("shows an inline error and does not treat it as success when signInWithOAuth errors", async () => {
+    signInWithOAuthMock.mockResolvedValue({ error: { message: "Provedor Azure não configurado." } });
+    const user = userEvent.setup();
+    render(<LoginPage />);
+
+    await user.click(screen.getByRole("button", { name: /entrar com microsoft/i }));
+
+    expect(await screen.findByText("Provedor Azure não configurado.")).toBeInTheDocument();
+  });
+
+  it("shows the access-denied message when redirected back with ?denied=1", async () => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: new URL("http://localhost/admin/login?denied=1"),
+    });
+
+    render(<LoginPage />);
+
+    expect(await screen.findByText(/não tem permissão para gerenciar cupons/i)).toBeInTheDocument();
+  });
+
+  it("does not show the access-denied message on a plain visit", () => {
+    render(<LoginPage />);
+
+    expect(screen.queryByText(/não tem permissão para gerenciar cupons/i)).not.toBeInTheDocument();
   });
 });

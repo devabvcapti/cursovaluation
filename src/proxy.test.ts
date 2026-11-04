@@ -28,10 +28,27 @@ describe("proxy", () => {
     expect(response.headers.get("location")).toContain("/admin/login");
   });
 
-  it("lets an authenticated request through", async () => {
+  it("lets an authenticated request from an allowlisted account through", async () => {
     getUserMock.mockResolvedValue({ data: { user: { email: "ti@abvcap.com.br" } } });
     const { proxy } = await import("./proxy");
     const response = await proxy(new NextRequest(new URL("http://localhost/admin/cupons")));
+    expect(response.status).toBe(200);
+  });
+
+  it("redirects an authenticated but non-allowlisted account to /admin/login?denied=1", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { email: "danila@sbeventos.com.br" } } });
+    const { proxy } = await import("./proxy");
+    const response = await proxy(new NextRequest(new URL("http://localhost/admin/cupons")));
+    expect(response.status).toBe(307);
+    const location = response.headers.get("location");
+    expect(location).toContain("/admin/login");
+    expect(location).toContain("denied=1");
+  });
+
+  it("never redirects /admin/login itself, even for a non-allowlisted authenticated account", async () => {
+    getUserMock.mockResolvedValue({ data: { user: { email: "danila@sbeventos.com.br" } } });
+    const { proxy } = await import("./proxy");
+    const response = await proxy(new NextRequest(new URL("http://localhost/admin/login")));
     expect(response.status).toBe(200);
   });
 

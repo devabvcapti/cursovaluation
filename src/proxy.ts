@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAllowedAdminEmail } from "@/lib/admin-allowlist";
 
 /**
  * Gates `/admin/*` behind Supabase Auth and refreshes the session cookie on
@@ -8,6 +9,12 @@ import { NextResponse, type NextRequest } from "next/server";
  * node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md) (see `src/lib/supabase/server-client.ts` for the Server Component /
  * Route Handler counterpart). `/admin/login` itself is exempt so there's
  * always a way to reach the sign-in form.
+ *
+ * A successful Microsoft SSO sign-in is not enough on its own: this Supabase
+ * project is shared with other ABVCAP systems, so anyone in ABVCAP's tenant
+ * (or any other account the project already has) can authenticate. Only the
+ * 7 accounts on `admin-allowlist.ts` may actually reach `/admin/*` — anyone
+ * else is sent back to `/admin/login?denied=1` even though they're signed in.
  */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -39,6 +46,12 @@ export async function proxy(request: NextRequest) {
   if (isAdminPath && !isLoginPath && !user) {
     const loginUrl = new URL("/admin/login", request.url);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (isAdminPath && !isLoginPath && user && !isAllowedAdminEmail(user.email)) {
+    const deniedUrl = new URL("/admin/login", request.url);
+    deniedUrl.searchParams.set("denied", "1");
+    return NextResponse.redirect(deniedUrl);
   }
 
   return response;

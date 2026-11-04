@@ -46,6 +46,17 @@ describe("requireAdminSession", () => {
     expect(session).toBeNull();
   });
 
+  it("returns null when the resolved user's email is not on the admin allowlist", async () => {
+    getUserMock.mockResolvedValue({
+      data: { user: { email: "danila@sbeventos.com.br" } },
+      error: null,
+    });
+
+    const session = await requireAdminSession();
+
+    expect(session).toBeNull();
+  });
+
   it("returns null (not a throw) when auth.getUser throws", async () => {
     getUserMock.mockRejectedValue(new Error("network down"));
 
