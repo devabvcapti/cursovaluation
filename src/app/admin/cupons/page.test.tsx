@@ -9,6 +9,11 @@ vi.mock("next/navigation", () => ({
   redirect: (url: string) => redirectMock(url),
 }));
 
+const connectionMock = vi.fn().mockResolvedValue(undefined);
+vi.mock("next/server", () => ({
+  connection: () => connectionMock(),
+}));
+
 const requireAdminSessionMock = vi.fn();
 vi.mock("@/lib/supabase/require-admin-session", () => ({
   requireAdminSession: () => requireAdminSessionMock(),
@@ -44,6 +49,7 @@ import CuponsPage from "./page";
 describe("admin cupons page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    connectionMock.mockResolvedValue(undefined);
     selectMock.mockReturnValue({ order: orderMock });
     fromMock.mockReturnValue({ select: selectMock });
     getSupabaseServiceClientMock.mockReturnValue({ from: fromMock });
@@ -63,6 +69,7 @@ describe("admin cupons page", () => {
 
     render(await CuponsPage());
 
+    expect(connectionMock).toHaveBeenCalled(); // opts out of build-time prerendering
     expect(getSupabaseServiceClientMock).toHaveBeenCalled();
     expect(getSupabaseServerClientMock).not.toHaveBeenCalled();
     expect(fromMock).toHaveBeenCalledWith("cupons");

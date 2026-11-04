@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { requireAdminSession } from "@/lib/supabase/require-admin-session";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
 import type { CupomRow } from "@/lib/supabase/types";
@@ -26,6 +27,12 @@ export const instant = false;
  * `CupomList` client island.
  */
 export default async function CuponsPage() {
+  // Request-time only: without this, `next build` prerenders the page, and
+  // any session-check failure at build time (e.g. Supabase env vars absent
+  // from the build environment) gets baked in as a static 307 to
+  // /admin/login — and the service-role read must never run at build either.
+  await connection();
+
   const session = await requireAdminSession();
   if (!session) {
     redirect("/admin/login");

@@ -1,7 +1,9 @@
+import { unstable_rethrow } from "next/navigation";
 import { getSupabaseServerClient } from "@/lib/supabase/server-client";
 
 /**
- * Independent, server-side session guard for `/api/admin/*` route handlers.
+ * Independent, server-side session guard for `/api/admin/*` route handlers
+ * and the `/admin/cupons` page.
  *
  * `src/proxy.ts` (Task 18) already redirects unauthenticated *page*
  * navigations under `/admin`, but that does not stop a direct HTTP request
@@ -10,7 +12,11 @@ import { getSupabaseServerClient } from "@/lib/supabase/server-client";
  *
  * Returns `{ email }` only when Supabase Auth resolves a real user with an
  * email on the current request's session cookie; `null` otherwise, including
- * when anything in the process throws.
+ * when anything in the process throws — EXCEPT Next.js's own
+ * framework-controlled throws (`unstable_rethrow`): during a build-time
+ * prerender, `cookies()` throws to mark the page as request-time. Swallowing
+ * that would make a page caller "see" no session at build time and bake a
+ * static redirect to /admin/login into the route.
  */
 export async function requireAdminSession(): Promise<{ email: string } | null> {
   try {
@@ -20,7 +26,8 @@ export async function requireAdminSession(): Promise<{ email: string } | null> {
     } = await supabase.auth.getUser();
 
     return user?.email ? { email: user.email } : null;
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return null;
   }
 }
