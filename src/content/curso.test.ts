@@ -13,8 +13,14 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(courseContent.investment.associadoEarlyBirdPrice)).toBe(true);
   });
 
-  it("has a machine-readable early-bird deadline matching the display date", () => {
-    expect(courseContent.investment.earlyBirdDeadlineISO).toBe("2026-12-20");
+  it("has a machine-readable early-bird deadline that ends after the whole display date in BRT", () => {
+    // Display: "20 de dezembro de 2026" -> early bird ends at the start of
+    // Dec 21 in Brasília time (UTC-3), i.e. 03:00 UTC on Dec 21.
+    expect(courseContent.investment.earlyBirdDeadline).toBe("20 de dezembro de 2026");
+    expect(courseContent.investment.earlyBirdDeadlineISO).toBe("2026-12-21T00:00:00-03:00");
+    expect(new Date(courseContent.investment.earlyBirdDeadlineISO).toISOString()).toBe(
+      "2026-12-21T03:00:00.000Z",
+    );
   });
 
   it("has real (non-placeholder) footer social links now that they're confirmed", () => {

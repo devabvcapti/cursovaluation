@@ -128,6 +128,42 @@ describe("POST /api/admin/cupons", () => {
     });
   });
 
+  it("anchors date-only validoDe/validoAte to the start/end of that day in BRT", async () => {
+    requireAdminSessionMock.mockResolvedValue({ email: "admin@abvcap.com.br" });
+    singleMock.mockResolvedValue({ data: { id: "1" }, error: null });
+
+    const res = await POST(
+      postRequest({
+        codigo: "NATAL",
+        percentualDesconto: 10,
+        validoDe: "2026-12-01",
+        validoAte: "2026-12-20",
+      }),
+    );
+
+    expect(res.status).toBe(201);
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        valido_de: "2026-12-01T00:00:00-03:00",
+        valido_ate: "2026-12-20T23:59:59.999-03:00",
+      }),
+    );
+    // Sanity: the end boundary is still Dec 20 in BRT, i.e. 02:59:59.999Z on Dec 21.
+    const [{ valido_ate }] = insertMock.mock.calls[0] as [{ valido_ate: string }];
+    expect(new Date(valido_ate).toISOString()).toBe("2026-12-21T02:59:59.999Z");
+  });
+
+  it("stores blank validoDe/validoAte as null", async () => {
+    requireAdminSessionMock.mockResolvedValue({ email: "admin@abvcap.com.br" });
+    singleMock.mockResolvedValue({ data: { id: "1" }, error: null });
+
+    await POST(postRequest({ codigo: "X", percentualDesconto: 10, validoDe: "", validoAte: "  " }));
+
+    expect(insertMock).toHaveBeenCalledWith(
+      expect.objectContaining({ valido_de: null, valido_ate: null }),
+    );
+  });
+
   it("returns 400 and does not insert when codigo is missing", async () => {
     requireAdminSessionMock.mockResolvedValue({ email: "admin@abvcap.com.br" });
 

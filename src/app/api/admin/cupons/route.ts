@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/supabase/require-admin-session";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * `validoDe`/`validoAte` come from `<input type="date">` (date-only
+ * "YYYY-MM-DD"). Stored as-is into a `timestamptz` column they'd mean UTC
+ * midnight — 21:00 BRT the previous day. Anchor them to Brasília time
+ * instead: `validoDe` = start of that day, `validoAte` = end of that day, so
+ * a cupom "valid until Dec 20" works through all of Dec 20 BRT. A value that
+ * already carries a time is passed through; blank/non-string becomes null.
+ */
+function toBrtBoundary(value: unknown, edge: "start" | "end"): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!DATE_ONLY.test(trimmed)) return trimmed;
+  return edge === "start" ? `${trimmed}T00:00:00-03:00` : `${trimmed}T23:59:59.999-03:00`;
+}
+
 /**
  * Lists all cupons for the admin area. Gated by `requireAdminSession()` —
  * independent of the `/admin/*` page middleware (Task 18), since that
@@ -82,8 +100,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ errors }, { status: 400 });
   }
 
-  const validoDe = typeof rawValidoDe === "string" ? rawValidoDe : null;
-  const validoAte = typeof rawValidoAte === "string" ? rawValidoAte : null;
+  const validoDe = toBrtBoundary(rawValidoDe, "start");
+  const validoAte = toBrtBoundary(rawValidoAte, "end");
   const limiteUso = typeof rawLimiteUso === "number" ? rawLimiteUso : null;
 
   const { data, error } = await getSupabaseServiceClient()

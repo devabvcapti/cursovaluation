@@ -42,6 +42,13 @@ export interface CourseContent {
     price: string;
     earlyBirdPrice: string;
     earlyBirdDeadline: string;
+    /**
+     * Exclusive end instant of the early-bird window (pricing uses
+     * `now < deadline`). An explicit BRT offset, set to the START of the day
+     * after `earlyBirdDeadline`, so early-bird holds through all of that day
+     * in Brasília time — a bare "YYYY-MM-DD" would parse as UTC midnight
+     * (21:00 BRT the day before).
+     */
     earlyBirdDeadlineISO: string;
     associadoPrice: string;
     associadoEarlyBirdPrice: string;
@@ -240,7 +247,7 @@ export const courseContent: CourseContent = {
     price: "10000",
     earlyBirdPrice: "9000",
     earlyBirdDeadline: "20 de dezembro de 2026",
-    earlyBirdDeadlineISO: "2026-12-20",
+    earlyBirdDeadlineISO: "2026-12-21T00:00:00-03:00",
     associadoPrice: placeholder("PREÇO ASSOCIADO"),
     associadoEarlyBirdPrice: placeholder("PREÇO ASSOCIADO EARLY BIRD"),
     seatsLimit: "Cerca de 20 vagas",
