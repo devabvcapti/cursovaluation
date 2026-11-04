@@ -110,6 +110,154 @@ describe("PaymentStep", () => {
     ).toBe(true);
   });
 
+  it('renders the Pix QR code, hides the Brick, and starts polling on a 200 "pending" response (what a real Pix returns)', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn((url: string) => {
+      if (typeof url === "string" && url.includes("/api/checkout/pedido/")) {
+        return jsonResponse({ status: "pending" });
+      }
+      return jsonResponse({
+        status: "pending",
+        pix: { qrCode: "00020126...", qrCodeBase64: "BASE64DATA" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<PaymentStep {...PROPS} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "submit-brick" }));
+    await act(async () => {
+      await flushMicrotasks();
+    });
+
+    expect(screen.getByAltText(/qr/i)).toHaveAttribute("src", "data:image/png;base64,BASE64DATA");
+    expect(screen.queryByText(/recusad/i)).not.toBeInTheDocument();
+    // No second charge can be started while this Pix is outstanding.
+    expect(screen.queryByRole("button", { name: "submit-brick" })).not.toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+
+    expect(
+      fetchMock.mock.calls.some(
+        (c) => typeof c[0] === "string" && c[0].includes("/api/checkout/pedido/pedido-1"),
+      ),
+    ).toBe(true);
+  });
+
+  it("shows the approved message once polling sees the Pix pedido approved", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn((url: string) => {
+      if (typeof url === "string" && url.includes("/api/checkout/pedido/")) {
+        return jsonResponse({ status: "approved" });
+      }
+      return jsonResponse({ status: "pending", pix: { qrCode: "x", qrCodeBase64: "B64" } });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<PaymentStep {...PROPS} />);
+    fireEvent.click(screen.getByRole("button", { name: "submit-brick" }));
+    await act(async () => {
+      await flushMicrotasks();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+
+    expect(screen.getByText(/aprovado/i)).toBeInTheDocument();
+  });
+
+  it("gives up polling after 20 attempts and tells the buyer to try again later", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn((url: string) => {
+      if (typeof url === "string" && url.includes("/api/checkout/pedido/")) {
+        return jsonResponse({ status: "pending" });
+      }
+      return jsonResponse({ status: "pending", pix: { qrCode: "x", qrCodeBase64: "B64" } });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<PaymentStep {...PROPS} />);
+    fireEvent.click(screen.getByRole("button", { name: "submit-brick" }));
+    await act(async () => {
+      await flushMicrotasks();
+    });
+
+    const pollCalls = () =>
+      fetchMock.mock.calls.filter(
+        (c) => typeof c[0] === "string" && c[0].includes("/api/checkout/pedido/"),
+      ).length;
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000 * 19);
+    });
+    expect(pollCalls()).toBe(19);
+    expect(screen.queryByText(/ainda não recebemos/i)).not.toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    expect(pollCalls()).toBe(20);
+    expect(screen.getByText(/ainda não recebemos a confirmação/i)).toBeInTheDocument();
+
+    // Polling has stopped: no further requests.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000 * 5);
+    });
+    expect(pollCalls()).toBe(20);
+  });
+
+  it("hides the Brick after approval", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => jsonResponse({ status: "approved" })));
+    const user = userEvent.setup();
+    render(<PaymentStep {...PROPS} />);
+
+    await user.click(screen.getByRole("button", { name: "submit-brick" }));
+
+    expect(await screen.findByText(/aprovado/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "submit-brick" })).not.toBeInTheDocument();
+  });
+
+  it("ignores a second submission while the first is still in flight", async () => {
+    let resolveFirst: (value: unknown) => void = () => {};
+    const fetchMock = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveFirst = resolve;
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<PaymentStep {...PROPS} />);
+
+    const button = screen.getByRole("button", { name: "submit-brick" });
+    fireEvent.click(button);
+    fireEvent.click(button);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveFirst({ ok: true, status: 200, json: () => Promise.resolve({ status: "rejected" }) });
+      await flushMicrotasks();
+    });
+
+    // After a decline, retrying is allowed again.
+    fireEvent.click(screen.getByRole("button", { name: "submit-brick" }));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats an unsettled status without a pix payload (card under review) as "em análise", not a decline, and hides the Brick', async () => {
+    vi.stubGlobal("fetch", vi.fn(() => jsonResponse({ status: "in_process" })));
+    const user = userEvent.setup();
+    render(<PaymentStep {...PROPS} />);
+
+    await user.click(screen.getByRole("button", { name: "submit-brick" }));
+
+    expect(await screen.findByText(/em análise/i)).toBeInTheDocument();
+    expect(screen.queryByText(/recusad/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "submit-brick" })).not.toBeInTheDocument();
+  });
+
   it("shows a decline message with no QR code on a 200 rejected response", async () => {
     vi.stubGlobal("fetch", vi.fn(() => jsonResponse({ status: "rejected" })));
     const user = userEvent.setup();
