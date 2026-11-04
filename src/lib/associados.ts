@@ -1,5 +1,6 @@
 import { onlyDigits } from "./digits";
 import { getSupabaseServiceClient } from "./supabase/service-client";
+import { TABLE_ASSOCIADOS } from "./supabase/table-names";
 
 /**
  * Looks up whether the given CNPJ belongs to an active ("ativo") associado.
@@ -15,7 +16,7 @@ export async function lookupAssociado(cnpj: string | null): Promise<boolean> {
 
   const client = getSupabaseServiceClient();
   const { data, error } = await client
-    .from("associados")
+    .from(TABLE_ASSOCIADOS)
     .select("ativo")
     .eq("cnpj", normalized)
     .eq("ativo", true)

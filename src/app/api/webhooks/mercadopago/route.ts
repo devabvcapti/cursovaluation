@@ -3,6 +3,7 @@ import { verifyMpWebhookSignature } from "@/lib/verify-mp-webhook-signature";
 import { getMpPayment } from "@/lib/mercadopago-client";
 import { applyPedidoStatus } from "@/lib/apply-payment-status";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
 import type { PedidoRow } from "@/lib/supabase/types";
 
 /**
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
   const client = getSupabaseServiceClient();
   const { data: pedido, error: fetchError } = await client
-    .from("pedidos")
+    .from(TABLE_PEDIDOS)
     .select("*")
     .eq("mp_payment_id", dataId)
     .maybeSingle();
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
   }
 
   const { data: fallbackPedido, error: fallbackError } = await client
-    .from("pedidos")
+    .from(TABLE_PEDIDOS)
     .select("*")
     .eq("id", externalReference)
     .maybeSingle();

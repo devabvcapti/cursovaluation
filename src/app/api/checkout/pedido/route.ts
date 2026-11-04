@@ -3,6 +3,8 @@ import { validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { resolvePrice } from "@/lib/pricing";
 import { onlyDigits } from "@/lib/digits";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 /**
  * Creates a pending pedido from a checkout payload. Re-validates the payload
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
   const price = await resolvePrice({ cnpj: cnpjDigits, cupom });
 
   const { data, error } = await getSupabaseServiceClient()
-    .from("pedidos")
+    .from(TABLE_PEDIDOS)
     .insert({
       nome,
       email,
@@ -67,6 +69,7 @@ export async function POST(request: Request) {
       valor_base: price.valorBase,
       valor_cobrado: price.valorCobrado,
       status: "pending",
+      curso_slug: CURSO_SLUG,
     })
     .select("id")
     .single();

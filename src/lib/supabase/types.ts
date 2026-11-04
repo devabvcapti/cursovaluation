@@ -19,6 +19,8 @@ export interface CupomRow {
   limite_uso: number | null;
   usos_atuais: number;
   criado_por: string;
+  /** Which course this coupon belongs to — see `@/lib/curso-slug`. */
+  curso_slug: string;
   created_at: string;
 }
 
@@ -36,6 +38,8 @@ export interface PedidoRow {
   valor_cobrado: number;
   status: PedidoStatus;
   payment_method: PaymentMethod | null;
+  /** Which course this order is for — see `@/lib/curso-slug`. */
+  curso_slug: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { TABLE_CUPONS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 const redirectMock = vi.fn((url: string) => {
   // Mirrors Next's real redirect(), which throws to abort rendering.
@@ -20,7 +22,8 @@ vi.mock("@/lib/supabase/require-admin-session", () => ({
 }));
 
 const orderMock = vi.fn();
-const selectMock = vi.fn().mockReturnValue({ order: orderMock });
+const eqMock = vi.fn().mockReturnValue({ order: orderMock });
+const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
 const fromMock = vi.fn().mockReturnValue({ select: selectMock });
 const getSupabaseServiceClientMock = vi.fn().mockReturnValue({ from: fromMock });
 vi.mock("@/lib/supabase/service-client", () => ({
@@ -50,7 +53,8 @@ describe("admin cupons page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     connectionMock.mockResolvedValue(undefined);
-    selectMock.mockReturnValue({ order: orderMock });
+    selectMock.mockReturnValue({ eq: eqMock });
+    eqMock.mockReturnValue({ order: orderMock });
     fromMock.mockReturnValue({ select: selectMock });
     getSupabaseServiceClientMock.mockReturnValue({ from: fromMock });
   });
@@ -72,7 +76,8 @@ describe("admin cupons page", () => {
     expect(connectionMock).toHaveBeenCalled(); // opts out of build-time prerendering
     expect(getSupabaseServiceClientMock).toHaveBeenCalled();
     expect(getSupabaseServerClientMock).not.toHaveBeenCalled();
-    expect(fromMock).toHaveBeenCalledWith("cupons");
+    expect(fromMock).toHaveBeenCalledWith(TABLE_CUPONS);
+    expect(eqMock).toHaveBeenCalledWith("curso_slug", CURSO_SLUG);
     expect(orderMock).toHaveBeenCalledWith("created_at", { ascending: false });
     expect(screen.getByText("PROMO10")).toBeInTheDocument();
     expect(screen.getByText("VIP20")).toBeInTheDocument();

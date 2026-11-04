@@ -59,6 +59,7 @@ function buildPedidoRow(overrides: Partial<Record<string, unknown>> = {}) {
     valor_cobrado: 900,
     status: "pending",
     payment_method: "pix",
+    curso_slug: "valuation",
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
     ...overrides,

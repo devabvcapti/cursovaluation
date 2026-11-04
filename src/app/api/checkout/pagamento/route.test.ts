@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
 
 const createMpPaymentMock = vi.fn();
 vi.mock("@/lib/mercadopago-client", () => ({
@@ -51,6 +52,7 @@ const pedidoRow = {
   valor_cobrado: 900,
   status: "pending",
   payment_method: null,
+  curso_slug: "valuation",
   created_at: "2026-01-01T00:00:00.000Z",
   updated_at: "2026-01-01T00:00:00.000Z",
 };
@@ -124,7 +126,7 @@ describe("POST /api/checkout/pagamento", () => {
       buildRequest({ pedidoId: pedidoRow.id, formData, paymentMethodId: "visa" }),
     );
 
-    expect(fromMock).toHaveBeenCalledWith("pedidos");
+    expect(fromMock).toHaveBeenCalledWith(TABLE_PEDIDOS);
     expect(eqSelectMock).toHaveBeenCalledWith("id", pedidoRow.id);
 
     expect(createMpPaymentMock).toHaveBeenCalledWith({

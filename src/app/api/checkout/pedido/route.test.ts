@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 const validateCheckoutMock = vi.fn();
 const resolvePriceMock = vi.fn();
@@ -77,7 +79,7 @@ describe("POST /api/checkout/pedido", () => {
       cnpj: "11222333000181",
       cupom: validPayload.cupom,
     });
-    expect(fromMock).toHaveBeenCalledWith("pedidos");
+    expect(fromMock).toHaveBeenCalledWith(TABLE_PEDIDOS);
     expect(insertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         nome: validPayload.nome,
@@ -90,6 +92,7 @@ describe("POST /api/checkout/pedido", () => {
         valor_base: price.valorBase,
         valor_cobrado: price.valorCobrado,
         status: "pending",
+        curso_slug: CURSO_SLUG,
       }),
     );
     expect(selectMock).toHaveBeenCalledWith("id");

@@ -1,4 +1,6 @@
 import { getSupabaseServiceClient } from "./supabase/service-client";
+import { TABLE_CUPONS } from "./supabase/table-names";
+import { CURSO_SLUG } from "./curso-slug";
 
 export type CupomResolution =
   | { applied: false }
@@ -20,8 +22,9 @@ export async function resolveCupom(codigo: string | null): Promise<CupomResoluti
 
   const client = getSupabaseServiceClient();
   const { data, error } = await client
-    .from("cupons")
+    .from(TABLE_CUPONS)
     .select("codigo, percentual_desconto, ativo, valido_de, valido_ate, limite_uso, usos_atuais")
+    .eq("curso_slug", CURSO_SLUG)
     .eq("codigo", normalized)
     .maybeSingle();
 
@@ -64,8 +67,9 @@ export async function incrementCupomUso(codigo: string): Promise<void> {
   try {
     const client = getSupabaseServiceClient();
     const { data, error } = await client
-      .from("cupons")
+      .from(TABLE_CUPONS)
       .select("usos_atuais")
+      .eq("curso_slug", CURSO_SLUG)
       .eq("codigo", codigo)
       .maybeSingle();
 
@@ -75,8 +79,9 @@ export async function incrementCupomUso(codigo: string): Promise<void> {
     }
 
     const { error: updateError } = await client
-      .from("cupons")
+      .from(TABLE_CUPONS)
       .update({ usos_atuais: data.usos_atuais + 1 })
+      .eq("curso_slug", CURSO_SLUG)
       .eq("codigo", codigo);
 
     if (updateError) {

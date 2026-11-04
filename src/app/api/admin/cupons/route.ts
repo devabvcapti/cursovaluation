@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/supabase/require-admin-session";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_CUPONS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -21,11 +23,13 @@ function toBrtBoundary(value: unknown, edge: "start" | "end"): string | null {
 }
 
 /**
- * Lists all cupons for the admin area. Gated by `requireAdminSession()` —
- * independent of the `/admin/*` page middleware (Task 18), since that
- * middleware does not stop a direct HTTP request to this route. Uses the
- * service-role client because no anon-key RLS policy is defined for
- * `cupons` (Task 4); the session check above is the only auth gate.
+ * Lists this course's cupons for the admin area. Gated by
+ * `requireAdminSession()` — independent of the `/admin/*` page middleware
+ * (Task 18), since that middleware does not stop a direct HTTP request to
+ * this route. Uses the service-role client because no anon-key RLS policy is
+ * defined for `curso_aprendacomquemfaz_cupons` (Task 4); the session check
+ * above is the only auth gate. Scoped to `CURSO_SLUG` since this shared table
+ * can hold other courses' cupons too.
  */
 export async function GET(_request: Request) {
   const session = await requireAdminSession();
@@ -35,8 +39,9 @@ export async function GET(_request: Request) {
   }
 
   const { data, error } = await getSupabaseServiceClient()
-    .from("cupons")
+    .from(TABLE_CUPONS)
     .select("*")
+    .eq("curso_slug", CURSO_SLUG)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -105,7 +110,7 @@ export async function POST(request: Request) {
   const limiteUso = typeof rawLimiteUso === "number" ? rawLimiteUso : null;
 
   const { data, error } = await getSupabaseServiceClient()
-    .from("cupons")
+    .from(TABLE_CUPONS)
     .insert({
       codigo: codigo.toUpperCase(),
       percentual_desconto: percentualDesconto,
@@ -115,6 +120,7 @@ export async function POST(request: Request) {
       limite_uso: limiteUso,
       usos_atuais: 0,
       criado_por: session.email,
+      curso_slug: CURSO_SLUG,
     })
     .select()
     .single();

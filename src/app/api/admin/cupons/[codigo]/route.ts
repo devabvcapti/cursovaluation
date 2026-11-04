@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAdminSession } from "@/lib/supabase/require-admin-session";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_CUPONS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 /**
  * Toggles `ativo` on a cupom by its código. Gated by `requireAdminSession()`
@@ -39,8 +41,9 @@ export async function PATCH(
   }
 
   const { data, error } = await getSupabaseServiceClient()
-    .from("cupons")
+    .from(TABLE_CUPONS)
     .update({ ativo })
+    .eq("curso_slug", CURSO_SLUG)
     .eq("codigo", codigo)
     .select()
     .maybeSingle();

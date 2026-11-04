@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TABLE_CUPONS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 const requireAdminSessionMock = vi.fn();
 
@@ -8,7 +10,10 @@ vi.mock("@/lib/supabase/require-admin-session", () => ({
 
 const maybeSingleMock = vi.fn();
 const selectMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
-const eqMock = vi.fn().mockReturnValue({ select: selectMock });
+// Chained twice now (.eq("curso_slug", ...).eq("codigo", ...)), so each call
+// must return an object that still offers both `eq` and `select`.
+const eqMock = vi.fn();
+eqMock.mockImplementation(() => ({ eq: eqMock, select: selectMock }));
 const setMock = vi.fn().mockReturnValue({ eq: eqMock });
 const fromMock = vi.fn().mockReturnValue({ update: setMock });
 const serviceClientMock = { from: fromMock };
@@ -35,7 +40,8 @@ describe("PATCH /api/admin/cupons/[codigo]", () => {
     vi.clearAllMocks();
     fromMock.mockReturnValue({ update: setMock });
     setMock.mockReturnValue({ eq: eqMock });
-    eqMock.mockReturnValue({ select: selectMock });
+    // eqMock keeps its module-scope mockImplementation (chainable .eq/.select)
+    // across vi.clearAllMocks(), which only clears call history.
     selectMock.mockReturnValue({ maybeSingle: maybeSingleMock });
   });
 
@@ -66,8 +72,9 @@ describe("PATCH /api/admin/cupons/[codigo]", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(updatedRow);
-    expect(fromMock).toHaveBeenCalledWith("cupons");
+    expect(fromMock).toHaveBeenCalledWith(TABLE_CUPONS);
     expect(setMock).toHaveBeenCalledWith({ ativo: false });
+    expect(eqMock).toHaveBeenCalledWith("curso_slug", CURSO_SLUG);
     expect(eqMock).toHaveBeenCalledWith("codigo", "ABC10");
   });
 });

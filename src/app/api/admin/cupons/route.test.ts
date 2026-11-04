@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TABLE_CUPONS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 
 const requireAdminSessionMock = vi.fn();
 
@@ -11,7 +13,8 @@ const selectInsertMock = vi.fn().mockReturnValue({ single: singleMock });
 const insertMock = vi.fn().mockReturnValue({ select: selectInsertMock });
 
 const orderMock = vi.fn();
-const selectListMock = vi.fn().mockReturnValue({ order: orderMock });
+const eqListMock = vi.fn().mockReturnValue({ order: orderMock });
+const selectListMock = vi.fn().mockReturnValue({ eq: eqListMock });
 
 const fromMock = vi.fn().mockReturnValue({
   select: selectListMock,
@@ -41,7 +44,8 @@ describe("GET /api/admin/cupons", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fromMock.mockReturnValue({ select: selectListMock, insert: insertMock });
-    selectListMock.mockReturnValue({ order: orderMock });
+    selectListMock.mockReturnValue({ eq: eqListMock });
+    eqListMock.mockReturnValue({ order: orderMock });
     insertMock.mockReturnValue({ select: selectInsertMock });
     selectInsertMock.mockReturnValue({ single: singleMock });
   });
@@ -55,7 +59,7 @@ describe("GET /api/admin/cupons", () => {
     expect(fromMock).not.toHaveBeenCalled();
   });
 
-  it("returns 200 with the listed rows when a session is present", async () => {
+  it("returns 200 with the listed rows when a session is present, scoped to this course", async () => {
     requireAdminSessionMock.mockResolvedValue({ email: "admin@abvcap.com.br" });
     const rows = [{ id: "1", codigo: "ABC10" }];
     orderMock.mockResolvedValue({ data: rows, error: null });
@@ -64,8 +68,9 @@ describe("GET /api/admin/cupons", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(rows);
-    expect(fromMock).toHaveBeenCalledWith("cupons");
+    expect(fromMock).toHaveBeenCalledWith(TABLE_CUPONS);
     expect(selectListMock).toHaveBeenCalledWith("*");
+    expect(eqListMock).toHaveBeenCalledWith("curso_slug", CURSO_SLUG);
     expect(orderMock).toHaveBeenCalledWith("created_at", { ascending: false });
   });
 });
@@ -74,7 +79,8 @@ describe("POST /api/admin/cupons", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fromMock.mockReturnValue({ select: selectListMock, insert: insertMock });
-    selectListMock.mockReturnValue({ order: orderMock });
+    selectListMock.mockReturnValue({ eq: eqListMock });
+    eqListMock.mockReturnValue({ order: orderMock });
     insertMock.mockReturnValue({ select: selectInsertMock });
     selectInsertMock.mockReturnValue({ single: singleMock });
   });
@@ -125,6 +131,7 @@ describe("POST /api/admin/cupons", () => {
       limite_uso: null,
       usos_atuais: 0,
       criado_por: "admin@abvcap.com.br",
+      curso_slug: CURSO_SLUG,
     });
   });
 

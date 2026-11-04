@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { requireAdminSession } from "@/lib/supabase/require-admin-session";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_CUPONS } from "@/lib/supabase/table-names";
+import { CURSO_SLUG } from "@/lib/curso-slug";
 import type { CupomRow } from "@/lib/supabase/types";
 import { CupomList } from "@/components/admin/CupomList";
 
@@ -21,10 +23,12 @@ export const instant = false;
  * Admin cupons page. The proxy (`src/proxy.ts`) already redirects
  * unauthenticated navigations, but this page re-checks the session itself
  * (defense in depth, same as the `/api/admin/*` routes) and then reads
- * `cupons` with the service-role client: `cupons` has RLS enabled with no
- * policies (Task 4 migration), so the anon-key/session client would silently
- * get zero rows back. Interactivity (creating/toggling cupons) lives in the
- * `CupomList` client island.
+ * `curso_aprendacomquemfaz_cupons` with the service-role client: that table
+ * has RLS enabled with no policies (Task 4 migration), so the
+ * anon-key/session client would silently get zero rows back. Scoped to
+ * `CURSO_SLUG` since this shared table can hold other courses' cupons too.
+ * Interactivity (creating/toggling cupons) lives in the `CupomList` client
+ * island.
  */
 export default async function CuponsPage() {
   // Request-time only: without this, `next build` prerenders the page, and
@@ -39,8 +43,9 @@ export default async function CuponsPage() {
   }
 
   const { data, error } = await getSupabaseServiceClient()
-    .from("cupons")
+    .from(TABLE_CUPONS)
     .select("*")
+    .eq("curso_slug", CURSO_SLUG)
     .order("created_at", { ascending: false });
 
   return (

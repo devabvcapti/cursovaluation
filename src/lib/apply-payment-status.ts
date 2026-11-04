@@ -1,5 +1,6 @@
 import type { MpPaymentStatus } from "@/lib/mercadopago-client";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
 import { incrementCupomUso } from "@/lib/cupons";
 import { sendOrderConfirmationEmail } from "@/lib/send-order-confirmation-email";
 import { sendOrderNotificationEmail } from "@/lib/send-order-notification-email";
@@ -98,7 +99,7 @@ export async function applyPedidoStatus(
   }
 
   const { data: updatedRows, error: updateError } = await getSupabaseServiceClient()
-    .from("pedidos")
+    .from(TABLE_PEDIDOS)
     .update({ status: nextStatus, ...extraFields })
     .eq("id", pedido.id)
     .eq("status", pedido.status)

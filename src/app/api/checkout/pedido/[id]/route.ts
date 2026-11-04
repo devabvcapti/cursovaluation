@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
 
 /**
  * Polled by the Pix waiting UI (Task 16) to learn whether a pedido has been
@@ -14,7 +15,7 @@ export async function GET(
   const client = getSupabaseServiceClient();
 
   const { data: pedido, error } = await client
-    .from("pedidos")
+    .from(TABLE_PEDIDOS)
     .select("status")
     .eq("id", id)
     .maybeSingle();

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TABLE_PEDIDOS } from "@/lib/supabase/table-names";
 
 const maybeSingleMock = vi.fn();
 const eqMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
@@ -36,7 +37,7 @@ describe("GET /api/checkout/pedido/[id]", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ status: "approved" });
-    expect(fromMock).toHaveBeenCalledWith("pedidos");
+    expect(fromMock).toHaveBeenCalledWith(TABLE_PEDIDOS);
     expect(selectMock).toHaveBeenCalledWith("status");
     expect(eqMock).toHaveBeenCalledWith("id", "pedido-1");
   });
