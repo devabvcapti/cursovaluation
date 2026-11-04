@@ -27,7 +27,7 @@ describe("Hero", () => {
     expect(secondary).toHaveAttribute("type", "button");
     expect(secondary).toHaveTextContent(courseContent.hero.syllabusCtaLabel);
 
-    const primary = screen.getByRole("link", { name: /matricular/i });
+    const primary = screen.getByRole("link", { name: /inscrever/i });
     expect(primary).toHaveAttribute("href", courseContent.hero.checkoutUrl || "#");
   });
 });

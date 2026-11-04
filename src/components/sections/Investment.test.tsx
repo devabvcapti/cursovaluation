@@ -26,7 +26,7 @@ describe("Investment", () => {
 
   it("keeps the enrollment CTA pointed at the checkout URL", () => {
     render(<Investment />);
-    expect(screen.getByRole("link", { name: /quero me matricular/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /quero me inscrever/i })).toHaveAttribute(
       "href",
       courseContent.investment.checkoutUrl,
     );

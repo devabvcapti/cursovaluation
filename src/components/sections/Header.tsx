@@ -50,7 +50,7 @@ export function Header() {
             variant="primary"
             className="px-5 py-2.5 text-xs"
           >
-            Matricule-se
+            Inscreva-se
           </Button>
           <MobileNavToggle open={mobileNavOpen} onToggle={() => setMobileNavOpen((prev) => !prev)} />
         </div>

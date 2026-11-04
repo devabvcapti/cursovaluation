@@ -156,7 +156,7 @@ function Ctas({ onSecondaryClick }: CtasProps) {
   return (
     <>
       <Button href={courseContent.hero.checkoutUrl} variant="primary">
-        Quero me matricular
+        Quero me inscrever
       </Button>
       <button
         type="button"

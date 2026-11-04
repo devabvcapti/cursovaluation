@@ -112,7 +112,7 @@ export function Investment() {
         </dl>
         <div className={CTA_WRAPPER_CLASSES}>
           <Button href={investment.checkoutUrl} variant="primary">
-            Quero me matricular
+            Quero me inscrever
           </Button>
         </div>
       </ScrollReveal>

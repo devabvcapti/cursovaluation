@@ -74,7 +74,7 @@ export function FinalCTA() {
         <div className={GRID_CLASSES}>
           <div className={CTA_WRAPPER_CLASSES}>
             <Button href={courseContent.hero.checkoutUrl} variant="primary" className={BUTTON_STACKING_CLASSES}>
-              Quero me matricular
+              Quero me inscrever
             </Button>
             <div className={BANDEIRA_FRAME_CLASSES}>
               <Image

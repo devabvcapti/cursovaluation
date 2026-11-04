@@ -7,7 +7,7 @@ import { courseContent } from "@/content/curso";
 describe("Header", () => {
   it("renders the primary CTA pointing at the checkout URL from content", () => {
     render(<Header />);
-    const cta = screen.getByRole("link", { name: /matricule-se/i });
+    const cta = screen.getByRole("link", { name: /inscreva-se/i });
     expect(cta).toHaveAttribute("href", courseContent.hero.checkoutUrl);
   });
 
