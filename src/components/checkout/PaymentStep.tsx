@@ -43,10 +43,10 @@ type StepStatus =
   | "error";
 
 const POLL_INTERVAL_MS = 3000;
-// Give up after ~1 minute of polling a Pix that hasn't settled (abandoned or
+// Give up after ~8 minutes of polling a Pix that hasn't settled (abandoned or
 // slow payment) instead of polling forever. The webhook still records a late
 // payment and the buyer still gets the confirmation email.
-const MAX_POLL_ATTEMPTS = 20;
+const MAX_POLL_ATTEMPTS = 160;
 
 // `initMercadoPago` is documented as a one-time setup call (it configures a
 // module-level singleton inside the SDK) — it must run exactly once, not on

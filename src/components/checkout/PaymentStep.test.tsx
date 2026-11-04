@@ -168,7 +168,7 @@ describe("PaymentStep", () => {
     expect(screen.getByText(/aprovado/i)).toBeInTheDocument();
   });
 
-  it("gives up polling after 20 attempts and tells the buyer to try again later", async () => {
+  it("gives up polling after 160 attempts (~8 minutes) and tells the buyer to try again later", async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn((url: string) => {
       if (typeof url === "string" && url.includes("/api/checkout/pedido/")) {
@@ -190,22 +190,22 @@ describe("PaymentStep", () => {
       ).length;
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(3000 * 19);
+      await vi.advanceTimersByTimeAsync(3000 * 159);
     });
-    expect(pollCalls()).toBe(19);
+    expect(pollCalls()).toBe(159);
     expect(screen.queryByText(/ainda não recebemos/i)).not.toBeInTheDocument();
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000);
     });
-    expect(pollCalls()).toBe(20);
+    expect(pollCalls()).toBe(160);
     expect(screen.getByText(/ainda não recebemos a confirmação/i)).toBeInTheDocument();
 
     // Polling has stopped: no further requests.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(3000 * 5);
     });
-    expect(pollCalls()).toBe(20);
+    expect(pollCalls()).toBe(160);
   });
 
   it("hides the Brick after approval", async () => {
