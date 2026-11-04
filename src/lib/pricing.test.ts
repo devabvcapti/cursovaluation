@@ -19,7 +19,7 @@ describe("resolvePrice", () => {
     lookupAssociadoMock.mockResolvedValue(false);
     const { resolvePrice } = await import("./pricing");
     const result = await resolvePrice({ cnpj: null, cupom: null });
-    expect(result).toEqual({ isAssociado: false, cupomAplicado: null, valorBase: 9000, valorCobrado: 9000 });
+    expect(result).toEqual({ isAssociado: false, cupomAplicado: null, valorBase: 7650, valorCobrado: 7650 });
   });
 
   it("still charges the early-bird price on the evening of the advertised last day (Dec 20, 21:00 BRT = UTC midnight)", async () => {
@@ -27,7 +27,7 @@ describe("resolvePrice", () => {
     lookupAssociadoMock.mockResolvedValue(false);
     const { resolvePrice } = await import("./pricing");
     const result = await resolvePrice({ cnpj: null, cupom: null });
-    expect(result.valorBase).toBe(9000);
+    expect(result.valorBase).toBe(7650);
   });
 
   it("still charges the early-bird price at the last millisecond of Dec 20 in BRT", async () => {
@@ -35,7 +35,7 @@ describe("resolvePrice", () => {
     lookupAssociadoMock.mockResolvedValue(false);
     const { resolvePrice } = await import("./pricing");
     const result = await resolvePrice({ cnpj: null, cupom: null });
-    expect(result.valorBase).toBe(9000);
+    expect(result.valorBase).toBe(7650);
   });
 
   it("charges the non-early-bird full price exactly at the deadline instant (start of Dec 21 BRT) and after", async () => {
@@ -43,16 +43,25 @@ describe("resolvePrice", () => {
     lookupAssociadoMock.mockResolvedValue(false);
     const { resolvePrice } = await import("./pricing");
     const result = await resolvePrice({ cnpj: null, cupom: null });
-    expect(result.valorBase).toBe(10000);
+    expect(result.valorBase).toBe(8500);
   });
 
-  it("falls back to non-associado pricing while the associado price is still a placeholder", async () => {
+  it("charges the associado early-bird price for an associado before the deadline", async () => {
     vi.setSystemTime(new Date("2026-11-03T12:00:00Z"));
     lookupAssociadoMock.mockResolvedValue(true);
     const { resolvePrice } = await import("./pricing");
     const result = await resolvePrice({ cnpj: "11222333000181", cupom: null });
     expect(result.isAssociado).toBe(true);
-    expect(result.valorBase).toBe(9000); // non-associado early-bird price, not NaN
+    expect(result.valorBase).toBe(6120);
+  });
+
+  it("charges the associado full price for an associado after the early-bird deadline", async () => {
+    vi.setSystemTime(new Date("2026-12-21T00:00:00-03:00"));
+    lookupAssociadoMock.mockResolvedValue(true);
+    const { resolvePrice } = await import("./pricing");
+    const result = await resolvePrice({ cnpj: "11222333000181", cupom: null });
+    expect(result.isAssociado).toBe(true);
+    expect(result.valorBase).toBe(6800);
   });
 
   it("applies a resolved coupon's percentage on top of the base price", async () => {
@@ -64,8 +73,8 @@ describe("resolvePrice", () => {
     expect(result).toEqual({
       isAssociado: false,
       cupomAplicado: "PROMO10",
-      valorBase: 9000,
-      valorCobrado: 8100,
+      valorBase: 7650,
+      valorCobrado: 6885,
     });
   });
 });

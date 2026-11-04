@@ -244,12 +244,12 @@ export const courseContent: CourseContent = {
   ],
 
   investment: {
-    price: "10000",
-    earlyBirdPrice: "9000",
+    price: "8500",
+    earlyBirdPrice: "7650",
     earlyBirdDeadline: "20 de dezembro de 2026",
     earlyBirdDeadlineISO: "2026-12-21T00:00:00-03:00",
-    associadoPrice: placeholder("PREÇO ASSOCIADO"),
-    associadoEarlyBirdPrice: placeholder("PREÇO ASSOCIADO EARLY BIRD"),
+    associadoPrice: "6800",
+    associadoEarlyBirdPrice: "6120",
     seatsLimit: "Cerca de 20 vagas",
     nextCohortDate: "16 de fevereiro de 2027",
     workloadHours: "39h em sala + 23h em casa",

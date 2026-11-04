@@ -8,9 +8,11 @@ describe("courseContent pending data", () => {
     expect(courseContent.hero.checkoutUrl).toBe("/inscricao");
   });
 
-  it("marks the associado price fields as pending", () => {
-    expect(isPlaceholder(courseContent.investment.associadoPrice)).toBe(true);
-    expect(isPlaceholder(courseContent.investment.associadoEarlyBirdPrice)).toBe(true);
+  it("has real (non-placeholder) associado prices now that they're confirmed", () => {
+    expect(isPlaceholder(courseContent.investment.associadoPrice)).toBe(false);
+    expect(isPlaceholder(courseContent.investment.associadoEarlyBirdPrice)).toBe(false);
+    expect(courseContent.investment.associadoPrice).toBe("6800");
+    expect(courseContent.investment.associadoEarlyBirdPrice).toBe("6120");
   });
 
   it("has a machine-readable early-bird deadline that ends after the whole display date in BRT", () => {
@@ -37,10 +39,12 @@ describe("courseContent pending data", () => {
 
   it("has a real (non-placeholder) price now that it's confirmed", () => {
     expect(isPlaceholder(courseContent.investment.price)).toBe(false);
+    expect(courseContent.investment.price).toBe("8500");
   });
 
   it("has real (non-placeholder) values for the confirmed investment fields", () => {
     expect(isPlaceholder(courseContent.investment.earlyBirdPrice)).toBe(false);
+    expect(courseContent.investment.earlyBirdPrice).toBe("7650");
     expect(isPlaceholder(courseContent.investment.earlyBirdDeadline)).toBe(false);
     expect(isPlaceholder(courseContent.investment.seatsLimit)).toBe(false);
     expect(isPlaceholder(courseContent.investment.workloadHours)).toBe(false);
