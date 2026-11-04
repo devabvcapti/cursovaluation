@@ -22,7 +22,7 @@ const validPayload = {
   nome: "Ana",
   email: "ana@example.com",
   cpf: "123.456.789-09",
-  telefone: "11999998888",
+  telefone: "(11) 99999-8888",
   cnpj: "11.222.333/0001-81",
   cupom: "PROMO10",
 };
@@ -55,7 +55,7 @@ describe("POST /api/checkout/pedido", () => {
     expect(fromMock).not.toHaveBeenCalled();
   });
 
-  it("resolves price server-side, inserts a pending pedido, and returns pedidoId/valorCobrado", async () => {
+  it("resolves price server-side, inserts a pending pedido with digits-only cpf/telefone/cnpj, and returns pedidoId/valorCobrado", async () => {
     validateCheckoutMock.mockReturnValue({ valid: true });
     const price = {
       isAssociado: true,
@@ -74,7 +74,7 @@ describe("POST /api/checkout/pedido", () => {
     const response = await POST(request);
 
     expect(resolvePriceMock).toHaveBeenCalledWith({
-      cnpj: validPayload.cnpj,
+      cnpj: "11222333000181",
       cupom: validPayload.cupom,
     });
     expect(fromMock).toHaveBeenCalledWith("pedidos");
@@ -82,9 +82,9 @@ describe("POST /api/checkout/pedido", () => {
       expect.objectContaining({
         nome: validPayload.nome,
         email: validPayload.email,
-        cpf: validPayload.cpf,
-        telefone: validPayload.telefone,
-        cnpj_informado: validPayload.cnpj,
+        cpf: "12345678909",
+        telefone: "11999998888",
+        cnpj_informado: "11222333000181",
         is_associado: price.isAssociado,
         cupom_codigo: price.cupomAplicado,
         valor_base: price.valorBase,
@@ -151,6 +151,31 @@ describe("POST /api/checkout/pedido", () => {
     expect(insertMock).toHaveBeenCalledWith(
       expect.objectContaining({ cnpj_informado: null }),
     );
+  });
+
+  it("sets cnpj_informado to null (not an empty string) for a blank or punctuation-only cnpj", async () => {
+    validateCheckoutMock.mockReturnValue({ valid: true });
+    resolvePriceMock.mockResolvedValue({
+      isAssociado: false,
+      cupomAplicado: null,
+      valorBase: 1000,
+      valorCobrado: 1000,
+    });
+    singleMock.mockResolvedValue({ data: { id: "pedido-790" }, error: null });
+
+    const { POST } = await import("./route");
+    for (const cnpj of ["", "   ", "./-"]) {
+      insertMock.mockClear();
+      resolvePriceMock.mockClear();
+      await POST(
+        new Request("http://localhost/api/checkout/pedido", {
+          method: "POST",
+          body: JSON.stringify({ ...validPayload, cnpj }),
+        }),
+      );
+      expect(insertMock).toHaveBeenCalledWith(expect.objectContaining({ cnpj_informado: null }));
+      expect(resolvePriceMock).toHaveBeenCalledWith(expect.objectContaining({ cnpj: null }));
+    }
   });
 
   it("returns 502 with a nome error when the Supabase insert fails", async () => {

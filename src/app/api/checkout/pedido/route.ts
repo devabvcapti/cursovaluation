@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { resolvePrice } from "@/lib/pricing";
+import { onlyDigits } from "@/lib/digits";
 import { getSupabaseServiceClient } from "@/lib/supabase/service-client";
 
 /**
@@ -44,16 +45,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ errors: result.errors }, { status: 400 });
   }
 
-  const price = await resolvePrice({ cnpj, cupom });
+  // Persist identity fields digits-only: that's what `isValidCpf` validated,
+  // what `associados.cnpj` is keyed by, and what Mercado Pago's
+  // `identification.number` expects (pagamento sends `pedido.cpf` as-is).
+  const cpfDigits = onlyDigits(cpf);
+  const telefoneDigits = onlyDigits(telefone);
+  const cnpjDigits = onlyDigits(cnpj ?? "") || null;
+
+  const price = await resolvePrice({ cnpj: cnpjDigits, cupom });
 
   const { data, error } = await getSupabaseServiceClient()
     .from("pedidos")
     .insert({
       nome,
       email,
-      cpf,
-      telefone,
-      cnpj_informado: cnpj ?? null,
+      cpf: cpfDigits,
+      telefone: telefoneDigits,
+      cnpj_informado: cnpjDigits,
       is_associado: price.isAssociado,
       cupom_codigo: price.cupomAplicado,
       valor_base: price.valorBase,
