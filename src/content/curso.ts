@@ -101,19 +101,19 @@ export const courseContent: CourseContent = {
 
   audienceProfiles: [
     {
-      title: "Profissionais de M&A e Investment Banking",
-      pain: "Você estrutura e negocia transações sob pressão de tempo e precisa defender premissas de valuation diante de clientes, comitês e contrapartes — com rigor técnico que resista a questionamento.",
-    },
-    {
       title: "Investidores de Private Equity e Venture Capital",
       pain: "Sua tese de investimento depende de uma avaliação defensável do ativo, da entrada à saída — e o retorno do fundo começa no preço que você paga.",
+    },
+    {
+      title: "Profissionais de M&A e Investment Banking",
+      pain: "Você estrutura e negocia transações sob pressão de tempo e precisa defender premissas de valuation diante de clientes, comitês e contrapartes — com rigor técnico que resista a questionamento.",
     },
     {
       title: "CFOs e Controllers",
       pain: "Você precisa avaliar aquisições, cisões, aportes e laudos societários internamente, sem depender exclusivamente de consultorias externas para decisões estratégicas.",
     },
     {
-      title: "Consultores e advogados especializados em transações",
+      title: "Consultores de Gestão",
       pain: "Você assessora clientes em M&A e precisa compreender a lógica financeira por trás do valuation para negociar cláusulas, earn-outs e garantias com propriedade.",
     },
   ],
