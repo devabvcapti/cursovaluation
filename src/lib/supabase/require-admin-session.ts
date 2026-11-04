@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server-client";
 /**
  * Independent, server-side session guard for `/api/admin/*` route handlers.
  *
- * `src/middleware.ts` (Task 18) already redirects unauthenticated *page*
+ * `src/proxy.ts` (Task 18) already redirects unauthenticated *page*
  * navigations under `/admin`, but that does not stop a direct HTTP request
  * to an API route — so every admin route handler calls this itself, per
  * request (it is not cached/memoized), before touching any data client.

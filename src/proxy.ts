@@ -4,11 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * Gates `/admin/*` behind Supabase Auth and refreshes the session cookie on
  * every matched request — the standard `@supabase/ssr` Next.js middleware
- * recipe (see `src/lib/supabase/server-client.ts` for the Server Component /
+ * recipe, under Next 16's `proxy` file convention (formerly `middleware`; see
+ * node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md) (see `src/lib/supabase/server-client.ts` for the Server Component /
  * Route Handler counterpart). `/admin/login` itself is exempt so there's
  * always a way to reach the sign-in form.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

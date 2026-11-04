@@ -28,7 +28,7 @@ const SUBMIT_BUTTON_CLASSES = cn(
 
 /**
  * Admin sign-in form for the `/admin/cupons` area. Middleware (Task 18's
- * `src/middleware.ts`) is the actual access gate; this page's only job is to
+ * `src/proxy.ts`) is the actual access gate; this page's only job is to
  * authenticate the user with Supabase Auth and hand them off.
  */
 export default function LoginPage() {
