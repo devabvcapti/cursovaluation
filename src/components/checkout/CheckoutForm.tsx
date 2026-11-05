@@ -51,9 +51,11 @@ const SUBMIT_BUTTON_CLASSES = cn(
  * touching the network (the server re-runs the same validation — see
  * `src/app/api/checkout/pedido/route.ts` — so this is a UX convenience, not
  * the trust boundary), and posts to `/api/checkout/pedido` only when the
- * payload is valid. The cnpj/cupom fields also drive a debounced price
- * preview against `/api/checkout/preco` so the user sees the resolved price
- * before submitting.
+ * payload is valid. The CNPJ field only renders once the student checks
+ * "Sou associado ABVCAP"; unchecking it clears any typed CNPJ so the
+ * non-member price is what actually gets submitted. The cnpj/cupom fields
+ * also drive a debounced price preview against `/api/checkout/preco`, which
+ * doubles as inline CNPJ-verification feedback while the toggle is on.
  */
 export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) {
   const uid = useId();
@@ -61,6 +63,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const emailId = `${uid}-checkout-email`;
   const cpfId = `${uid}-checkout-cpf`;
   const telefoneId = `${uid}-checkout-telefone`;
+  const membroId = `${uid}-checkout-membro`;
   const cnpjId = `${uid}-checkout-cnpj`;
   const cupomId = `${uid}-checkout-cupom`;
   const nomeErrorId = `${uid}-checkout-nome-error`;
@@ -72,8 +75,18 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [isMember, setIsMember] = useState(false);
   const [cnpj, setCnpj] = useState("");
   const [cupom, setCupom] = useState("");
+
+  function handleMemberToggle(checked: boolean) {
+    setIsMember(checked);
+    if (!checked) {
+      // Unchecking hides the field; clearing it too means a previously
+      // typed CNPJ can never silently keep applying the member price.
+      setCnpj("");
+    }
+  }
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -263,21 +276,52 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
         ) : null}
       </div>
 
-      <div className="mt-5">
-        <label htmlFor={cnpjId} className={LABEL_CLASSES}>
-          CNPJ (opcional)
-        </label>
+      <div className="mt-5 flex items-center gap-2">
         <input
-          id={cnpjId}
-          name="cnpj"
-          type="text"
-          inputMode="numeric"
-          autoComplete="off"
-          value={cnpj}
-          onChange={(event) => setCnpj(event.target.value)}
-          className={cn(FIELD_CLASSES, FIELD_BORDER_CLASSES)}
+          id={membroId}
+          name="membro"
+          type="checkbox"
+          checked={isMember}
+          onChange={(event) => handleMemberToggle(event.target.checked)}
+          className="h-4 w-4 shrink-0 rounded border-brand-navy/30 text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
         />
+        <label htmlFor={membroId} className={LABEL_CLASSES}>
+          Sou associado ABVCAP
+        </label>
       </div>
+
+      {isMember ? (
+        <div className="mt-5">
+          <label htmlFor={cnpjId} className={LABEL_CLASSES}>
+            CNPJ da empresa associada
+          </label>
+          <input
+            id={cnpjId}
+            name="cnpj"
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            value={cnpj}
+            onChange={(event) => setCnpj(event.target.value)}
+            className={cn(FIELD_CLASSES, FIELD_BORDER_CLASSES)}
+          />
+          {trimmedCnpj !== "" ? (
+            showPreview && preview ? (
+              preview.isAssociado ? (
+                <p className="mt-2 font-body text-sm text-brand-green">
+                  ✓ CNPJ verificado como associado ABVCAP.
+                </p>
+              ) : (
+                <p className="mt-2 font-body text-sm text-amber-600">
+                  CNPJ não encontrado na base de associados — seguindo com valor de não-membro.
+                </p>
+              )
+            ) : (
+              <p className="mt-2 font-body text-sm text-brand-navy/60">Verificando CNPJ...</p>
+            )
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-5">
         <label htmlFor={cupomId} className={LABEL_CLASSES}>
@@ -299,9 +343,6 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
           <p className="font-body text-base font-semibold text-brand-navy">
             Valor: {formatInvestment(String(preview.valorCobrado))}
           </p>
-          {preview.isAssociado ? (
-            <p className="mt-1 font-body text-sm text-brand-navy">Preço de associado aplicado.</p>
-          ) : null}
         </div>
       ) : null}
 

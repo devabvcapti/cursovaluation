@@ -43,21 +43,71 @@ describe("CheckoutForm", () => {
     );
   });
 
-  it("renders nome, e-mail, CPF, telefone, CNPJ (opcional) and cupom (opcional) fields", () => {
+  it("renders nome, e-mail, CPF, telefone, the member toggle and cupom (opcional) fields", () => {
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
     expect(screen.getByLabelText(/nome/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cpf/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/cnpj.*opcional/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/sou associado abvcap/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cupom.*opcional/i)).toBeInTheDocument();
+  });
+
+  it("hides the CNPJ field until the member toggle is checked, and clears it when unchecked", async () => {
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
+
+    const memberToggle = screen.getByLabelText(/sou associado abvcap/i);
+    await user.click(memberToggle);
+    const cnpjInput = screen.getByLabelText(/cnpj/i);
+    expect(cnpjInput).toBeInTheDocument();
+
+    await user.type(cnpjInput, "11222333000181");
+    await user.click(memberToggle);
+    expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
+
+    await user.click(memberToggle);
+    expect(screen.getByLabelText(/cnpj/i)).toHaveValue("");
+  });
+
+  it("shows inline CNPJ verification feedback: verifying, then verified or not found", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { cnpj?: string }) : {};
+          return jsonResponse({
+            isAssociado: parsedBody.cnpj === "11222333000181",
+            cupomAplicado: null,
+            valorBase: 1000,
+            valorCobrado: parsedBody.cnpj === "11222333000181" ? 800 : 1000,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 1000 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+    await user.click(screen.getByLabelText(/sou associado abvcap/i));
+
+    await user.type(screen.getByLabelText(/cnpj/i), "11222333000181");
+    expect(await screen.findByText(/verificando cnpj/i)).toBeInTheDocument();
+    expect(await screen.findByText(/verificado como associado abvcap/i)).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText(/cnpj/i));
+    await user.type(screen.getByLabelText(/cnpj/i), "99888777000166");
+    expect(await screen.findByText(/não encontrado na base de associados/i)).toBeInTheDocument();
   });
 
   it("debounces the price preview call on cnpj change and displays the formatted price", async () => {
     const user = userEvent.setup();
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+    await user.click(screen.getByLabelText(/sou associado abvcap/i));
 
-    await user.type(screen.getByLabelText(/cnpj.*opcional/i), "11222333000181");
+    await user.type(screen.getByLabelText(/cnpj/i), "11222333000181");
 
     // Debounce: should not fire immediately on every keystroke.
     expect(
@@ -106,7 +156,8 @@ describe("CheckoutForm", () => {
 
     const user = userEvent.setup();
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
-    const cnpjInput = screen.getByLabelText(/cnpj.*opcional/i);
+    await user.click(screen.getByLabelText(/sou associado abvcap/i));
+    const cnpjInput = screen.getByLabelText(/cnpj/i);
 
     // Resolve a preview for the first cnpj.
     await user.type(cnpjInput, "11222333000181");
