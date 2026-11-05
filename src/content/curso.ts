@@ -73,7 +73,7 @@ export const courseContent: CourseContent = {
     eyebrow: "Aprenda com quem faz",
     headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
-      "Programa presencial de avaliação de empresas para profissionais que atuam, ou querem atuar, em Private Equity, Venture Capital, M&A, investment banking e finanças corporativas. São 13 aulas construídas a partir de uma companhia aberta real, do histórico ao fechamento do modelo e à estruturação do deal.",
+      "Formação presencial de avaliação de empresas para estudantes e profissionais que atuam, ou querem atuar, em Private Equity, Venture Capital, M&A, investment banking e finanças corporativas.",
     checkoutUrl: "/inscricao",
     syllabusCtaLabel: "Baixar ementa completa",
   },
