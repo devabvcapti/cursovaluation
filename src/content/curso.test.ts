@@ -69,15 +69,18 @@ describe("courseContent pending data", () => {
     }
   });
 
-  it("marks every testimonial's fields as placeholders", () => {
-    expect(courseContent.testimonials.length).toBeGreaterThan(0);
+  it("has two real (non-placeholder) text testimonials now that they're confirmed", () => {
+    expect(courseContent.testimonials).toHaveLength(2);
     for (const testimonial of courseContent.testimonials) {
-      expect(isPlaceholder(testimonial.quote)).toBe(true);
-      expect(isPlaceholder(testimonial.author)).toBe(true);
-      expect(isPlaceholder(testimonial.role)).toBe(true);
-      expect(isPlaceholder(testimonial.company)).toBe(true);
-      expect(isPlaceholder(testimonial.photo)).toBe(true);
+      expect(isPlaceholder(testimonial.quote)).toBe(false);
+      expect(isPlaceholder(testimonial.author)).toBe(false);
+      expect(isPlaceholder(testimonial.company)).toBe(false);
     }
+    const [first, second] = courseContent.testimonials;
+    expect(first.author).toBe("Suzana Shiraishi");
+    expect(first.company).toBe("TMF Group");
+    expect(second.author).toBe("Yuri Nico");
+    expect(second.company).toBe("Bbutton Ventures");
   });
 
   it("does not mark real copy fields as placeholders", () => {

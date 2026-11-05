@@ -32,11 +32,7 @@ export interface CourseContent {
   testimonials: {
     quote: string;
     author: string;
-    role: string;
     company: string;
-    photo: string;
-    /** Optional video testimonial; when set, the card plays this instead of showing quote/photo. */
-    videoUrl?: string;
   }[];
   investment: {
     price: string;
@@ -218,28 +214,16 @@ export const courseContent: CourseContent = {
 
   testimonials: [
     {
-      quote: placeholder("DEPOIMENTO 1"),
-      author: placeholder("NOME DO DEPOENTE 1"),
-      role: placeholder("CARGO DO DEPOENTE 1"),
-      company: placeholder("EMPRESA DO DEPOENTE 1"),
-      photo: placeholder("FOTO DO DEPOENTE 1"),
-      // Temporary public-domain sample clip to preview the video-testimonial
-      // layout — swap for a real recorded testimonial before launch.
-      videoUrl: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+      quote:
+        "Minha experiência está sendo ótima. Tenho participado de todas as aulas e acredito que os temas foram escolhidos com muito cuidado, de forma a contribuir para a aplicabilidade dos conhecimentos no nosso dia a dia. Além disso, as aulas têm uma abordagem bastante didática, o que facilita o entendimento dos conteúdos desde o início.",
+      author: "Suzana Shiraishi",
+      company: "TMF Group",
     },
     {
-      quote: placeholder("DEPOIMENTO 2"),
-      author: placeholder("NOME DO DEPOENTE 2"),
-      role: placeholder("CARGO DO DEPOENTE 2"),
-      company: placeholder("EMPRESA DO DEPOENTE 2"),
-      photo: placeholder("FOTO DO DEPOENTE 2"),
-    },
-    {
-      quote: placeholder("DEPOIMENTO 3"),
-      author: placeholder("NOME DO DEPOENTE 3"),
-      role: placeholder("CARGO DO DEPOENTE 3"),
-      company: placeholder("EMPRESA DO DEPOENTE 3"),
-      photo: placeholder("FOTO DO DEPOENTE 3"),
+      quote:
+        "A minha primeira impressão do curso foi muito boa. Já fiz alguns outros cursos mais tradicionais sobre Venture Capital e Private Equity, mas o diferencial deste é que aqui temos pessoas que ensinam e que vivem o mercado na prática. Não é só teoria, pelo contrário, é muito mais sobre a experiência de mercado e aquilo que está, e não está, nos livros.",
+      author: "Yuri Nico",
+      company: "Bbutton Ventures",
     },
   ],
 

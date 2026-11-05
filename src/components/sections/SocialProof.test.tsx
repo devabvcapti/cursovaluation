@@ -9,9 +9,11 @@ describe("SocialProof", () => {
     expect(screen.getAllByTestId("testimonial")).toHaveLength(courseContent.testimonials.length);
   });
 
-  it("renders a video player for a testimonial with a videoUrl", () => {
+  it("renders each testimonial's quote, author and company", () => {
     render(<SocialProof />);
-    const videoCount = courseContent.testimonials.filter((t) => t.videoUrl).length;
-    expect(screen.getAllByTestId("testimonial-video")).toHaveLength(videoCount);
+    for (const testimonial of courseContent.testimonials) {
+      expect(screen.getByText(new RegExp(testimonial.author))).toBeInTheDocument();
+      expect(screen.getByText(new RegExp(testimonial.company))).toBeInTheDocument();
+    }
   });
 });
