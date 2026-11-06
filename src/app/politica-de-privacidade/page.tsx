@@ -87,8 +87,11 @@ export default function PoliticaDePrivacidadePage() {
 
           <h2 className={HEADING_CLASSES}>10. Contato</h2>
           <p className={PARAGRAPH_CLASSES}>
-            Dúvidas sobre o tratamento dos seus dados, entre em contato pelo WhatsApp disponível
-            neste site.
+            Dúvidas sobre o tratamento dos seus dados, entre em contato pelo e-mail{" "}
+            <a href="mailto:lgpd@abvcap.com.br" className="text-brand-green underline underline-offset-2 hover:text-brand-green/80">
+              lgpd@abvcap.com.br
+            </a>
+            .
           </p>
         </div>
       </Section>
