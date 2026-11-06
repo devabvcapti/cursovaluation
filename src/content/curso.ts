@@ -259,7 +259,7 @@ export const courseContent: CourseContent = {
     {
       question: "Qual a política de reembolso?",
       answer:
-        "O cancelamento pode ser solicitado em até 7 dias corridos após a confirmação do pagamento, com reembolso integral, conforme o direito de arrependimento previsto no Código de Defesa do Consumidor para compras realizadas fora do estabelecimento comercial. Após esse prazo, consulte a equipe da ABVCAP pelo WhatsApp disponível neste site.",
+        "O cancelamento pode ser solicitado em até 7 dias corridos após a confirmação do pagamento, com reembolso integral, conforme o direito de arrependimento previsto no Código de Defesa do Consumidor. Após esse prazo e até o início da turma, o reembolso é parcial (retenção de 10% a título de taxa administrativa); após o início, não há reembolso em dinheiro, mas é possível transferir a inscrição para a turma seguinte. Veja os detalhes completos na Política de Reembolso, disponível no rodapé deste site.",
     },
     {
       question: "Preciso ter conhecimento prévio de finanças para acompanhar o curso?",

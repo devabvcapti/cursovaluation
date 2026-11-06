@@ -17,7 +17,7 @@ const SOCIAL_LINKS = [
  * cheaper than introducing a shared module for it.
  */
 // "/#id", not bare "#id" — see nav-items.ts for why (these also need to work
-// from /politica-de-privacidade and /termos-de-uso).
+// from /politica-de-privacidade, /termos-de-uso and /politica-de-reembolso).
 const FOOTER_LINKS: { label: string; href: string }[] = [
   { label: "Programa", href: "/#programa" },
   { label: "Diferenciais", href: "/#metodologia" },
@@ -29,6 +29,7 @@ const FOOTER_LINKS: { label: string; href: string }[] = [
 const LEGAL_LINKS: { label: string; href: string }[] = [
   { label: "Política de Privacidade", href: "/politica-de-privacidade" },
   { label: "Termos de Uso", href: "/termos-de-uso" },
+  { label: "Política de Reembolso", href: "/politica-de-reembolso" },
 ];
 
 /**

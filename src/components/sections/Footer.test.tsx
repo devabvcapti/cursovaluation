@@ -16,7 +16,7 @@ describe("Footer", () => {
     );
   });
 
-  it("renders the privacy policy and terms of use links", () => {
+  it("renders the privacy policy, terms of use and refund policy links", () => {
     render(<Footer />);
     expect(screen.getByRole("link", { name: "Política de Privacidade" })).toHaveAttribute(
       "href",
@@ -25,6 +25,10 @@ describe("Footer", () => {
     expect(screen.getByRole("link", { name: "Termos de Uso" })).toHaveAttribute(
       "href",
       "/termos-de-uso",
+    );
+    expect(screen.getByRole("link", { name: "Política de Reembolso" })).toHaveAttribute(
+      "href",
+      "/politica-de-reembolso",
     );
   });
 });
