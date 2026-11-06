@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { cn } from "@/lib/cn";
 
@@ -9,12 +10,23 @@ type Status = "idle" | "redirecting" | "error";
 const ERROR_TEXT_CLASSES = "mt-4 font-body text-sm text-red-600";
 
 const SUBMIT_BUTTON_CLASSES = cn(
-  "mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-md px-8 py-3.5",
-  "bg-brand-green text-brand-navy border-2 border-brand-green",
-  "font-heading text-sm font-bold uppercase tracking-[0.08em]",
-  "transition-all duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-60",
+  "mt-8 inline-flex min-h-11 w-full items-center justify-center gap-3 rounded-full px-8 py-3",
+  "border border-brand-navy/15 bg-white text-brand-navy",
+  "font-body text-sm font-medium",
+  "transition-all duration-200 ease-out hover:bg-brand-navy/5 disabled:cursor-not-allowed disabled:opacity-60",
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green",
 );
+
+function MicrosoftLogo() {
+  return (
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 21 21" className="shrink-0">
+      <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+      <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+    </svg>
+  );
+}
 
 const DENIED_MESSAGE =
   "Sua conta entrou com sucesso, mas não tem permissão para gerenciar cupons do Curso Valuation.";
@@ -62,11 +74,22 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-4">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm text-center">
-        <h1 className="font-heading text-xl font-bold text-brand-navy">Acesso administrativo</h1>
-        <p className="mt-2 font-body text-sm text-brand-navy/70">
-          Entre com sua conta Microsoft da ABVCAP para gerenciar cupons.
+        <Image
+          src="/brand/abvcap-logo-color.png"
+          alt="ABVCAP"
+          width={168}
+          height={70}
+          priority
+          className="mx-auto h-10 w-auto"
+        />
+
+        <h1 className="mt-6 font-heading text-2xl font-semibold text-brand-navy">
+          Painel de Cupons
+        </h1>
+        <p className="mt-2 font-body text-sm text-brand-navy/60">
+          Acesso restrito a colaboradores ABVCAP.
         </p>
 
         <button
@@ -75,6 +98,7 @@ export default function LoginPage() {
           disabled={status === "redirecting"}
           className={SUBMIT_BUTTON_CLASSES}
         >
+          <MicrosoftLogo />
           Entrar com Microsoft
         </button>
 
