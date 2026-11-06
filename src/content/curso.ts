@@ -1,5 +1,3 @@
-import { placeholder } from "@/lib/placeholder";
-
 export interface CourseContent {
   /** ABVCAP's WhatsApp Business number (digits only, with country+area code), used by the floating widget. Marked temporary by the client — swap when a permanent number is confirmed. */
   whatsappNumber: string;
@@ -26,8 +24,6 @@ export interface CourseContent {
     photo: string;
     linkedin: string;
     quote: string;
-    /** Names of companies he's worked at — rendered as grayscale logo placeholders until real logo files exist. */
-    companies: string[];
   }[];
   testimonials: {
     quote: string;
@@ -209,7 +205,6 @@ export const courseContent: CourseContent = {
       linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
       quote:
         "Valuation não é uma fórmula: é uma tese que precisa resistir ao comitê. Por isso começamos na unha.",
-      companies: [placeholder("LOGO EMPRESA 1"), placeholder("LOGO EMPRESA 2")],
     },
   ],
 

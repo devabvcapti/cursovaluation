@@ -22,12 +22,4 @@ describe("Faculty", () => {
       professor.linkedin,
     );
   });
-
-  it("renders one placeholder per company", () => {
-    const [professor] = courseContent.faculty;
-    render(<Faculty />);
-    for (const company of professor.companies) {
-      expect(screen.getByText(company)).toBeInTheDocument();
-    }
-  });
 });

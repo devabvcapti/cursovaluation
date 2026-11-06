@@ -26,11 +26,6 @@ const QUOTE_CLASSES = "mt-6 font-quote text-2xl italic text-[#4E8A1F] md:text-3x
 
 const LINKEDIN_LINK_CLASSES = "mt-6 inline-flex";
 
-const COMPANIES_ROW_CLASSES = "mt-8 flex flex-wrap items-center gap-4 border-t border-brand-navy/10 pt-6";
-
-const COMPANY_PLACEHOLDER_CLASSES =
-  "flex h-10 items-center rounded-sm border border-dashed border-brand-navy/25 px-4 font-body text-xs font-medium uppercase tracking-[0.04em] text-brand-navy/40 grayscale";
-
 /**
  * "Quem vai construir o modelo com você": a single editorial profile
  * block (photo + bio), not a
@@ -64,13 +59,6 @@ export function Faculty() {
               <LinkedinIcon />
               Ver no LinkedIn
             </Button>
-            <div className={COMPANIES_ROW_CLASSES}>
-              {professor.companies.map((company) => (
-                <span key={company} className={COMPANY_PLACEHOLDER_CLASSES}>
-                  {company}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       </ScrollReveal>
