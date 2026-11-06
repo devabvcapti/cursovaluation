@@ -45,7 +45,11 @@ export default function PoliticaDeReembolsoPage() {
           <h2 className={HEADING_CLASSES}>4. Como solicitar</h2>
           <p className={PARAGRAPH_CLASSES}>
             As solicitações de cancelamento, reembolso ou transferência devem ser feitas pelo
-            WhatsApp da ABVCAP, disponível neste site.
+            WhatsApp da ABVCAP, disponível neste site, ou pelo e-mail{" "}
+            <a href="mailto:financeiro@abvcap.com.br" className="text-brand-green underline underline-offset-2 hover:text-brand-green/80">
+              financeiro@abvcap.com.br
+            </a>
+            .
           </p>
 
           <h2 className={HEADING_CLASSES}>5. Prazo e forma de devolução</h2>
