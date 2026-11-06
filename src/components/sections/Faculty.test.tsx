@@ -10,7 +10,9 @@ describe("Faculty", () => {
 
     expect(screen.getByRole("heading", { name: professor.name })).toBeInTheDocument();
     expect(screen.getByText(professor.role)).toBeInTheDocument();
-    expect(screen.getByText(professor.bio)).toBeVisible();
+    for (const paragraph of professor.bio.split("\n\n")) {
+      expect(screen.getByText(paragraph)).toBeVisible();
+    }
     expect(screen.getByText(professor.quote, { exact: false })).toBeInTheDocument();
   });
 

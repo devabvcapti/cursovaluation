@@ -20,7 +20,9 @@ const NAME_CLASSES = "font-heading text-2xl font-medium text-brand-navy md:text-
 
 const ROLE_CLASSES = "mt-1 font-body text-base font-semibold text-brand-navy/70";
 
-const BIO_CLASSES = "mt-5 font-body text-base leading-relaxed text-brand-navy/80";
+const BIO_WRAPPER_CLASSES = "mt-5 space-y-3";
+
+const BIO_PARAGRAPH_CLASSES = "font-body text-base leading-relaxed text-brand-navy/80";
 
 const QUOTE_CLASSES = "mt-6 font-quote text-2xl italic text-[#4E8A1F] md:text-3xl";
 
@@ -49,7 +51,13 @@ export function Faculty() {
           <div className={BIO_COLUMN_CLASSES}>
             <h3 className={NAME_CLASSES}>{professor.name}</h3>
             <p className={ROLE_CLASSES}>{professor.role}</p>
-            <p className={BIO_CLASSES}>{professor.bio}</p>
+            <div className={BIO_WRAPPER_CLASSES}>
+              {professor.bio.split("\n\n").map((paragraph) => (
+                <p key={paragraph} className={BIO_PARAGRAPH_CLASSES}>
+                  {paragraph}
+                </p>
+              ))}
+            </div>
             <blockquote className={QUOTE_CLASSES}>&ldquo;{professor.quote}&rdquo;</blockquote>
             <Button
               href={professor.linkedin}
