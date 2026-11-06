@@ -48,6 +48,8 @@ describe("courseContent pending data", () => {
     expect(isPlaceholder(courseContent.investment.earlyBirdDeadline)).toBe(false);
     expect(isPlaceholder(courseContent.investment.seatsLimit)).toBe(false);
     expect(isPlaceholder(courseContent.investment.workloadHours)).toBe(false);
+    expect(isPlaceholder(courseContent.investment.schedule)).toBe(false);
+    expect(courseContent.investment.schedule).toBe("Segundas e quintas, às 19h");
   });
 
   it("has real name, role, photo and LinkedIn for the sole confirmed professor", () => {

@@ -50,6 +50,7 @@ export interface CourseContent {
     associadoEarlyBirdPrice: string;
     seatsLimit: string;
     nextCohortDate: string;
+    schedule: string;
     workloadHours: string;
     checkoutUrl: string;
   };
@@ -236,6 +237,7 @@ export const courseContent: CourseContent = {
     associadoEarlyBirdPrice: "6120",
     seatsLimit: "Cerca de 20 vagas",
     nextCohortDate: "16 de fevereiro de 2027",
+    schedule: "Segundas e quintas, às 19h",
     workloadHours: "39h em sala + 23h em casa",
     checkoutUrl: "/inscricao",
   },
@@ -249,7 +251,7 @@ export const courseContent: CourseContent = {
     {
       question: "Qual a dedicação de tempo exigida durante o curso?",
       answer:
-        "O curso soma cerca de 62 horas: 39 horas em sala (13 aulas de 3 horas, duas vezes por semana, ao longo de cerca de 7 semanas) e mais 23 horas em 8 entregas para fazer em casa. O apoio para essas entregas vai sendo retirado ao longo do curso — é uma dedicação intensa, mas compatível com uma rotina profissional ativa.",
+        "O curso soma cerca de 62 horas: 39 horas em sala (13 aulas de 3 horas, às segundas e quintas, 19h, ao longo de cerca de 7 semanas) e mais 23 horas em 8 entregas para fazer em casa. O apoio para essas entregas vai sendo retirado ao longo do curso — é uma dedicação intensa, mas compatível com uma rotina profissional ativa.",
     },
     {
       question: "Qual a diferença entre este curso e um MBA ou uma pós-graduação tradicional em finanças?",
@@ -269,7 +271,7 @@ export const courseContent: CourseContent = {
     {
       question: "O curso é presencial ou online?",
       answer:
-        "O curso é 100% presencial: 13 aulas de 3 horas cada. Antes do início, uma Aula Zero gravada e gratuita apresenta boas práticas de modelagem no Excel e o resultado final esperado — útil também para quem ainda está decidindo se vai se inscrever.",
+        "O curso é 100% presencial: 13 aulas de 3 horas cada, às segundas e quintas, 19h. Antes do início, uma Aula Zero online, gravada e gratuita, apresenta boas práticas de modelagem no Excel e o resultado final esperado — útil também para quem ainda está decidindo se vai se inscrever.",
     },
   ],
 };

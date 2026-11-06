@@ -32,6 +32,7 @@ const CTA_WRAPPER_CLASSES = "mt-12 flex justify-center md:justify-start";
 const DETAILS = (investment: typeof courseContent.investment) => [
   { label: "Carga horária", value: investment.workloadHours },
   { label: "Próxima turma", value: investment.nextCohortDate },
+  { label: "Dias e horário", value: investment.schedule },
   { label: "Vagas", value: investment.seatsLimit },
 ];
 
