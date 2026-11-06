@@ -39,7 +39,7 @@ vi.mock("@/lib/supabase/server-client", () => ({
 
 vi.mock("@/components/admin/CupomList", () => ({
   CupomList: ({ initialCupons }: { initialCupons: Array<{ codigo: string }> }) => (
-    <ul>
+    <ul data-testid="cupom-list">
       {initialCupons.map((c) => (
         <li key={c.codigo}>{c.codigo}</li>
       ))}
@@ -90,6 +90,6 @@ describe("admin cupons page", () => {
     render(await CuponsPage());
 
     expect(screen.getByRole("alert")).toHaveTextContent(/não foi possível carregar os cupons/i);
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("cupom-list")).not.toBeInTheDocument();
   });
 });

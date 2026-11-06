@@ -6,6 +6,9 @@ import { TABLE_CUPONS } from "@/lib/supabase/table-names";
 import { CURSO_SLUG } from "@/lib/curso-slug";
 import type { CupomRow } from "@/lib/supabase/types";
 import { CupomList } from "@/components/admin/CupomList";
+import { Header } from "@/components/sections/Header";
+import { Footer } from "@/components/sections/Footer";
+import { Section } from "@/components/ui/Section";
 
 /**
  * Cache Components (next.config.ts) requires a request-time read like
@@ -49,15 +52,29 @@ export default async function CuponsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-12 lg:px-10">
-      <h1 className="font-heading text-xl font-bold text-brand-navy">Cupons</h1>
-      {error ? (
-        <p role="alert" className="mt-6 font-body text-sm text-red-600">
-          Não foi possível carregar os cupons agora. Recarregue a página em instantes.
-        </p>
-      ) : (
-        <CupomList initialCupons={(data ?? []) as CupomRow[]} />
-      )}
-    </main>
+    <>
+      <Header />
+      <Section tone="white">
+        <div className="mx-auto w-full max-w-4xl px-6 lg:px-10">
+          <h1 className="font-heading text-3xl font-light text-brand-navy md:text-4xl">
+            Cupons de Desconto
+          </h1>
+          <p className="mt-4 font-body text-base leading-relaxed text-brand-navy/80">
+            Crie e gerencie os cupons de desconto do Curso Valuation.
+          </p>
+
+          {error ? (
+            <p role="alert" className="mt-6 font-body text-sm text-red-600">
+              Não foi possível carregar os cupons agora. Recarregue a página em instantes.
+            </p>
+          ) : (
+            <div className="mt-10">
+              <CupomList initialCupons={(data ?? []) as CupomRow[]} />
+            </div>
+          )}
+        </div>
+      </Section>
+      <Footer />
+    </>
   );
 }
