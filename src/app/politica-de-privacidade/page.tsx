@@ -58,9 +58,8 @@ export default function PoliticaDePrivacidadePage() {
 
           <h2 className={HEADING_CLASSES}>6. Seus direitos (LGPD)</h2>
           <p className={PARAGRAPH_CLASSES}>
-            Você pode solicitar confirmação, acesso, correção, eliminação ou portabilidade dos seus
-            dados pelo WhatsApp disponível neste site. Para revogação de consentimento e
-            eliminação de dados, você também pode enviar um e-mail para{" "}
+            Você pode solicitar confirmação, acesso, correção, eliminação, portabilidade ou
+            revogação de consentimento dos seus dados enviando um e-mail para{" "}
             <a href="mailto:lgpd@abvcap.com.br" className="text-brand-green underline underline-offset-2 hover:text-brand-green/80">
               lgpd@abvcap.com.br
             </a>
