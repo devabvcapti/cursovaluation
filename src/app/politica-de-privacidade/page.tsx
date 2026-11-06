@@ -45,11 +45,9 @@ export default function PoliticaDePrivacidadePage() {
 
           <h2 className={HEADING_CLASSES}>4. Com quem compartilhamos</h2>
           <p className={PARAGRAPH_CLASSES}>
-            Mercado Pago, para processar o pagamento; Resend, para envio dos e-mails transacionais
-            (confirmação, ementa, notificações); Supabase, para armazenamento seguro dos dados em
-            banco de dados; e Vercel, para hospedagem do site e, somente com seu consentimento,
-            analytics. Não vendemos nem compartilhamos seus dados para fins de marketing de
-            terceiros.
+            Compartilhamos seus dados com o Mercado Pago, para processar o pagamento, e com a
+            equipe de recepção do evento, para controle de presença. Não vendemos nem
+            compartilhamos seus dados para fins de marketing de terceiros.
           </p>
 
           <h2 className={HEADING_CLASSES}>5. Armazenamento e segurança</h2>
