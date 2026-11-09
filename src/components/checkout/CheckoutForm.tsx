@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
 import { resolveBasePrice } from "@/lib/base-price";
+import { onlyDigits } from "@/lib/digits";
 import { cn } from "@/lib/cn";
 
 export interface CheckoutFormProps {
@@ -337,7 +338,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
             inputMode="numeric"
             autoComplete="off"
             value={cnpj}
-            onChange={(event) => setCnpj(event.target.value)}
+            onChange={(event) => setCnpj(onlyDigits(event.target.value))}
             className={cn(FIELD_CLASSES, FIELD_BORDER_CLASSES)}
           />
           {trimmedCnpj !== "" ? (

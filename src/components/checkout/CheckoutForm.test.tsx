@@ -137,6 +137,18 @@ describe("CheckoutForm", () => {
     expect(screen.getByLabelText(/cnpj/i)).toHaveValue("");
   });
 
+  it("strips non-digit characters typed into the CNPJ field", async () => {
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.click(screen.getByLabelText(/sou associado abvcap/i));
+    const cnpjInput = screen.getByLabelText(/cnpj/i);
+
+    await user.type(cnpjInput, "11.222.333/0001-81");
+
+    expect(cnpjInput).toHaveValue("11222333000181");
+  });
+
   it("shows inline CNPJ verification feedback: verifying, then verified or not found", async () => {
     vi.stubGlobal(
       "fetch",
