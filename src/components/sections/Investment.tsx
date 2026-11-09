@@ -34,6 +34,7 @@ const DETAILS = (investment: typeof courseContent.investment) => [
   { label: "Próxima turma", value: investment.nextCohortDate },
   { label: "Dias e horário", value: investment.schedule },
   { label: "Vagas", value: investment.seatsLimit },
+  { label: "Local", value: investment.location },
 ];
 
 type PricingCard = {

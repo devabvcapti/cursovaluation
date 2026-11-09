@@ -24,6 +24,12 @@ describe("Investment", () => {
     expect(screen.getAllByText(new RegExp(deadline))).toHaveLength(2);
   });
 
+  it("shows the course location", () => {
+    render(<Investment />);
+    expect(screen.getByText("Local")).toBeInTheDocument();
+    expect(screen.getByText(courseContent.investment.location)).toBeInTheDocument();
+  });
+
   it("keeps the enrollment CTA pointed at the checkout URL", () => {
     render(<Investment />);
     expect(screen.getByRole("link", { name: /quero me inscrever/i })).toHaveAttribute(

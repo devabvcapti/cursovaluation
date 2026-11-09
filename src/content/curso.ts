@@ -48,6 +48,7 @@ export interface CourseContent {
     nextCohortDate: string;
     schedule: string;
     workloadHours: string;
+    location: string;
     checkoutUrl: string;
   };
   faq: { question: string; answer: string }[];
@@ -234,6 +235,7 @@ export const courseContent: CourseContent = {
     nextCohortDate: "16 de fevereiro de 2027",
     schedule: "Segundas e quintas, às 19h",
     workloadHours: "39h em sala + 23h em casa",
+    location: "São Paulo",
     checkoutUrl: "/inscricao",
   },
 
