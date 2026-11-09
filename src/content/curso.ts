@@ -154,13 +154,13 @@ export const courseContent: CourseContent = {
       ],
     },
     {
-      title: "Módulo 2 — Depois da unha",
-      summary: "Aula 10 · 3 horas · com professor convidado do mercado.",
+      title: "Módulo 2 — Uso de IA para valuation",
+      summary: "Aula 10 · 3 horas em sala.",
       lessons: ["Aula 10 — IA aplicada ao trabalho de análise"],
     },
     {
-      title: "Módulo 3 — Do valor ao deal",
-      summary: "Aulas 11 a 13 · 9 horas.",
+      title: "Módulo 3 — Elaboração da transação e recomendação de investimento",
+      summary: "Aulas 11 a 13 · 9 horas em sala.",
       lessons: [
         "Aula 11 — Múltiplos e comparáveis",
         "Aula 12 — O deal: deal table e de onde vem o retorno",
@@ -204,7 +204,7 @@ export const courseContent: CourseContent = {
       photo: "/brand/pedro-di-palma.png",
       linkedin: "https://www.linkedin.com/in/pedro-henrique-di-palma-cga-cge-bb912930/",
       quote:
-        "Valuation não é uma fórmula: é uma tese que precisa resistir ao comitê. Por isso começamos na unha.",
+        "Valuation não é uma fórmula: é uma tese que precisa resistir ao comitê. Por isso começamos pela construção do modelo, do zero.",
     },
   ],
 
