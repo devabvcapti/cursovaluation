@@ -3,6 +3,7 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
+import { resolveBasePrice } from "@/lib/base-price";
 import { cn } from "@/lib/cn";
 
 export interface CheckoutFormProps {
@@ -18,6 +19,7 @@ type SubmitStatus = "idle" | "submitting" | "error";
 interface PricePreview {
   isAssociado: boolean;
   cupomAplicado: string | null;
+  percentualDesconto: number | null;
   valorBase: number;
   valorCobrado: number;
 }
@@ -56,6 +58,13 @@ const SUBMIT_BUTTON_CLASSES = cn(
  * non-member price is what actually gets submitted. The cnpj/cupom fields
  * also drive a debounced price preview against `/api/checkout/preco`, which
  * doubles as inline CNPJ-verification feedback while the toggle is on.
+ *
+ * The price itself is always visible, even before anything is typed: it
+ * starts at the non-associado value and switches to the associado value the
+ * instant "Sou associado ABVCAP" is checked (computed client-side via
+ * `resolveBasePrice`, so it doesn't wait on a CNPJ lookup). Once the server
+ * preview resolves (cnpj and/or cupom), its value — and, if a cupom
+ * applied, the discount percentage — takes over as the authoritative figure.
  */
 export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) {
   const uid = useId();
@@ -152,6 +161,32 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   }, [cnpj, cupom, hasPreviewQuery, queryKey, trimmedCnpj, trimmedCupom]);
 
   const showPreview = preview !== null && previewQueryKey === queryKey;
+  const confirmedPreview = showPreview ? preview : null;
+
+  // Instant, client-computed reference price for the current "Sou associado
+  // ABVCAP" state — shown the moment the visitor checks the box, without
+  // waiting on a CNPJ to be typed/validated. Once a server-confirmed preview
+  // is available (cnpj and/or cupom resolved), it takes over as the
+  // authoritative displayed value instead.
+  //
+  // Computed in an effect (not directly during render) because it reads the
+  // current date (via `resolveBasePrice`'s early-bird check), and Next's
+  // Cache Components prerendering rejects a Client Component reading
+  // `new Date()` during the static render pass — this keeps that read
+  // client/runtime-only, same as the [defer] fix it suggests.
+  const [instantValor, setInstantValor] = useState<number | null>(null);
+  useEffect(() => {
+    setInstantValor(resolveBasePrice(isMember));
+  }, [isMember]);
+
+  const displayedValor = confirmedPreview ? confirmedPreview.valorCobrado : instantValor;
+  const displayedPercentualDesconto = confirmedPreview?.cupomAplicado
+    ? confirmedPreview.percentualDesconto
+    : null;
+  // A cupom was typed and the server resolved a preview for it, but that
+  // preview came back without a discount applied — distinct from "still
+  // typing"/"not resolved yet" (confirmedPreview null) or "no cupom typed".
+  const cupomInvalido = confirmedPreview !== null && trimmedCupom !== "" && !confirmedPreview.cupomAplicado;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -338,13 +373,21 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
         />
       </div>
 
-      {showPreview && preview ? (
-        <div className="mt-5">
+      <div className="mt-5">
+        {displayedValor !== null ? (
           <p className="font-body text-base font-semibold text-brand-navy">
-            Valor: {formatInvestment(String(preview.valorCobrado))}
+            Valor: {formatInvestment(String(displayedValor))}
+            {displayedPercentualDesconto !== null
+              ? ` (${displayedPercentualDesconto}% de desconto aplicado)`
+              : ""}
           </p>
-        </div>
-      ) : null}
+        ) : null}
+        {cupomInvalido ? (
+          <p className="mt-2 font-body text-sm text-amber-600">
+            Cupom inválido ou expirado — seguindo sem desconto.
+          </p>
+        ) : null}
+      </div>
 
       <button type="submit" disabled={status === "submitting"} className={SUBMIT_BUTTON_CLASSES}>
         Continuar para pagamento

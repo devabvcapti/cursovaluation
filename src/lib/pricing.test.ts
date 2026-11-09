@@ -19,7 +19,13 @@ describe("resolvePrice", () => {
     lookupAssociadoMock.mockResolvedValue(false);
     const { resolvePrice } = await import("./pricing");
     const result = await resolvePrice({ cnpj: null, cupom: null });
-    expect(result).toEqual({ isAssociado: false, cupomAplicado: null, valorBase: 7650, valorCobrado: 7650 });
+    expect(result).toEqual({
+      isAssociado: false,
+      cupomAplicado: null,
+      percentualDesconto: null,
+      valorBase: 7650,
+      valorCobrado: 7650,
+    });
   });
 
   it("still charges the early-bird price on the evening of the advertised last day (Dec 4, 21:00 BRT = UTC midnight)", async () => {
@@ -73,6 +79,7 @@ describe("resolvePrice", () => {
     expect(result).toEqual({
       isAssociado: false,
       cupomAplicado: "PROMO10",
+      percentualDesconto: 10,
       valorBase: 7650,
       valorCobrado: 6885,
     });

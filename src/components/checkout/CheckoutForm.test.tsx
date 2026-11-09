@@ -43,6 +43,71 @@ describe("CheckoutForm", () => {
     );
   });
 
+  it("shows the non-associado price immediately on mount, before any interaction", async () => {
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+    expect(await screen.findByText(/R\$\s*7\.650,00/)).toBeInTheDocument();
+  });
+
+  it("switches to the associado reference price the instant the member toggle is checked, before a CNPJ is typed", async () => {
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.click(screen.getByLabelText(/sou associado abvcap/i));
+
+    expect(await screen.findByText(/R\$\s*6\.120,00/)).toBeInTheDocument();
+  });
+
+  it("shows the discount percentage when a valid cupom resolves", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          return jsonResponse({
+            isAssociado: false,
+            cupomAplicado: "PROMO10",
+            percentualDesconto: 10,
+            valorBase: 7650,
+            valorCobrado: 6885,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 6885 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/cupom.*opcional/i), "PROMO10");
+
+    expect(await screen.findByText(/R\$\s*6\.885,00/)).toBeInTheDocument();
+    expect(screen.getByText(/10%\s*de desconto aplicado/)).toBeInTheDocument();
+  });
+
+  it("shows an inline message when a typed cupom does not resolve to a discount", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          return jsonResponse({
+            isAssociado: false,
+            cupomAplicado: null,
+            percentualDesconto: null,
+            valorBase: 7650,
+            valorCobrado: 7650,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 7650 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/cupom.*opcional/i), "INEXISTENTE");
+
+    expect(await screen.findByText(/cupom inválido ou expirado/i)).toBeInTheDocument();
+  });
+
   it("renders nome, e-mail, CPF, telefone, the member toggle and cupom (opcional) fields", () => {
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
     expect(screen.getByLabelText(/nome/i)).toBeInTheDocument();
