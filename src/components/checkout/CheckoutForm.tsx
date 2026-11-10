@@ -367,9 +367,6 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
               {simulaAssociado ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
               Sou associado ABVCAP
             </button>
-            <p className="mt-2 font-body text-xs text-white/40">
-              O valor de associado é confirmado automaticamente pelo e-mail informado abaixo.
-            </p>
           </div>
 
           <div>
