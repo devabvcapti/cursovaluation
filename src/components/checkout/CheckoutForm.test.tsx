@@ -237,6 +237,35 @@ describe("CheckoutForm", () => {
     expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
   });
 
+  it("directs the visitor to the Diretório de Membros when they claim to be a member but the e-mail has no match", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          return jsonResponse({
+            isAssociado: false,
+            empresaAssociada: null,
+            cupomAplicado: null,
+            percentualDesconto: null,
+            valorBase: 1000,
+            valorCobrado: 1000,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 1000 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: /sou associado abvcap/i }));
+    await user.type(screen.getByLabelText(/e-mail/i), "naoassociado@example.com");
+
+    const diretorioLink = await screen.findByRole("link", { name: /diretoriodemembros@abvcap\.com\.br/i });
+    expect(diretorioLink).toHaveAttribute("href", "mailto:diretoriodemembros@abvcap.com.br");
+    expect(screen.getByText(/não consta no Diretório de Membros ABVCAP/i)).toBeInTheDocument();
+  });
+
   it("shows inline errors and never calls /api/checkout/pedido when the form is invalid", async () => {
     const user = userEvent.setup();
     const onPedidoCreated = vi.fn();

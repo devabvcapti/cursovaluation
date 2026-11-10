@@ -229,6 +229,12 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   // preview came back without a discount applied — distinct from "still
   // typing"/"not resolved yet" (confirmedPreview null) or "no cupom typed".
   const cupomInvalido = confirmedPreview !== null && trimmedCupom !== "" && !confirmedPreview.cupomAplicado;
+  // The visitor claimed to be a member (the display-only toggle) and typed a
+  // complete e-mail, but the server-confirmed lookup came back without a
+  // match — tells them to sort it out with the Diretório de Membros instead
+  // of silently charging the non-associado price.
+  const emailNaoEncontradoNoDiretorio =
+    simulaAssociado && isPlausibleEmail && showPreview && !preview?.empresaAssociada;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -271,7 +277,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   return (
     <div className={cn("grid gap-6 lg:grid-cols-5 lg:items-start lg:gap-8", className)}>
       <form noValidate onSubmit={handleSubmit} className={cn(CARD_CLASSES, "lg:col-span-3")}>
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col items-center text-center">
           <button
             type="button"
             aria-pressed={simulaAssociado}
@@ -344,6 +350,15 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
           {showPreview && preview?.empresaAssociada ? (
             <p className="mt-2 font-body text-sm text-brand-green">
               ✓ Membro ABVCAP — {preview.empresaAssociada}
+            </p>
+          ) : null}
+          {emailNaoEncontradoNoDiretorio ? (
+            <p className="mt-2 font-body text-sm text-amber-300">
+              Este e-mail não consta no Diretório de Membros ABVCAP. Entre em contato com{" "}
+              <a href="mailto:diretoriodemembros@abvcap.com.br" className="underline text-amber-200">
+                diretoriodemembros@abvcap.com.br
+              </a>{" "}
+              para verificar seu cadastro.
             </p>
           ) : null}
         </div>
