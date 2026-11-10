@@ -1,9 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import Link from "next/link";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
-import { CheckCircle2, Clock, AlertTriangle, XCircle, CreditCard, type LucideIcon } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  XCircle,
+  CreditCard,
+  GraduationCap,
+  Mail,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
+import { formatInvestment } from "@/lib/format-investment";
 
 const CARD_CLASSES = "rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8";
 
@@ -15,6 +26,14 @@ const STATUS_TONE_CLASSES: Record<StatusTone, string> = {
   warning: "text-amber-300",
   error: "text-red-300",
 };
+
+const PRIMARY_LINK_CLASSES = cn(
+  "inline-flex min-h-11 items-center justify-center rounded-md px-8 py-3.5",
+  "bg-brand-green text-brand-navy border-2 border-brand-green",
+  "font-heading text-sm font-bold uppercase tracking-[0.08em]",
+  "transition-all duration-200 ease-out",
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green",
+);
 
 /** A dark card matching `CheckoutForm`'s styling, for a single status message with its icon. */
 function StatusCard({
@@ -94,7 +113,9 @@ initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY!, { locale: "pt-B
  * Pix/bank transfer) and forwards its `onSubmit` formData to
  * `POST /api/checkout/pagamento` (Task 10).
  *
- * - `"approved"` shows a confirmation message and unmounts the Brick.
+ * - `"approved"` switches to a two-column confirmation layout (success
+ *   panel + a "Resumo da inscrição" card echoing `CheckoutForm`'s) and
+ *   unmounts the Brick.
  * - `"pending"` or `"in_process"` with a `pix` payload renders the Pix QR
  *   code, unmounts the Brick (no second charge while a Pix is outstanding),
  *   and polls `GET /api/checkout/pedido/:id` (Task 12) every few seconds
@@ -243,6 +264,54 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
     setErrorMessage("Ocorreu um erro ao carregar o formulário de pagamento. Tente novamente.");
   }
 
+  if (status === "approved") {
+    return (
+      <div className="grid gap-6 lg:grid-cols-5 lg:items-stretch">
+        <div
+          className={cn(
+            CARD_CLASSES,
+            "flex flex-col items-center justify-center gap-4 py-12 text-center lg:col-span-3",
+          )}
+        >
+          <span className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-brand-green">
+            <CheckCircle2 className="h-8 w-8 text-brand-green" aria-hidden="true" />
+          </span>
+          <h2 role="status" className="max-w-sm font-heading text-xl font-bold text-white">
+            Pagamento aprovado!
+          </h2>
+          <p className="max-w-sm font-body text-sm text-white/60">
+            Você receberá um e-mail de confirmação em instantes, com os próximos passos para acessar
+            o curso.
+          </p>
+          <Link href="/" className={cn(PRIMARY_LINK_CLASSES, "mt-2")}>
+            Voltar para o site
+          </Link>
+        </div>
+
+        <div className={cn(CARD_CLASSES, "lg:col-span-2")}>
+          <h2 className="flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-[0.08em] text-white">
+            <GraduationCap className="h-4 w-4 text-brand-green" aria-hidden="true" />
+            Resumo da inscrição
+          </h2>
+
+          <p className="mt-4 font-body text-base font-semibold text-white">
+            Modelagem Financeira e Valuation
+          </p>
+
+          <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 font-body text-lg font-bold text-white">
+            <span>Total pago</span>
+            <span>{formatInvestment(String(valorCobrado))}</span>
+          </div>
+
+          <div className="mt-6 flex items-start gap-3 border-t border-white/10 pt-5 font-body text-sm text-white/60">
+            <Mail className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-green" aria-hidden="true" />
+            <p>Confirmação enviada para {email}.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
       {showBrick ? (
@@ -261,12 +330,6 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
             onError={handleError}
           />
         </div>
-      ) : null}
-
-      {status === "approved" ? (
-        <StatusCard icon={CheckCircle2} tone="success" role="status">
-          Pagamento aprovado! Você receberá um e-mail de confirmação em instantes.
-        </StatusCard>
       ) : null}
 
       {(status === "pix_waiting" || status === "pix_timeout") && pix ? (
