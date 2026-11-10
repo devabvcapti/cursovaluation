@@ -65,7 +65,7 @@ export const courseContent: CourseContent = {
   },
   hero: {
     eyebrow: "Aprenda com quem faz",
-    headlineLines: ["Modelagem Financeira e Valuation:", "o método por trás", "das decisões que movem capital."],
+    headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
       "Formação presencial de avaliação de empresas para estudantes e profissionais que atuam, ou querem atuar, em Private Equity, Venture Capital, M&A, investment banking e finanças corporativas.",
     checkoutUrl: "/inscricao",
