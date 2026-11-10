@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { User, Mail, CreditCard, Phone, Tag, GraduationCap, ShieldCheck, type LucideIcon } from "lucide-react";
 import { EMAIL_PATTERN, validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
@@ -77,6 +78,10 @@ function FieldIcon({ icon: Icon }: { icon: LucideIcon }) {
  * `resolveBasePrice`, so it doesn't wait on a network round-trip) and only
  * the server-confirmed preview (email match and/or cupom) can raise it,
  * once resolved — alongside the discount percentage when a cupom applied.
+ *
+ * Submission is also gated on the "Li e concordo com os Termos de Uso e a
+ * Política de Privacidade" checkbox: unchecked, submit shows an inline error
+ * instead of ever reaching `/api/checkout/pedido`.
  */
 export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) {
   const uid = useId();
@@ -89,12 +94,19 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const emailErrorId = `${uid}-checkout-email-error`;
   const cpfErrorId = `${uid}-checkout-cpf-error`;
   const telefoneErrorId = `${uid}-checkout-telefone-error`;
+  const termosId = `${uid}-checkout-termos`;
+  const termosErrorId = `${uid}-checkout-termos-error`;
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cupom, setCupom] = useState("");
+  const [aceitaTermos, setAceitaTermos] = useState(false);
+  // Shown only after a submit was attempted without the box checked — not on
+  // every render while it's unchecked, so the error doesn't appear before
+  // the user has tried to continue.
+  const [termosError, setTermosError] = useState(false);
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -109,8 +121,9 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   // True only for a genuine network/server failure after client validation
   // passed (errors were cleared right before the fetch attempt). A client
   // validation failure sets `errors` alongside `status === "error"`, so that
-  // case is excluded here and keeps showing its own inline field errors.
-  const isServerError = status === "error" && Object.keys(errors).length === 0;
+  // case is excluded here and keeps showing its own inline field errors —
+  // same for an unchecked terms box, which shows its own `termosError`.
+  const isServerError = status === "error" && Object.keys(errors).length === 0 && !termosError;
 
   const trimmedCupom = cupom.trim();
   const trimmedEmail = email.trim();
@@ -197,12 +210,14 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
 
     const checkoutInput: CheckoutInput = { nome, email, cpf, telefone, cupom };
     const result = validateCheckout(checkoutInput);
-    if (!result.valid) {
-      setErrors(result.errors);
+    if (!result.valid || !aceitaTermos) {
+      setErrors(result.valid ? {} : result.errors);
+      setTermosError(!aceitaTermos);
       setStatus("error");
       return;
     }
     setErrors({});
+    setTermosError(false);
     setStatus("submitting");
 
     try {
@@ -360,7 +375,46 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
           ) : null}
         </div>
 
-        <button type="submit" disabled={status === "submitting"} className={cn(SUBMIT_BUTTON_CLASSES, "mt-7")}>
+        <div className="mt-6 flex items-start gap-3">
+          <input
+            id={termosId}
+            name="aceitaTermos"
+            type="checkbox"
+            checked={aceitaTermos}
+            onChange={(event) => {
+              setAceitaTermos(event.target.checked);
+              if (event.target.checked) {
+                setTermosError(false);
+              }
+            }}
+            className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-white/30 bg-white/5 accent-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
+            aria-invalid={termosError}
+            aria-describedby={termosError ? termosErrorId : undefined}
+          />
+          <label htmlFor={termosId} className="font-body text-sm text-white/70">
+            Li e concordo com os{" "}
+            <Link href="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="underline text-white">
+              Termos de Uso
+            </Link>{" "}
+            e a{" "}
+            <Link
+              href="/politica-de-privacidade"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-white"
+            >
+              Política de Privacidade
+            </Link>
+            .
+          </label>
+        </div>
+        {termosError ? (
+          <p id={termosErrorId} className={ERROR_TEXT_CLASSES}>
+            Você precisa concordar com os Termos de Uso e a Política de Privacidade para continuar.
+          </p>
+        ) : null}
+
+        <button type="submit" disabled={status === "submitting"} className={cn(SUBMIT_BUTTON_CLASSES, "mt-5")}>
           Continuar para pagamento
         </button>
 

@@ -15,6 +15,7 @@ async function fillValidFields(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/e-mail/i), VALID.email);
   await user.type(screen.getByLabelText(/cpf/i), VALID.cpf);
   await user.type(screen.getByLabelText(/telefone/i), VALID.telefone);
+  await user.click(screen.getByRole("checkbox", { name: /termos de uso/i }));
 }
 
 function jsonResponse(body: unknown, ok = true, status = ok ? 200 : 400) {
@@ -228,6 +229,33 @@ describe("CheckoutForm", () => {
       ).length
     ).toBe(0);
     expect(onPedidoCreated).not.toHaveBeenCalled();
+  });
+
+  it("blocks submission with an inline error when the terms checkbox is left unchecked", async () => {
+    const user = userEvent.setup();
+    const onPedidoCreated = vi.fn();
+    render(<CheckoutForm onPedidoCreated={onPedidoCreated} />);
+
+    await user.type(screen.getByLabelText(/nome/i), VALID.nome);
+    await user.type(screen.getByLabelText(/e-mail/i), VALID.email);
+    await user.type(screen.getByLabelText(/cpf/i), VALID.cpf);
+    await user.type(screen.getByLabelText(/telefone/i), VALID.telefone);
+    await user.click(screen.getByRole("button", { name: /inscri|finaliz|continuar/i }));
+
+    expect(
+      await screen.findByText(/concordar com os termos de uso e a política de privacidade/i),
+    ).toBeInTheDocument();
+    expect(
+      (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+        (call) => typeof call[0] === "string" && call[0].includes("/api/checkout/pedido")
+      ).length
+    ).toBe(0);
+    expect(onPedidoCreated).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("checkbox", { name: /termos de uso/i }));
+    await user.click(screen.getByRole("button", { name: /inscri|finaliz|continuar/i }));
+
+    await waitFor(() => expect(onPedidoCreated).toHaveBeenCalled());
   });
 
   it("posts to /api/checkout/pedido and calls onPedidoCreated with pedidoId, valorCobrado and email on success", async () => {
