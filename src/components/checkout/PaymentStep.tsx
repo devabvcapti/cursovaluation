@@ -1,7 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
 import { initMercadoPago, Payment } from "@mercadopago/sdk-react";
+import { CheckCircle2, Clock, AlertTriangle, XCircle, CreditCard, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/cn";
+
+const CARD_CLASSES = "rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8";
+
+type StatusTone = "success" | "info" | "warning" | "error";
+
+const STATUS_TONE_CLASSES: Record<StatusTone, string> = {
+  success: "text-brand-green",
+  info: "text-sky-300",
+  warning: "text-amber-300",
+  error: "text-red-300",
+};
+
+/** A dark card matching `CheckoutForm`'s styling, for a single status message with its icon. */
+function StatusCard({
+  icon: Icon,
+  tone,
+  role,
+  children,
+}: {
+  icon: LucideIcon;
+  tone: StatusTone;
+  role: "status" | "alert";
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn(CARD_CLASSES, "flex items-start gap-3")}>
+      <Icon className={cn("mt-0.5 h-5 w-5 flex-shrink-0", STATUS_TONE_CLASSES[tone])} aria-hidden="true" />
+      <p role={role} className="font-body text-sm text-white/80">
+        {children}
+      </p>
+    </div>
+  );
+}
 
 export interface PaymentStepProps {
   pedidoId: string;
@@ -209,51 +244,76 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
   }
 
   return (
-    <div>
+    <div className="mx-auto flex max-w-xl flex-col gap-6">
       {showBrick ? (
-        <Payment
-          initialization={{ amount: valorCobrado, payer: { email } }}
-          customization={{ paymentMethods: { creditCard: "all", bankTransfer: "all" } }}
-          onSubmit={handleSubmit}
-          onError={handleError}
-        />
+        <div className={CARD_CLASSES}>
+          <h2 className="mb-6 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-[0.08em] text-white">
+            <CreditCard className="h-4 w-4 text-brand-green" aria-hidden="true" />
+            Pagamento
+          </h2>
+          <Payment
+            initialization={{ amount: valorCobrado, payer: { email } }}
+            customization={{
+              paymentMethods: { creditCard: "all", bankTransfer: "all" },
+              visual: { style: { theme: "dark" } },
+            }}
+            onSubmit={handleSubmit}
+            onError={handleError}
+          />
+        </div>
       ) : null}
 
       {status === "approved" ? (
-        <p role="status">Pagamento aprovado! Você receberá um e-mail de confirmação em instantes.</p>
+        <StatusCard icon={CheckCircle2} tone="success" role="status">
+          Pagamento aprovado! Você receberá um e-mail de confirmação em instantes.
+        </StatusCard>
       ) : null}
 
       {(status === "pix_waiting" || status === "pix_timeout") && pix ? (
-        <div>
+        <div className={CARD_CLASSES}>
           {status === "pix_waiting" ? (
-            <p role="status">
+            <p role="status" className="flex items-start gap-3 font-body text-sm text-white/80">
+              <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-300" aria-hidden="true" />
               Pagamento via Pix em processamento. Escaneie o QR code abaixo para concluir.
             </p>
           ) : (
-            <p role="alert">
+            <p role="alert" className="flex items-start gap-3 font-body text-sm text-amber-300">
+              <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0" aria-hidden="true" />
               Ainda não recebemos a confirmação do pagamento. Tente novamente mais tarde — se você
               já pagou o Pix, a confirmação chegará por e-mail.
             </p>
           )}
-          <img src={`data:image/png;base64,${pix.qrCodeBase64}`} alt="QR code para pagamento via Pix" />
+          <div className="mt-5 flex justify-center">
+            <div className="rounded-xl bg-white p-4">
+              <img
+                src={`data:image/png;base64,${pix.qrCodeBase64}`}
+                alt="QR code para pagamento via Pix"
+                className="h-48 w-48"
+              />
+            </div>
+          </div>
         </div>
       ) : null}
 
       {status === "under_review" ? (
-        <p role="status">
+        <StatusCard icon={Clock} tone="info" role="status">
           Seu pagamento está em análise pelo Mercado Pago. Você receberá a confirmação por e-mail
           assim que ele for aprovado.
-        </p>
+        </StatusCard>
       ) : null}
 
       {status === "rejected" ? (
-        <p role="alert">
+        <StatusCard icon={XCircle} tone="error" role="alert">
           Pagamento recusado. Verifique os dados e tente novamente com outro cartão ou forma de
           pagamento.
-        </p>
+        </StatusCard>
       ) : null}
 
-      {status === "error" && errorMessage ? <p role="alert">{errorMessage}</p> : null}
+      {status === "error" && errorMessage ? (
+        <StatusCard icon={AlertTriangle} tone="error" role="alert">
+          {errorMessage}
+        </StatusCard>
+      ) : null}
     </div>
   );
 }
