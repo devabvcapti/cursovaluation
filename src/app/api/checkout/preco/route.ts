@@ -3,9 +3,9 @@ import { resolvePrice } from "@/lib/pricing";
 
 /**
  * Non-blocking price preview for the checkout form: recomputes the price
- * server-side from an optional cnpj/cupom so the UI can show the resolved
- * value before the pedido is actually created. A malformed/empty body is
- * treated as having no cnpj/cupom rather than failing the request.
+ * server-side from an optional cnpj/email/cupom so the UI can show the
+ * resolved value before the pedido is actually created. A malformed/empty
+ * body is treated as having none of them rather than failing the request.
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -15,11 +15,16 @@ export async function POST(request: Request) {
     body = {};
   }
 
-  const { cnpj: rawCnpj, cupom: rawCupom } = (body ?? {}) as { cnpj?: unknown; cupom?: unknown };
+  const { cnpj: rawCnpj, email: rawEmail, cupom: rawCupom } = (body ?? {}) as {
+    cnpj?: unknown;
+    email?: unknown;
+    cupom?: unknown;
+  };
   const cnpj = typeof rawCnpj === "string" ? rawCnpj : undefined;
+  const email = typeof rawEmail === "string" ? rawEmail : undefined;
   const cupom = typeof rawCupom === "string" ? rawCupom : undefined;
 
-  const result = await resolvePrice({ cnpj, cupom });
+  const result = await resolvePrice({ cnpj, email, cupom });
 
   return NextResponse.json(result, { status: 200 });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState, type FormEvent } from "react";
-import { validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
+import { EMAIL_PATTERN, validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
 import { resolveBasePrice } from "@/lib/base-price";
 import { onlyDigits } from "@/lib/digits";
@@ -19,6 +19,7 @@ type SubmitStatus = "idle" | "submitting" | "error";
 
 interface PricePreview {
   isAssociado: boolean;
+  empresaAssociada?: string | null;
   cupomAplicado: string | null;
   percentualDesconto: number | null;
   valorBase: number;
@@ -58,7 +59,11 @@ const SUBMIT_BUTTON_CLASSES = cn(
  * "Sou associado ABVCAP"; unchecking it clears any typed CNPJ so the
  * non-member price is what actually gets submitted. The cnpj/cupom fields
  * also drive a debounced price preview against `/api/checkout/preco`, which
- * doubles as inline CNPJ-verification feedback while the toggle is on.
+ * doubles as inline CNPJ-verification feedback while the toggle is on. The
+ * email field drives that same preview independently (DEV-only experiment):
+ * once it looks like a complete address, it's checked against the GlueUp
+ * member-email export, and a match shows "Membro ABVCAP — empresa" and the
+ * associado price without needing the toggle or a CNPJ at all.
  *
  * The price itself is always visible, even before anything is typed: it
  * starts at the non-associado value and switches to the associado value the
@@ -116,19 +121,26 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
 
   const trimmedCnpj = cnpj.trim();
   const trimmedCupom = cupom.trim();
-  const hasPreviewQuery = trimmedCnpj !== "" || trimmedCupom !== "";
-  // Identifies "what cnpj/cupom pair is the user currently asking about",
-  // recomputed every render (no debounce). Comparing `previewQueryKey` to
-  // this current value is what hides a stale preview the instant the user
-  // edits cnpj/cupom again, even though the *fetch* for the new pair is
-  // still debounced and hasn't resolved yet (reproduction: resolve a
-  // preview for cnpj A, clear the field, start typing cnpj B — on B's very
-  // first keystroke this key changes, so A's resolved price stops matching
-  // and is hidden immediately, instead of flashing until B's fetch lands).
-  const queryKey = `${trimmedCnpj}::${trimmedCupom}`;
+  const trimmedEmail = email.trim();
+  // Gates the email-based associado check on "looks like a complete email"
+  // (not just non-blank) so this doesn't fire a preview request on every
+  // keystroke of a still half-typed address.
+  const isPlausibleEmail = EMAIL_PATTERN.test(trimmedEmail);
+  const hasPreviewQuery = trimmedCnpj !== "" || trimmedCupom !== "" || isPlausibleEmail;
+  // Identifies "what cnpj/cupom/email combination is the user currently
+  // asking about", recomputed every render (no debounce). Comparing
+  // `previewQueryKey` to this current value is what hides a stale preview
+  // the instant the user edits cnpj/cupom/email again, even though the
+  // *fetch* for the new combination is still debounced and hasn't resolved
+  // yet (reproduction: resolve a preview for cnpj A, clear the field, start
+  // typing cnpj B — on B's very first keystroke this key changes, so A's
+  // resolved price stops matching and is hidden immediately, instead of
+  // flashing until B's fetch lands).
+  const queryKey = `${trimmedCnpj}::${trimmedCupom}::${isPlausibleEmail ? trimmedEmail.toLowerCase() : ""}`;
 
-  // Debounced price preview: recomputed from cnpj/cupom only, so it never
-  // fires on mount while both are still blank (nothing has changed yet).
+  // Debounced price preview: recomputed from cnpj/cupom/email, so it never
+  // fires on mount while all three are still blank/incomplete (nothing has
+  // changed yet).
   useEffect(() => {
     if (!hasPreviewQuery) {
       return;
@@ -142,6 +154,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cnpj: trimmedCnpj === "" ? undefined : cnpj,
+          email: isPlausibleEmail ? email : undefined,
           cupom: trimmedCupom === "" ? undefined : cupom,
         }),
       })
@@ -159,7 +172,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
     }, PRICE_PREVIEW_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [cnpj, cupom, hasPreviewQuery, queryKey, trimmedCnpj, trimmedCupom]);
+  }, [cnpj, cupom, email, hasPreviewQuery, isPlausibleEmail, queryKey, trimmedCnpj, trimmedCupom]);
 
   const showPreview = preview !== null && previewQueryKey === queryKey;
   const confirmedPreview = showPreview ? preview : null;
@@ -263,6 +276,11 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
         {errors.email ? (
           <p id={emailErrorId} className={ERROR_TEXT_CLASSES}>
             {errors.email}
+          </p>
+        ) : null}
+        {showPreview && preview?.empresaAssociada ? (
+          <p className="mt-2 font-body text-sm text-brand-green">
+            ✓ Membro ABVCAP — {preview.empresaAssociada}
           </p>
         ) : null}
       </div>

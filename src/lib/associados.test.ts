@@ -40,3 +40,43 @@ describe("lookupAssociado", () => {
     expect(await lookupAssociado("11222333000181")).toBe(false);
   });
 });
+
+describe("lookupAssociadoPorEmail", () => {
+  beforeEach(() => {
+    maybeSingleMock.mockReset();
+  });
+
+  it("returns isAssociado false without querying Supabase for a null/blank email", async () => {
+    const { lookupAssociadoPorEmail } = await import("./associados");
+    expect(await lookupAssociadoPorEmail(null)).toEqual({ isAssociado: false, empresa: null });
+    expect(await lookupAssociadoPorEmail("")).toEqual({ isAssociado: false, empresa: null });
+    expect(maybeSingleMock).not.toHaveBeenCalled();
+  });
+
+  it("returns isAssociado true with the empresa when a row matches the normalized email", async () => {
+    maybeSingleMock.mockResolvedValue({ data: { empresa: "ABVCAP" }, error: null });
+    const { lookupAssociadoPorEmail } = await import("./associados");
+    expect(await lookupAssociadoPorEmail(" Membro@ABVCAP.com.br ")).toEqual({
+      isAssociado: true,
+      empresa: "ABVCAP",
+    });
+  });
+
+  it("returns isAssociado false when no row matches", async () => {
+    maybeSingleMock.mockResolvedValue({ data: null, error: null });
+    const { lookupAssociadoPorEmail } = await import("./associados");
+    expect(await lookupAssociadoPorEmail("alguem@example.com")).toEqual({
+      isAssociado: false,
+      empresa: null,
+    });
+  });
+
+  it("returns isAssociado false (never throws) on a Supabase error", async () => {
+    maybeSingleMock.mockResolvedValue({ data: null, error: { message: "network error" } });
+    const { lookupAssociadoPorEmail } = await import("./associados");
+    expect(await lookupAssociadoPorEmail("alguem@example.com")).toEqual({
+      isAssociado: false,
+      empresa: null,
+    });
+  });
+});

@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const lookupAssociadoMock = vi.fn();
+const lookupAssociadoPorEmailMock = vi.fn();
 const resolveCupomMock = vi.fn();
 
-vi.mock("./associados", () => ({ lookupAssociado: lookupAssociadoMock }));
+vi.mock("./associados", () => ({
+  lookupAssociado: lookupAssociadoMock,
+  lookupAssociadoPorEmail: lookupAssociadoPorEmailMock,
+}));
 vi.mock("./cupons", () => ({ resolveCupom: resolveCupomMock }));
 
 describe("resolvePrice", () => {
   beforeEach(() => {
     lookupAssociadoMock.mockReset();
+    lookupAssociadoPorEmailMock.mockReset();
+    lookupAssociadoPorEmailMock.mockResolvedValue({ isAssociado: false, empresa: null });
     resolveCupomMock.mockReset();
     resolveCupomMock.mockResolvedValue({ applied: false });
     vi.useFakeTimers();
@@ -21,6 +27,7 @@ describe("resolvePrice", () => {
     const result = await resolvePrice({ cnpj: null, cupom: null });
     expect(result).toEqual({
       isAssociado: false,
+      empresaAssociada: null,
       cupomAplicado: null,
       percentualDesconto: null,
       valorBase: 7650,
@@ -78,10 +85,32 @@ describe("resolvePrice", () => {
     const result = await resolvePrice({ cnpj: null, cupom: "promo10" });
     expect(result).toEqual({
       isAssociado: false,
+      empresaAssociada: null,
       cupomAplicado: "PROMO10",
       percentualDesconto: 10,
       valorBase: 7650,
       valorCobrado: 6885,
     });
+  });
+
+  it("charges the associado price and surfaces the company name when only the email matches the GlueUp export", async () => {
+    vi.setSystemTime(new Date("2026-12-05T00:00:00-03:00"));
+    lookupAssociadoMock.mockResolvedValue(false);
+    lookupAssociadoPorEmailMock.mockResolvedValue({ isAssociado: true, empresa: "ABVCAP" });
+    const { resolvePrice } = await import("./pricing");
+    const result = await resolvePrice({ cnpj: null, email: "membro@abvcap.com.br", cupom: null });
+    expect(result.isAssociado).toBe(true);
+    expect(result.empresaAssociada).toBe("ABVCAP");
+    expect(result.valorBase).toBe(6800);
+  });
+
+  it("does not surface a company name when the match came only from the cnpj lookup", async () => {
+    vi.setSystemTime(new Date("2026-12-05T00:00:00-03:00"));
+    lookupAssociadoMock.mockResolvedValue(true);
+    lookupAssociadoPorEmailMock.mockResolvedValue({ isAssociado: false, empresa: null });
+    const { resolvePrice } = await import("./pricing");
+    const result = await resolvePrice({ cnpj: "11222333000181", cupom: null });
+    expect(result.isAssociado).toBe(true);
+    expect(result.empresaAssociada).toBeNull();
   });
 });

@@ -9,6 +9,13 @@ export interface AssociadoRow {
   created_at: string;
 }
 
+export interface AssociadoEmailRow {
+  id: string;
+  email: string;
+  empresa: string | null;
+  created_at: string;
+}
+
 export interface CupomRow {
   id: string;
   codigo: string;

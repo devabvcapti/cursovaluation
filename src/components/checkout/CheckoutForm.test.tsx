@@ -255,6 +255,36 @@ describe("CheckoutForm", () => {
     });
   });
 
+  it("shows the member badge and associado price when a typed email matches the GlueUp export, without checking the member toggle", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { email?: string }) : {};
+          const matched = parsedBody.email === "membro@abvcap.com.br";
+          return jsonResponse({
+            isAssociado: matched,
+            empresaAssociada: matched ? "ABVCAP" : null,
+            cupomAplicado: null,
+            percentualDesconto: null,
+            valorBase: 1000,
+            valorCobrado: matched ? 800 : 1000,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 1000 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/e-mail/i), "membro@abvcap.com.br");
+
+    expect(await screen.findByText(/membro abvcap.*abvcap/i)).toBeInTheDocument();
+    expect(await screen.findByText(/R\$\s*800,00/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
+  });
+
   it("shows inline errors and never calls /api/checkout/pedido when the form is invalid", async () => {
     const user = userEvent.setup();
     const onPedidoCreated = vi.fn();

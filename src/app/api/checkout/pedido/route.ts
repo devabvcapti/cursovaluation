@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   const telefoneDigits = onlyDigits(telefone);
   const cnpjDigits = onlyDigits(cnpj ?? "") || null;
 
-  const price = await resolvePrice({ cnpj: cnpjDigits, cupom });
+  const price = await resolvePrice({ cnpj: cnpjDigits, email, cupom });
 
   const { data, error } = await getSupabaseServiceClient()
     .from(TABLE_PEDIDOS)

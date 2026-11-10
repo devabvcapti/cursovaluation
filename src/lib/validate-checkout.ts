@@ -16,7 +16,9 @@ export type CheckoutValidationResult =
 
 // Deliberately permissive: same pattern as `validate-lead.ts`'s EMAIL_PATTERN,
 // reused here rather than redefined so both forms treat email the same way.
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Exported so `CheckoutForm` can gate its email-based associado preview on
+// the same definition of "looks like an email" used for validation.
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Validates a checkout payload (nome/email/cpf/telefone). `cnpj` and `cupom`

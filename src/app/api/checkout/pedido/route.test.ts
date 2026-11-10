@@ -77,6 +77,7 @@ describe("POST /api/checkout/pedido", () => {
 
     expect(resolvePriceMock).toHaveBeenCalledWith({
       cnpj: "11222333000181",
+      email: validPayload.email,
       cupom: validPayload.cupom,
     });
     expect(fromMock).toHaveBeenCalledWith(TABLE_PEDIDOS);
