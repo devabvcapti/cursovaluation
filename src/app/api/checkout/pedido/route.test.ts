@@ -27,6 +27,8 @@ const validPayload = {
   telefone: "(11) 99999-8888",
   cnpj: "11.222.333/0001-81",
   cupom: "PROMO10",
+  empresa: "ABVCAP",
+  cargo: "Analista",
 };
 
 describe("POST /api/checkout/pedido", () => {
@@ -88,6 +90,8 @@ describe("POST /api/checkout/pedido", () => {
         cpf: "12345678909",
         telefone: "11999998888",
         cnpj_informado: "11222333000181",
+        empresa: "ABVCAP",
+        cargo: "Analista",
         is_associado: price.isAssociado,
         cupom_codigo: price.cupomAplicado,
         valor_base: price.valorBase,
@@ -155,6 +159,29 @@ describe("POST /api/checkout/pedido", () => {
     expect(insertMock).toHaveBeenCalledWith(
       expect.objectContaining({ cnpj_informado: null }),
     );
+  });
+
+  it("sets empresa/cargo to null when they're absent or blank (they're optional)", async () => {
+    validateCheckoutMock.mockReturnValue({ valid: true });
+    resolvePriceMock.mockResolvedValue({
+      isAssociado: false,
+      cupomAplicado: null,
+      valorBase: 1000,
+      valorCobrado: 1000,
+    });
+    singleMock.mockResolvedValue({ data: { id: "pedido-791" }, error: null });
+
+    const { POST } = await import("./route");
+    const payloadWithoutEmpresaCargo: Record<string, unknown> = { ...validPayload, empresa: "   ", cargo: "" };
+    delete payloadWithoutEmpresaCargo.cargo;
+    await POST(
+      new Request("http://localhost/api/checkout/pedido", {
+        method: "POST",
+        body: JSON.stringify(payloadWithoutEmpresaCargo),
+      }),
+    );
+
+    expect(insertMock).toHaveBeenCalledWith(expect.objectContaining({ empresa: null, cargo: null }));
   });
 
   it("sets cnpj_informado to null (not an empty string) for a blank or punctuation-only cnpj", async () => {

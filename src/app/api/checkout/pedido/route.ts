@@ -31,6 +31,8 @@ export async function POST(request: Request) {
     telefone: rawTelefone,
     cnpj: rawCnpj,
     cupom: rawCupom,
+    empresa: rawEmpresa,
+    cargo: rawCargo,
   } = (body ?? {}) as Record<string, unknown>;
 
   const nome = typeof rawNome === "string" ? rawNome : "";
@@ -39,6 +41,8 @@ export async function POST(request: Request) {
   const telefone = typeof rawTelefone === "string" ? rawTelefone : "";
   const cnpj = typeof rawCnpj === "string" ? rawCnpj : undefined;
   const cupom = typeof rawCupom === "string" ? rawCupom : undefined;
+  const empresa = typeof rawEmpresa === "string" && rawEmpresa.trim() !== "" ? rawEmpresa.trim() : null;
+  const cargo = typeof rawCargo === "string" && rawCargo.trim() !== "" ? rawCargo.trim() : null;
 
   const checkoutInput: CheckoutInput = { nome, email, cpf, telefone, cnpj, cupom };
   const result = validateCheckout(checkoutInput);
@@ -64,6 +68,8 @@ export async function POST(request: Request) {
       cpf: cpfDigits,
       telefone: telefoneDigits,
       cnpj_informado: cnpjDigits,
+      empresa,
+      cargo,
       is_associado: price.isAssociado,
       cupom_codigo: price.cupomAplicado,
       valor_base: price.valorBase,

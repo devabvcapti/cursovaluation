@@ -46,6 +46,8 @@ const pedidoRow = {
   cpf: "12345678909",
   telefone: "11999998888",
   cnpj_informado: null,
+  empresa: null,
+  cargo: null,
   is_associado: false,
   cupom_codigo: null,
   valor_base: 1000,

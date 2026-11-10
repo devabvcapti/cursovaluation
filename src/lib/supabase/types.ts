@@ -39,6 +39,8 @@ export interface PedidoRow {
   cpf: string;
   telefone: string;
   cnpj_informado: string | null;
+  empresa: string | null;
+  cargo: string | null;
   is_associado: boolean;
   cupom_codigo: string | null;
   valor_base: number;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateCheckout } from "./validate-checkout";
+import { validateCheckout, validateCheckoutStep1 } from "./validate-checkout";
 
 const VALID = {
   nome: "Ana",
@@ -38,6 +38,27 @@ describe("validateCheckout", () => {
   });
   it("flags a telefone with too few digits", () => {
     const result = validateCheckout({ ...VALID, telefone: "123" });
+    expect(result.valid).toBe(false);
+  });
+  it("accepts empresa and cargo without validating them", () => {
+    expect(validateCheckout({ ...VALID, empresa: "ABVCAP", cargo: "Analista" })).toEqual({ valid: true });
+  });
+});
+
+describe("validateCheckoutStep1", () => {
+  it("accepts a valid nome/email pair", () => {
+    expect(validateCheckoutStep1({ nome: "Ana", email: "ana@example.com" })).toEqual({ valid: true });
+  });
+  it("flags missing nome and email", () => {
+    const result = validateCheckoutStep1({ nome: "", email: "" });
+    expect(result.valid).toBe(false);
+    if (!result.valid) {
+      expect(result.errors.nome).toBeDefined();
+      expect(result.errors.email).toBeDefined();
+    }
+  });
+  it("flags an invalid email format", () => {
+    const result = validateCheckoutStep1({ nome: "Ana", email: "not-an-email" });
     expect(result.valid).toBe(false);
   });
 });

@@ -18,6 +18,8 @@ function buildPedido(overrides: Partial<PedidoRow> = {}): PedidoRow {
     cpf: "123.456.789-00",
     telefone: "11999999999",
     cnpj_informado: null,
+    empresa: null,
+    cargo: null,
     is_associado: true,
     cupom_codigo: "PROMO10",
     valor_base: 1000,
