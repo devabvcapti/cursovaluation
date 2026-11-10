@@ -192,6 +192,46 @@ describe("CheckoutForm", () => {
     expect(await screen.findByText(/R\$\s*800,00/)).toBeInTheDocument();
   });
 
+  it("keeps showing the 'Valor do curso' / 'Desconto' breakdown — not a flat total — once a real associado e-mail match resolves, including after advancing to screen 2", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
+          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { email?: string }) : {};
+          const matched = parsedBody.email === VALID.email;
+          return jsonResponse({
+            isAssociado: matched,
+            empresaAssociada: matched ? "ABVCAP" : null,
+            cupomAplicado: null,
+            percentualDesconto: null,
+            valorBase: 6120,
+            valorCobrado: matched ? 6120 : 7650,
+          });
+        }
+        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 6120 });
+      })
+    );
+
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/e-mail/i), VALID.email);
+    await screen.findByText(/membro abvcap/i);
+
+    expect(screen.getByText(/R\$\s*7\.650,00/)).toBeInTheDocument();
+    expect(screen.getByText(/R\$\s*6\.120,00/)).toBeInTheDocument();
+    expect(screen.getByText(/desconto/i)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/nome/i), VALID.nome);
+    await user.click(screen.getByRole("checkbox", { name: /termos de uso/i }));
+    await user.click(screen.getByRole("button", { name: "Continuar" }));
+    await screen.findByLabelText(/cpf/i);
+
+    expect(screen.getByText(/R\$\s*7\.650,00/)).toBeInTheDocument();
+    expect(screen.getByText(/R\$\s*6\.120,00/)).toBeInTheDocument();
+    expect(screen.getByText(/desconto/i)).toBeInTheDocument();
+  });
+
   it("directs the visitor to the Diretório de Membros when they claim to be a member but the e-mail has no match", async () => {
     vi.stubGlobal(
       "fetch",

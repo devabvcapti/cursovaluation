@@ -256,15 +256,26 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
 
   const simulatedValor = simulaAssociado ? instantValorAssociado : instantValor;
   const displayedValor = confirmedPreview ? confirmedPreview.valorCobrado : simulatedValor;
-  const simulatedPercentualDesconto =
-    simulaAssociado && instantValor && instantValorAssociado
-      ? Math.round(((instantValor - instantValorAssociado) / instantValor) * 100)
+  // The non-associado reference price is always what "Valor do curso"
+  // compares against in the summary card below — regardless of whether the
+  // lower `displayedValor` comes from the display-only toggle, a real
+  // e-mail/CNPJ associado match, a cupom, or any combination of those. This
+  // keeps the breakdown (riscado + "Desconto X%" + Total) visually
+  // consistent across both checkout screens: without it, a real
+  // server-confirmed associado match (whose `valorBase` is already the
+  // associado price, since `resolveBasePrice` is keyed on `isAssociado`)
+  // would otherwise collapse straight to a flat Total the instant the
+  // e-mail lookup resolves, even though the toggle's simulated guess showed
+  // the full breakdown a moment earlier for the exact same price.
+  const hasDesconto =
+    instantValor !== null && displayedValor !== null && instantValor !== displayedValor;
+  // Always the combined savings vs. that same non-associado reference price
+  // — one line covers a cupom alone, an associado match alone (real or
+  // simulated), or both together, rather than trying to split them out.
+  const displayedPercentualDesconto =
+    hasDesconto && instantValor !== null && displayedValor !== null
+      ? Math.round(((instantValor - displayedValor) / instantValor) * 100)
       : null;
-  const displayedPercentualDesconto = confirmedPreview
-    ? confirmedPreview.cupomAplicado
-      ? confirmedPreview.percentualDesconto
-      : null
-    : simulatedPercentualDesconto;
   // A cupom was typed and the server resolved a preview for it, but that
   // preview came back without a discount applied — distinct from "still
   // typing"/"not resolved yet" (confirmedPreview null) or "no cupom typed".
@@ -331,10 +342,6 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
       setStatus("error");
     }
   }
-
-  const displayedValorBase = confirmedPreview ? confirmedPreview.valorBase : instantValor;
-  const hasDesconto =
-    displayedValorBase !== null && displayedValor !== null && displayedValorBase !== displayedValor;
 
   return (
     <div className={cn("grid gap-6 lg:grid-cols-5 lg:items-start lg:gap-8", className)}>
@@ -620,7 +627,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
             <>
               <div className="flex items-center justify-between font-body text-sm text-white/70">
                 <span>Valor do curso</span>
-                <span className="line-through">{formatInvestment(String(displayedValorBase))}</span>
+                <span className="line-through">{formatInvestment(String(instantValor))}</span>
               </div>
               <div className="flex items-center justify-between font-body text-sm text-brand-green">
                 <span>
@@ -630,7 +637,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
                     : ""}
                 </span>
                 <span>
-                  -{formatInvestment(String((displayedValorBase as number) - (displayedValor as number)))}
+                  -{formatInvestment(String((instantValor as number) - (displayedValor as number)))}
                 </span>
               </div>
             </>
