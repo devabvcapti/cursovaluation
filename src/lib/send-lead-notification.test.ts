@@ -47,4 +47,23 @@ describe("sendLeadNotification", () => {
     const result = await sendLeadNotification({ name: "Ana", email: "ana@example.com" });
     expect(result).toEqual({ ok: false, reason: "domain not verified" });
   });
+
+  it("tags the subject [LEAD] by default (no origem, or origem: \"ementa\")", async () => {
+    sendMock.mockResolvedValue({ data: { id: "1" }, error: null });
+    const { sendLeadNotification } = await import("./send-lead-notification");
+    await sendLeadNotification({ name: "Ana", email: "ana@example.com" });
+    expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({ subject: expect.stringMatching(/^\[LEAD\]/) }));
+  });
+
+  it("tags the subject [COMPRAS] and notes the origem in the body for origem: \"checkout\"", async () => {
+    sendMock.mockResolvedValue({ data: { id: "1" }, error: null });
+    const { sendLeadNotification } = await import("./send-lead-notification");
+    await sendLeadNotification({ name: "Ana", email: "ana@example.com", origem: "checkout" });
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: expect.stringMatching(/^\[COMPRAS\]/),
+        text: expect.stringContaining("Origem: Checkout"),
+      }),
+    );
+  });
 });

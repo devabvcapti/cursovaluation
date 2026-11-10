@@ -31,7 +31,11 @@ describe("POST /api/checkout/lead", () => {
     });
     const response = await POST(request);
     expect(response.status).toBe(200);
-    expect(sendLeadNotificationMock).toHaveBeenCalledWith({ name: "Ana", email: "ana@example.com" });
+    expect(sendLeadNotificationMock).toHaveBeenCalledWith({
+      name: "Ana",
+      email: "ana@example.com",
+      origem: "checkout",
+    });
   });
 
   it("returns 502 when the admissions notification fails to send", async () => {

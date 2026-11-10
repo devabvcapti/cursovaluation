@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ errors: result.errors }, { status: 400 });
   }
 
-  const notification = await sendLeadNotification({ name: nome, email });
+  const notification = await sendLeadNotification({ name: nome, email, origem: "checkout" });
 
   if (!notification.ok) {
     console.error("[checkout/lead] admissions notification failed:", notification.reason);
