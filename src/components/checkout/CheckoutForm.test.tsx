@@ -48,15 +48,6 @@ describe("CheckoutForm", () => {
     expect(await screen.findByText(/R\$\s*7\.650,00/)).toBeInTheDocument();
   });
 
-  it("switches to the associado reference price the instant the member toggle is checked, before a CNPJ is typed", async () => {
-    const user = userEvent.setup();
-    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
-
-    await user.click(screen.getByLabelText(/sou associado abvcap/i));
-
-    expect(await screen.findByText(/R\$\s*6\.120,00/)).toBeInTheDocument();
-  });
-
   it("shows the discount percentage when a valid cupom resolves", async () => {
     vi.stubGlobal(
       "fetch",
@@ -108,83 +99,22 @@ describe("CheckoutForm", () => {
     expect(await screen.findByText(/cupom inválido ou expirado/i)).toBeInTheDocument();
   });
 
-  it("renders nome, e-mail, CPF, telefone, the member toggle and cupom (opcional) fields", () => {
+  it("renders nome, e-mail, CPF, telefone and cupom (opcional) fields, with no member toggle or CNPJ field", () => {
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
     expect(screen.getByLabelText(/nome/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cpf/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/sou associado abvcap/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cupom.*opcional/i)).toBeInTheDocument();
-  });
-
-  it("hides the CNPJ field until the member toggle is checked, and clears it when unchecked", async () => {
-    const user = userEvent.setup();
-    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
-
+    expect(screen.queryByLabelText(/sou associado abvcap/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
-
-    const memberToggle = screen.getByLabelText(/sou associado abvcap/i);
-    await user.click(memberToggle);
-    const cnpjInput = screen.getByLabelText(/cnpj/i);
-    expect(cnpjInput).toBeInTheDocument();
-
-    await user.type(cnpjInput, "11222333000181");
-    await user.click(memberToggle);
-    expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
-
-    await user.click(memberToggle);
-    expect(screen.getByLabelText(/cnpj/i)).toHaveValue("");
   });
 
-  it("strips non-digit characters typed into the CNPJ field", async () => {
+  it("debounces the price preview call on cupom change and displays the formatted price", async () => {
     const user = userEvent.setup();
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
 
-    await user.click(screen.getByLabelText(/sou associado abvcap/i));
-    const cnpjInput = screen.getByLabelText(/cnpj/i);
-
-    await user.type(cnpjInput, "11.222.333/0001-81");
-
-    expect(cnpjInput).toHaveValue("11222333000181");
-  });
-
-  it("shows inline CNPJ verification feedback: verifying, then verified or not found", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn((url: string, init?: RequestInit) => {
-        if (typeof url === "string" && url.includes("/api/checkout/preco")) {
-          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { cnpj?: string }) : {};
-          return jsonResponse({
-            isAssociado: parsedBody.cnpj === "11222333000181",
-            cupomAplicado: null,
-            valorBase: 1000,
-            valorCobrado: parsedBody.cnpj === "11222333000181" ? 800 : 1000,
-          });
-        }
-        return jsonResponse({ pedidoId: "pedido-1", valorCobrado: 1000 });
-      })
-    );
-
-    const user = userEvent.setup();
-    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
-    await user.click(screen.getByLabelText(/sou associado abvcap/i));
-
-    await user.type(screen.getByLabelText(/cnpj/i), "11222333000181");
-    expect(await screen.findByText(/verificando cnpj/i)).toBeInTheDocument();
-    expect(await screen.findByText(/verificado como associado abvcap/i)).toBeInTheDocument();
-
-    await user.clear(screen.getByLabelText(/cnpj/i));
-    await user.type(screen.getByLabelText(/cnpj/i), "99888777000166");
-    expect(await screen.findByText(/não encontrado na base de associados/i)).toBeInTheDocument();
-  });
-
-  it("debounces the price preview call on cnpj change and displays the formatted price", async () => {
-    const user = userEvent.setup();
-    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
-    await user.click(screen.getByLabelText(/sou associado abvcap/i));
-
-    await user.type(screen.getByLabelText(/cnpj/i), "11222333000181");
+    await user.type(screen.getByLabelText(/cupom.*opcional/i), "PROMO10");
 
     // Debounce: should not fire immediately on every keystroke.
     expect(
@@ -206,13 +136,13 @@ describe("CheckoutForm", () => {
     expect(await screen.findByText(/R\$\s*1\.000,00/)).toBeInTheDocument();
   });
 
-  it("does not flash a stale preview when the cnpj changes before the new fetch resolves", async () => {
+  it("does not flash a stale preview when the cupom changes before the new fetch resolves", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url: string, init?: RequestInit) => {
         if (typeof url === "string" && url.includes("/api/checkout/preco")) {
-          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { cnpj?: string }) : {};
-          if (parsedBody.cnpj === "99888777000166") {
+          const parsedBody = init?.body ? (JSON.parse(init.body as string) as { cupom?: string }) : {};
+          if (parsedBody.cupom === "OUTRO") {
             return jsonResponse({
               isAssociado: false,
               cupomAplicado: null,
@@ -233,20 +163,19 @@ describe("CheckoutForm", () => {
 
     const user = userEvent.setup();
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
-    await user.click(screen.getByLabelText(/sou associado abvcap/i));
-    const cnpjInput = screen.getByLabelText(/cnpj/i);
+    const cupomInput = screen.getByLabelText(/cupom.*opcional/i);
 
-    // Resolve a preview for the first cnpj.
-    await user.type(cnpjInput, "11222333000181");
+    // Resolve a preview for the first cupom.
+    await user.type(cupomInput, "PRIMEIRO");
     await waitFor(() => expect(screen.getByText(/R\$\s*1\.000,00/)).toBeInTheDocument(), {
       timeout: 2000,
     });
 
-    // Clear the field and start typing a different cnpj. The new fetch is
+    // Clear the field and start typing a different cupom. The new fetch is
     // still debounced (hasn't fired/resolved yet), but the old, now-stale
     // R$ 1.000,00 preview must not still be shown in the meantime.
-    await user.clear(cnpjInput);
-    await user.type(cnpjInput, "99888777000166");
+    await user.clear(cupomInput);
+    await user.type(cupomInput, "OUTRO");
     expect(screen.queryByText(/R\$\s*1\.000,00/)).not.toBeInTheDocument();
 
     // Once the new fetch resolves, the new preview does show.

@@ -4,7 +4,6 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { EMAIL_PATTERN, validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
 import { resolveBasePrice } from "@/lib/base-price";
-import { onlyDigits } from "@/lib/digits";
 import { cn } from "@/lib/cn";
 
 export interface CheckoutFormProps {
@@ -51,26 +50,23 @@ const SUBMIT_BUTTON_CLASSES = cn(
 
 /**
  * Checkout step 1: collects nome/email/cpf/telefone (required) plus an
- * optional cnpj/cupom, validates with `validateCheckout` before ever
- * touching the network (the server re-runs the same validation — see
+ * optional cupom, validates with `validateCheckout` before ever touching the
+ * network (the server re-runs the same validation — see
  * `src/app/api/checkout/pedido/route.ts` — so this is a UX convenience, not
  * the trust boundary), and posts to `/api/checkout/pedido` only when the
- * payload is valid. The CNPJ field only renders once the student checks
- * "Sou associado ABVCAP"; unchecking it clears any typed CNPJ so the
- * non-member price is what actually gets submitted. The cnpj/cupom fields
- * also drive a debounced price preview against `/api/checkout/preco`, which
- * doubles as inline CNPJ-verification feedback while the toggle is on. The
- * email field drives that same preview independently (DEV-only experiment):
- * once it looks like a complete address, it's checked against the GlueUp
- * member-email export, and a match shows "Membro ABVCAP — empresa" and the
- * associado price without needing the toggle or a CNPJ at all.
+ * payload is valid. There's no manual "Sou associado ABVCAP" toggle or CNPJ
+ * field — membership is detected automatically from the email field: once it
+ * looks like a complete address, it's checked (debounced) against the
+ * GlueUp member-email export via `/api/checkout/preco`, and a match shows
+ * "Membro ABVCAP — empresa" and switches the price to the associado value
+ * with no action needed from the student. The cupom field drives that same
+ * preview.
  *
  * The price itself is always visible, even before anything is typed: it
- * starts at the non-associado value and switches to the associado value the
- * instant "Sou associado ABVCAP" is checked (computed client-side via
- * `resolveBasePrice`, so it doesn't wait on a CNPJ lookup). Once the server
- * preview resolves (cnpj and/or cupom), its value — and, if a cupom
- * applied, the discount percentage — takes over as the authoritative figure.
+ * starts at the non-associado value (computed client-side via
+ * `resolveBasePrice`, so it doesn't wait on a network round-trip) and only
+ * the server-confirmed preview (email match and/or cupom) can raise it,
+ * once resolved — alongside the discount percentage when a cupom applied.
  */
 export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) {
   const uid = useId();
@@ -78,8 +74,6 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const emailId = `${uid}-checkout-email`;
   const cpfId = `${uid}-checkout-cpf`;
   const telefoneId = `${uid}-checkout-telefone`;
-  const membroId = `${uid}-checkout-membro`;
-  const cnpjId = `${uid}-checkout-cnpj`;
   const cupomId = `${uid}-checkout-cupom`;
   const nomeErrorId = `${uid}-checkout-nome-error`;
   const emailErrorId = `${uid}-checkout-email-error`;
@@ -90,26 +84,15 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [isMember, setIsMember] = useState(false);
-  const [cnpj, setCnpj] = useState("");
   const [cupom, setCupom] = useState("");
-
-  function handleMemberToggle(checked: boolean) {
-    setIsMember(checked);
-    if (!checked) {
-      // Unchecking hides the field; clearing it too means a previously
-      // typed CNPJ can never silently keep applying the member price.
-      setCnpj("");
-    }
-  }
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [preview, setPreview] = useState<PricePreview | null>(null);
-  // The cnpj/cupom pair `preview` was actually fetched for. Rendering gates
+  // The cupom/email pair `preview` was actually fetched for. Rendering gates
   // on this matching the *current* `queryKey` (not just on `preview` being
   // non-null) so a resolved preview from an earlier, now-superseded
-  // cnpj/cupom pair can never be shown as if it were current — see the
+  // cupom/email pair can never be shown as if it were current — see the
   // `queryKey` comment below for why this matters.
   const [previewQueryKey, setPreviewQueryKey] = useState<string | null>(null);
 
@@ -119,28 +102,26 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   // case is excluded here and keeps showing its own inline field errors.
   const isServerError = status === "error" && Object.keys(errors).length === 0;
 
-  const trimmedCnpj = cnpj.trim();
   const trimmedCupom = cupom.trim();
   const trimmedEmail = email.trim();
   // Gates the email-based associado check on "looks like a complete email"
   // (not just non-blank) so this doesn't fire a preview request on every
   // keystroke of a still half-typed address.
   const isPlausibleEmail = EMAIL_PATTERN.test(trimmedEmail);
-  const hasPreviewQuery = trimmedCnpj !== "" || trimmedCupom !== "" || isPlausibleEmail;
-  // Identifies "what cnpj/cupom/email combination is the user currently
-  // asking about", recomputed every render (no debounce). Comparing
+  const hasPreviewQuery = trimmedCupom !== "" || isPlausibleEmail;
+  // Identifies "what cupom/email combination is the user currently asking
+  // about", recomputed every render (no debounce). Comparing
   // `previewQueryKey` to this current value is what hides a stale preview
-  // the instant the user edits cnpj/cupom/email again, even though the
-  // *fetch* for the new combination is still debounced and hasn't resolved
-  // yet (reproduction: resolve a preview for cnpj A, clear the field, start
-  // typing cnpj B — on B's very first keystroke this key changes, so A's
+  // the instant the user edits cupom/email again, even though the *fetch*
+  // for the new combination is still debounced and hasn't resolved yet
+  // (reproduction: resolve a preview for email A, clear the field, start
+  // typing email B — on B's very first keystroke this key changes, so A's
   // resolved price stops matching and is hidden immediately, instead of
   // flashing until B's fetch lands).
-  const queryKey = `${trimmedCnpj}::${trimmedCupom}::${isPlausibleEmail ? trimmedEmail.toLowerCase() : ""}`;
+  const queryKey = `${trimmedCupom}::${isPlausibleEmail ? trimmedEmail.toLowerCase() : ""}`;
 
-  // Debounced price preview: recomputed from cnpj/cupom/email, so it never
-  // fires on mount while all three are still blank/incomplete (nothing has
-  // changed yet).
+  // Debounced price preview: recomputed from cupom/email, so it never fires
+  // on mount while both are still blank/incomplete (nothing has changed yet).
   useEffect(() => {
     if (!hasPreviewQuery) {
       return;
@@ -153,7 +134,6 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cnpj: trimmedCnpj === "" ? undefined : cnpj,
           email: isPlausibleEmail ? email : undefined,
           cupom: trimmedCupom === "" ? undefined : cupom,
         }),
@@ -172,16 +152,16 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
     }, PRICE_PREVIEW_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [cnpj, cupom, email, hasPreviewQuery, isPlausibleEmail, queryKey, trimmedCnpj, trimmedCupom]);
+  }, [cupom, email, hasPreviewQuery, isPlausibleEmail, queryKey, trimmedCupom]);
 
   const showPreview = preview !== null && previewQueryKey === queryKey;
   const confirmedPreview = showPreview ? preview : null;
 
-  // Instant, client-computed reference price for the current "Sou associado
-  // ABVCAP" state — shown the moment the visitor checks the box, without
-  // waiting on a CNPJ to be typed/validated. Once a server-confirmed preview
-  // is available (cnpj and/or cupom resolved), it takes over as the
-  // authoritative displayed value instead.
+  // Instant, client-computed non-associado reference price, shown before any
+  // server round-trip resolves. Once a server-confirmed preview is available
+  // (email match and/or cupom resolved), it takes over as the authoritative
+  // displayed value instead — that's the only way this can go up to the
+  // associado price, since there's no manual toggle.
   //
   // Computed in an effect (not directly during render) because it reads the
   // current date (via `resolveBasePrice`'s early-bird check), and Next's
@@ -190,8 +170,8 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   // client/runtime-only, same as the [defer] fix it suggests.
   const [instantValor, setInstantValor] = useState<number | null>(null);
   useEffect(() => {
-    setInstantValor(resolveBasePrice(isMember));
-  }, [isMember]);
+    setInstantValor(resolveBasePrice(false));
+  }, []);
 
   const displayedValor = confirmedPreview ? confirmedPreview.valorCobrado : instantValor;
   const displayedPercentualDesconto = confirmedPreview?.cupomAplicado
@@ -205,7 +185,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const checkoutInput: CheckoutInput = { nome, email, cpf, telefone, cnpj, cupom };
+    const checkoutInput: CheckoutInput = { nome, email, cpf, telefone, cupom };
     const result = validateCheckout(checkoutInput);
     if (!result.valid) {
       setErrors(result.errors);
@@ -219,7 +199,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
       const response = await fetch("/api/checkout/pedido", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, email, cpf, telefone, cnpj, cupom }),
+        body: JSON.stringify({ nome, email, cpf, telefone, cupom }),
       });
 
       if (!response.ok) {
@@ -329,53 +309,6 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
           </p>
         ) : null}
       </div>
-
-      <div className="mt-5 flex items-center gap-2">
-        <input
-          id={membroId}
-          name="membro"
-          type="checkbox"
-          checked={isMember}
-          onChange={(event) => handleMemberToggle(event.target.checked)}
-          className="h-4 w-4 shrink-0 rounded border-brand-navy/30 text-brand-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green"
-        />
-        <label htmlFor={membroId} className={LABEL_CLASSES}>
-          Sou associado ABVCAP
-        </label>
-      </div>
-
-      {isMember ? (
-        <div className="mt-5">
-          <label htmlFor={cnpjId} className={LABEL_CLASSES}>
-            CNPJ da empresa associada
-          </label>
-          <input
-            id={cnpjId}
-            name="cnpj"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            value={cnpj}
-            onChange={(event) => setCnpj(onlyDigits(event.target.value))}
-            className={cn(FIELD_CLASSES, FIELD_BORDER_CLASSES)}
-          />
-          {trimmedCnpj !== "" ? (
-            showPreview && preview ? (
-              preview.isAssociado ? (
-                <p className="mt-2 font-body text-sm text-brand-green">
-                  ✓ CNPJ verificado como associado ABVCAP.
-                </p>
-              ) : (
-                <p className="mt-2 font-body text-sm text-amber-600">
-                  CNPJ não encontrado na base de associados — seguindo com valor de não-membro.
-                </p>
-              )
-            ) : (
-              <p className="mt-2 font-body text-sm text-brand-navy/60">Verificando CNPJ...</p>
-            )
-          ) : null}
-        </div>
-      ) : null}
 
       <div className="mt-5">
         <label htmlFor={cupomId} className={LABEL_CLASSES}>
