@@ -30,7 +30,7 @@ export async function sendLeadNotification(
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: [getRecipient()],
-    subject: "Novo lead — Curso Valuation ABVCAP",
+    subject: "Novo lead — Curso Modelagem Financeira e Valuation ABVCAP",
     text: `Nome: ${lead.name}\nE-mail: ${lead.email}\nRecebido em: ${new Date().toISOString()}`,
   });
 

@@ -20,7 +20,7 @@ function buildEmailBody(name: string): string {
   return [
     `Olá, ${name}!`,
     "",
-    "Aqui está, como prometido: a ementa completa do curso de Valuation da ABVCAP.",
+    "Aqui está, como prometido: a ementa completa do curso de Modelagem Financeira e Valuation da ABVCAP.",
     "",
     "A maioria dos cursos de valuation do mercado termina no número. Este começa nele — você sai sabendo construir o modelo financeiro inteiro, do zero, e também montar o deal: calcular TIR e MOIC, decompor de onde vem o retorno e defender uma recomendação de investimento diante de um comitê.",
     "",
@@ -67,11 +67,11 @@ export async function sendEmentaEmail(
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: [lead.email],
-    subject: "Sua ementa chegou — e a próxima turma de Valuation está com inscrições abertas",
+    subject: "Sua ementa chegou — e a próxima turma de Modelagem Financeira e Valuation está com inscrições abertas",
     text: buildEmailBody(lead.name),
     attachments: [
       {
-        filename: "Ementa - Curso de Valuation ABVCAP.pdf",
+        filename: "Ementa - Modelagem Financeira e Valuation ABVCAP.pdf",
         content: pdf,
       },
     ],

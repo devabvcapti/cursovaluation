@@ -60,7 +60,7 @@ export default async function CuponsPage() {
             Cupons de Desconto
           </h1>
           <p className="mt-4 font-body text-base leading-relaxed text-brand-navy/80">
-            Crie e gerencie os cupons de desconto do Curso Valuation.
+            Crie e gerencie os cupons de desconto do curso Modelagem Financeira e Valuation.
           </p>
 
           {error ? (

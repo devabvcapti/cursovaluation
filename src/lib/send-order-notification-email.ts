@@ -40,7 +40,7 @@ export async function sendOrderNotificationEmail(
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: [getRecipient()],
-    subject: "Nova matrícula paga — Curso Valuation ABVCAP",
+    subject: "Nova matrícula paga — Curso Modelagem Financeira e Valuation ABVCAP",
     text: buildEmailBody(pedido),
   });
 

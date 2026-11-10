@@ -31,7 +31,7 @@ export default function TermosDeUsoPage() {
           <p className={PARAGRAPH_CLASSES}>
             Este site é operado pela Associação Brasileira de Private Equity e Venture Capital
             (ABVCAP), CNPJ 03.990.636/0001-16, para divulgação e venda de inscrições do curso
-            presencial &ldquo;Valuation&rdquo;.
+            presencial &ldquo;Modelagem Financeira e Valuation&rdquo;.
           </p>
 
           <h2 className={HEADING_CLASSES}>3. Inscrição</h2>

@@ -59,7 +59,7 @@ describe("sendOrderConfirmationEmail", () => {
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
         to: ["ana@example.com"],
-        subject: "Matrícula confirmada — Curso de Valuation ABVCAP",
+        subject: "Matrícula confirmada — Curso de Modelagem Financeira e Valuation ABVCAP",
       }),
     );
     const call = sendMock.mock.calls[0][0];

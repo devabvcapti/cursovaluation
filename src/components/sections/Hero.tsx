@@ -120,8 +120,10 @@ function renderHighlighted(text: string) {
 }
 
 // Experiment (2026-10-21): cycles the opening word instead of a static
-// "Valuation" — easy to drop by reverting this constant/usage pair.
-const HEADLINE_CYCLE_WORDS = ["Valuation", "M&A", "Governança", "Estruturação"];
+// course name — easy to drop by reverting this constant/usage pair. First
+// word matches `hero.headlineLines[0]` (the course's actual name) so the
+// reduced-motion/initial render and the <title>/meta description agree.
+const HEADLINE_CYCLE_WORDS = ["Modelagem Financeira e Valuation", "M&A", "Governança", "Estruturação"];
 
 const SUBHEADLINE_CLASSES = "max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg";
 

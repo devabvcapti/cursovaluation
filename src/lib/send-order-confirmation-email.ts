@@ -10,7 +10,7 @@ function buildEmailBody(pedido: PedidoRow): string {
   return [
     `Olá, ${pedido.nome}!`,
     "",
-    "Sua matrícula no Curso de Valuation da ABVCAP está confirmada.",
+    "Sua matrícula no Curso de Modelagem Financeira e Valuation da ABVCAP está confirmada.",
     "",
     `Valor pago: ${formatInvestment(String(pedido.valor_cobrado))}.`,
     `Próxima turma: ${investment.nextCohortDate}.`,
@@ -42,7 +42,7 @@ export async function sendOrderConfirmationEmail(
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: [pedido.email],
-    subject: "Matrícula confirmada — Curso de Valuation ABVCAP",
+    subject: "Matrícula confirmada — Curso de Modelagem Financeira e Valuation ABVCAP",
     text: buildEmailBody(pedido),
   });
 

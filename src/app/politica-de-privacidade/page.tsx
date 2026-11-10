@@ -22,7 +22,8 @@ export default function PoliticaDePrivacidadePage() {
 
           <h2 className={HEADING_CLASSES}>1. Controlador dos dados</h2>
           <p className={PARAGRAPH_CLASSES}>
-            Esta política se aplica ao site e ao processo de inscrição do curso &ldquo;Valuation&rdquo;,
+            Esta política se aplica ao site e ao processo de inscrição do curso &ldquo;Modelagem
+            Financeira e Valuation&rdquo;,
             operado pela Associação Brasileira de Private Equity e Venture Capital (ABVCAP), CNPJ
             03.990.636/0001-16.
           </p>

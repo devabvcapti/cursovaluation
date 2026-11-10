@@ -58,14 +58,14 @@ export const courseContent: CourseContent = {
   // Temporary number provided by the client on 2026-10-21.
   whatsappNumber: "5511991480203",
   whatsappMessage:
-    "Olá, tenho interesse em saber mais sobre o curso de Valuation. ABVCAP — Aprenda com quem faz.",
+    "Olá, tenho interesse em saber mais sobre o curso de Modelagem Financeira e Valuation. ABVCAP — Aprenda com quem faz.",
   socialLinks: {
     linkedin: "https://www.linkedin.com/company/abvcap/",
     youtube: "https://www.youtube.com/@ABVCAPVideos",
   },
   hero: {
     eyebrow: "Aprenda com quem faz",
-    headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
+    headlineLines: ["Modelagem Financeira e Valuation:", "o método por trás", "das decisões que movem capital."],
     subheadline:
       "Formação presencial de avaliação de empresas para estudantes e profissionais que atuam, ou querem atuar, em Private Equity, Venture Capital, M&A, investment banking e finanças corporativas.",
     checkoutUrl: "/inscricao",

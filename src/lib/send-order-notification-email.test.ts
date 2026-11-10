@@ -62,7 +62,7 @@ describe("sendOrderNotificationEmail", () => {
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
         to: ["ti@abvcap.com.br"],
-        subject: "Nova matrícula paga — Curso Valuation ABVCAP",
+        subject: "Nova matrícula paga — Curso Modelagem Financeira e Valuation ABVCAP",
       }),
     );
     const call = sendMock.mock.calls[0][0];

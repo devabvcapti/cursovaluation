@@ -29,7 +29,7 @@ function MicrosoftLogo() {
 }
 
 const DENIED_MESSAGE =
-  "Sua conta entrou com sucesso, mas não tem permissão para gerenciar cupons do Curso Valuation.";
+  "Sua conta entrou com sucesso, mas não tem permissão para gerenciar cupons do curso Modelagem Financeira e Valuation.";
 
 /**
  * Admin sign-in for `/admin/cupons`. Login is Microsoft SSO (Azure, via
