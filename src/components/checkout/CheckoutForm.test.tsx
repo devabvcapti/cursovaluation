@@ -188,7 +188,7 @@ describe("CheckoutForm", () => {
 
     await user.type(screen.getByLabelText(/e-mail/i), "membro@abvcap.com.br");
 
-    expect(await screen.findByText(/membro abvcap.*abvcap/i)).toBeInTheDocument();
+    expect(await screen.findByText(/membro abvcap ativo/i)).toBeInTheDocument();
     expect(await screen.findByText(/R\$\s*800,00/)).toBeInTheDocument();
   });
 

@@ -90,8 +90,8 @@ function FieldIcon({ icon: Icon }: { icon: LucideIcon }) {
  *    toggle and the Termos/Privacidade checkbox). This is also where
  *    membership is actually verified: once the e-mail looks like a complete
  *    address, it's checked (debounced) against the GlueUp member-email
- *    export via `/api/checkout/preco`, and a match shows "Membro ABVCAP —
- *    empresa" and switches the displayed price to the associado value with
+ *    export via `/api/checkout/preco`, and a match shows "Membro ABVCAP
+ *    Ativo" and switches the displayed price to the associado value with
  *    no action needed from the student. Advancing past this screen
  *    (`handleStep1Submit`) fires a fire-and-forget `POST /api/checkout/lead`
  *    with just nome/email, so the admissions team has the lead on record
@@ -418,9 +418,7 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
               </p>
             ) : null}
             {showPreview && preview?.empresaAssociada ? (
-              <p className="mt-2 font-body text-sm text-brand-green">
-                ✓ Membro ABVCAP — {preview.empresaAssociada}
-              </p>
+              <p className="mt-2 font-body text-sm text-brand-green">✓ Membro ABVCAP Ativo</p>
             ) : null}
             {emailNaoEncontradoNoDiretorio ? (
               <p className="mt-2 font-body text-sm text-amber-300">
