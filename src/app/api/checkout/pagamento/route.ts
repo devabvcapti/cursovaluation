@@ -80,6 +80,7 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
+    console.error("[checkout/pagamento] createMpPayment failed for pedido", pedidoId, "reason:", result.reason);
     return NextResponse.json(
       { errors: { nome: "Não foi possível processar o pagamento agora." } },
       { status: 502 },
