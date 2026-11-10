@@ -19,8 +19,8 @@ export default function InscricaoPage() {
   return (
     <>
       <Header />
-      <Section tone="white">
-        <div className="mx-auto w-full max-w-3xl px-6 lg:px-10">
+      <Section tone="navy">
+        <div className="mx-auto w-full max-w-5xl px-6 lg:px-10">
           {pedido ? (
             <PaymentStep
               pedidoId={pedido.pedidoId}
