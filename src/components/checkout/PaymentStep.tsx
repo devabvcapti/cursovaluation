@@ -326,12 +326,17 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
               paymentMethods: { creditCard: "all", bankTransfer: "all" },
               // `theme: "dark"` alone still renders its own boxed
               // form background, visibly mismatched against the card's
-              // `bg-white/[0.04]` over the page's navy — `formBackgroundColor:
-              // "transparent"` lets the card behind it show through instead.
+              // `bg-white/[0.04]` over the page's navy — `formBackgroundColor`
+              // lets the card behind it show through instead, and
+              // `inputBackgroundColor` does the same for each field (its dark
+              // theme default is an opaque grey box, equally mismatched).
               visual: {
                 style: {
                   theme: "dark",
-                  customVariables: { formBackgroundColor: "transparent" },
+                  customVariables: {
+                    formBackgroundColor: "transparent",
+                    inputBackgroundColor: "transparent",
+                  },
                 },
               },
             }}
