@@ -324,7 +324,16 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
             initialization={{ amount: valorCobrado, payer: { email } }}
             customization={{
               paymentMethods: { creditCard: "all", bankTransfer: "all" },
-              visual: { style: { theme: "dark" } },
+              // `theme: "dark"` alone still renders its own boxed
+              // form background, visibly mismatched against the card's
+              // `bg-white/[0.04]` over the page's navy — `formBackgroundColor:
+              // "transparent"` lets the card behind it show through instead.
+              visual: {
+                style: {
+                  theme: "dark",
+                  customVariables: { formBackgroundColor: "transparent" },
+                },
+              },
             }}
             onSubmit={handleSubmit}
             onError={handleError}
