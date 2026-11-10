@@ -336,6 +336,10 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
                   customVariables: {
                     formBackgroundColor: "transparent",
                     inputBackgroundColor: "transparent",
+                    // Drives the selected payment-method row's highlighted
+                    // background in the Brick (not separately exposed as its
+                    // own variable).
+                    baseColor: "#d4ecc7",
                   },
                 },
               },
