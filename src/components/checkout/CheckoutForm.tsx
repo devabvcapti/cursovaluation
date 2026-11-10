@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { User, Mail, CreditCard, Phone, Tag, GraduationCap, ShieldCheck, type LucideIcon } from "lucide-react";
+import { User, Mail, CreditCard, Phone, Tag, GraduationCap, ShieldCheck, Check, type LucideIcon } from "lucide-react";
 import { EMAIL_PATTERN, validateCheckout, type CheckoutInput } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
 import { resolveBasePrice } from "@/lib/base-price";
@@ -65,13 +65,21 @@ function FieldIcon({ icon: Icon }: { icon: LucideIcon }) {
  * network (the server re-runs the same validation — see
  * `src/app/api/checkout/pedido/route.ts` — so this is a UX convenience, not
  * the trust boundary), and posts to `/api/checkout/pedido` only when the
- * payload is valid. There's no manual "Sou associado ABVCAP" toggle or CNPJ
- * field — membership is detected automatically from the email field: once it
- * looks like a complete address, it's checked (debounced) against the
- * GlueUp member-email export via `/api/checkout/preco`, and a match shows
- * "Membro ABVCAP — empresa" and switches the price to the associado value
- * with no action needed from the student. The cupom field drives that same
- * preview.
+ * payload is valid. There's no CNPJ field — membership is actually verified
+ * automatically from the email field: once it looks like a complete
+ * address, it's checked (debounced) against the GlueUp member-email export
+ * via `/api/checkout/preco`, and a match shows "Membro ABVCAP — empresa"
+ * and switches the price to the associado value with no action needed from
+ * the student. The cupom field drives that same preview.
+ *
+ * The "Sou associado ABVCAP" button above the Nome field is a display-only
+ * toggle: it instantly swaps the shown reference price between the
+ * non-associado and associado values (both computed client-side, see
+ * `instantValor`/`instantValorAssociado` below) so a visitor gets a sense of
+ * the member price before typing anything. It is never sent to the server
+ * and never changes what's actually charged — the e-mail (and/or cupom)
+ * lookup above is the only real validator, and its server-confirmed
+ * preview always overrides this toggle's guess once it resolves.
  *
  * The price itself is always visible, even before anything is typed: it
  * starts at the non-associado value (computed client-side via
@@ -102,6 +110,11 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cupom, setCupom] = useState("");
+  // Purely a display toggle: it only switches which client-computed
+  // reference price is shown before the real e-mail-based lookup resolves.
+  // It is never sent to the server and never affects what's actually
+  // charged — see the `instantValorAssociado`/`simulatedValor` comment below.
+  const [simulaAssociado, setSimulaAssociado] = useState(false);
   const [aceitaTermos, setAceitaTermos] = useState(false);
   // Shown only after a submit was attempted without the box checked — not on
   // every render while it's unchecked, so the error doesn't appear before
@@ -180,11 +193,14 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   const showPreview = preview !== null && previewQueryKey === queryKey;
   const confirmedPreview = showPreview ? preview : null;
 
-  // Instant, client-computed non-associado reference price, shown before any
-  // server round-trip resolves. Once a server-confirmed preview is available
-  // (email match and/or cupom resolved), it takes over as the authoritative
-  // displayed value instead — that's the only way this can go up to the
-  // associado price, since there's no manual toggle.
+  // Instant, client-computed reference prices (non-associado and associado),
+  // shown before any server round-trip resolves. Once a server-confirmed
+  // preview is available (email match and/or cupom resolved), it takes over
+  // as the authoritative displayed value instead — `simulaAssociado` only
+  // ever affects which of these two reference prices is shown in the
+  // meantime, never what's actually charged (that's decided server-side by
+  // the real e-mail/cupom lookup in `resolvePrice`, regardless of this
+  // toggle).
   //
   // Computed in an effect (not directly during render) because it reads the
   // current date (via `resolveBasePrice`'s early-bird check), and Next's
@@ -192,14 +208,23 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   // `new Date()` during the static render pass — this keeps that read
   // client/runtime-only, same as the [defer] fix it suggests.
   const [instantValor, setInstantValor] = useState<number | null>(null);
+  const [instantValorAssociado, setInstantValorAssociado] = useState<number | null>(null);
   useEffect(() => {
     setInstantValor(resolveBasePrice(false));
+    setInstantValorAssociado(resolveBasePrice(true));
   }, []);
 
-  const displayedValor = confirmedPreview ? confirmedPreview.valorCobrado : instantValor;
-  const displayedPercentualDesconto = confirmedPreview?.cupomAplicado
-    ? confirmedPreview.percentualDesconto
-    : null;
+  const simulatedValor = simulaAssociado ? instantValorAssociado : instantValor;
+  const displayedValor = confirmedPreview ? confirmedPreview.valorCobrado : simulatedValor;
+  const simulatedPercentualDesconto =
+    simulaAssociado && instantValor && instantValorAssociado
+      ? Math.round(((instantValor - instantValorAssociado) / instantValor) * 100)
+      : null;
+  const displayedPercentualDesconto = confirmedPreview
+    ? confirmedPreview.cupomAplicado
+      ? confirmedPreview.percentualDesconto
+      : null
+    : simulatedPercentualDesconto;
   // A cupom was typed and the server resolved a preview for it, but that
   // preview came back without a discount applied — distinct from "still
   // typing"/"not resolved yet" (confirmedPreview null) or "no cupom typed".
@@ -246,6 +271,28 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
   return (
     <div className={cn("grid gap-6 lg:grid-cols-5 lg:items-start lg:gap-8", className)}>
       <form noValidate onSubmit={handleSubmit} className={cn(CARD_CLASSES, "lg:col-span-3")}>
+        <div className="mb-6">
+          <button
+            type="button"
+            aria-pressed={simulaAssociado}
+            onClick={() => setSimulaAssociado((value) => !value)}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border px-4 py-2",
+              "font-body text-sm font-semibold transition-colors",
+              simulaAssociado
+                ? "border-brand-green bg-brand-green/15 text-brand-green"
+                : "border-white/20 bg-white/5 text-white/70 hover:border-white/35",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green",
+            )}
+          >
+            {simulaAssociado ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
+            Sou associado ABVCAP
+          </button>
+          <p className="mt-2 font-body text-xs text-white/40">
+            O valor de associado é confirmado automaticamente pelo e-mail informado abaixo.
+          </p>
+        </div>
+
         <div>
           <label htmlFor={nomeId} className={LABEL_CLASSES}>
             Nome

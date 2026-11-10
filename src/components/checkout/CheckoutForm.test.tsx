@@ -100,15 +100,37 @@ describe("CheckoutForm", () => {
     expect(await screen.findByText(/cupom inválido ou expirado/i)).toBeInTheDocument();
   });
 
-  it("renders nome, e-mail, CPF, telefone and cupom (opcional) fields, with no member toggle or CNPJ field", () => {
+  it("renders nome, e-mail, CPF, telefone, cupom (opcional) fields and the display-only member button, with no CNPJ field", () => {
     render(<CheckoutForm onPedidoCreated={vi.fn()} />);
     expect(screen.getByLabelText(/nome/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cpf/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/telefone/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cupom.*opcional/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/sou associado abvcap/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /sou associado abvcap/i })).toBeInTheDocument();
     expect(screen.queryByLabelText(/cnpj/i)).not.toBeInTheDocument();
+  });
+
+  it("clicking 'Sou associado ABVCAP' only swaps the displayed reference price, with no network call", async () => {
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    expect(await screen.findByText(/R\$\s*7\.650,00/)).toBeInTheDocument();
+
+    const toggle = screen.getByRole("button", { name: /sou associado abvcap/i });
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByText(/R\$\s*6\.120,00/)).toBeInTheDocument();
+    expect(
+      (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.filter(
+        (call) => typeof call[0] === "string" && call[0].includes("/api/checkout/preco")
+      ).length
+    ).toBe(0);
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    expect(await screen.findByText(/R\$\s*7\.650,00/)).toBeInTheDocument();
   });
 
   it("debounces the price preview call on cupom change and displays the formatted price", async () => {
