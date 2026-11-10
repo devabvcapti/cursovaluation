@@ -24,6 +24,7 @@ import {
 } from "@/lib/validate-checkout";
 import { formatInvestment } from "@/lib/format-investment";
 import { resolveBasePrice } from "@/lib/base-price";
+import { formatCpf } from "@/lib/cpf";
 import { cn } from "@/lib/cn";
 
 export interface CheckoutFormProps {
@@ -541,7 +542,8 @@ export function CheckoutForm({ onPedidoCreated, className }: CheckoutFormProps) 
                 inputMode="numeric"
                 autoComplete="off"
                 value={cpf}
-                onChange={(event) => setCpf(event.target.value)}
+                onChange={(event) => setCpf(formatCpf(event.target.value))}
+                maxLength={14}
                 className={cn(FIELD_CLASSES, errors.cpf ? FIELD_ERROR_BORDER_CLASSES : FIELD_BORDER_CLASSES)}
                 aria-invalid={Boolean(errors.cpf)}
                 aria-describedby={errors.cpf ? cpfErrorId : undefined}

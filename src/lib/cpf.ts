@@ -37,3 +37,20 @@ export function isValidCpf(value: string): boolean {
 
   return true;
 }
+
+/**
+ * Formats a (possibly partial, possibly already-punctuated) CPF as the
+ * user types: "###.###.###-##". Strips any non-digit characters first (so
+ * re-formatting an already-masked value, e.g. after a backspace, never
+ * doubles up punctuation) and ignores anything past the 11th digit.
+ */
+export function formatCpf(value: string): string {
+  const digits = onlyDigits(value).slice(0, 11);
+
+  let formatted = digits.slice(0, 3);
+  if (digits.length > 3) formatted += `.${digits.slice(3, 6)}`;
+  if (digits.length > 6) formatted += `.${digits.slice(6, 9)}`;
+  if (digits.length > 9) formatted += `-${digits.slice(9, 11)}`;
+
+  return formatted;
+}

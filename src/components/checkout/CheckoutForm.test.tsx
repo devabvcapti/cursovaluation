@@ -377,6 +377,16 @@ describe("CheckoutForm", () => {
     });
   });
 
+  it("masks the CPF field as digits are typed (screen 2)", async () => {
+    const user = userEvent.setup();
+    render(<CheckoutForm onPedidoCreated={vi.fn()} />);
+
+    await goToStep2(user);
+    await user.type(screen.getByLabelText(/cpf/i), VALID.cpf);
+
+    expect(screen.getByLabelText(/cpf/i)).toHaveValue("111.444.777-35");
+  });
+
   it("shows inline errors and never calls /api/checkout/pedido when CPF/Telefone are invalid", async () => {
     const user = userEvent.setup();
     const onPedidoCreated = vi.fn();
