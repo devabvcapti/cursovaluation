@@ -7,7 +7,7 @@
 // under the plain "node" environment uses Node's built-in fetch globals,
 // which is what `next/server` is built against, so `NextRequest`/`NextResponse`
 // behave as they do in real proxy execution.
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const getUserMock = vi.fn();
@@ -16,8 +16,19 @@ vi.mock("@supabase/ssr", () => ({
 }));
 
 describe("proxy", () => {
+  const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
   beforeEach(() => {
     getUserMock.mockReset();
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+  });
+
+  afterEach(() => {
+    if (originalSiteUrl === undefined) {
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_SITE_URL = originalSiteUrl;
+    }
   });
 
   it("redirects an unauthenticated request for /admin/cupons to /admin/login", async () => {
@@ -57,5 +68,20 @@ describe("proxy", () => {
     const { proxy } = await import("./proxy");
     const response = await proxy(new NextRequest(new URL("http://localhost/admin/login")));
     expect(response.status).toBe(200);
+  });
+
+  it("redirects via NEXT_PUBLIC_SITE_URL instead of the request's own origin when it's set", async () => {
+    // Reproduces the Hostinger bug: behind its reverse proxy, the incoming
+    // request's own origin resolves to the Next.js server's bind address
+    // (http://0.0.0.0:3000), not the public domain. Since the PKCE exchange
+    // in /auth/callback was failing, `user` was always null here, so EVERY
+    // /admin/* request redirected to an unreachable /admin/login — the
+    // generic 500 the user kept seeing, even in a fresh incognito window.
+    process.env.NEXT_PUBLIC_SITE_URL = "https://educacaoexecutiva.abvcap.com.br";
+    getUserMock.mockResolvedValue({ data: { user: null } });
+    const { proxy } = await import("./proxy");
+    const response = await proxy(new NextRequest(new URL("http://0.0.0.0:3000/admin/cupons")));
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("https://educacaoexecutiva.abvcap.com.br/admin/login");
   });
 });

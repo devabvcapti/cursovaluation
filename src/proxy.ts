@@ -43,13 +43,19 @@ export async function proxy(request: NextRequest) {
   const isAdminPath = request.nextUrl.pathname.startsWith("/admin");
   const isLoginPath = request.nextUrl.pathname === "/admin/login";
 
+  // Same Hostinger reverse-proxy gotcha as `src/app/auth/callback/route.ts`:
+  // `request.url`'s origin can resolve to the Next.js server's own bind
+  // address (http://0.0.0.0:3000) instead of the public domain, sending the
+  // browser to a redirect it can never reach (rendered as a generic 500).
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
+
   if (isAdminPath && !isLoginPath && !user) {
-    const loginUrl = new URL("/admin/login", request.url);
+    const loginUrl = new URL("/admin/login", siteUrl);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isAdminPath && !isLoginPath && user && !isAllowedAdminEmail(user.email)) {
-    const deniedUrl = new URL("/admin/login", request.url);
+    const deniedUrl = new URL("/admin/login", siteUrl);
     deniedUrl.searchParams.set("denied", "1");
     return NextResponse.redirect(deniedUrl);
   }
