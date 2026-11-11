@@ -12,6 +12,7 @@ import {
   GraduationCap,
   Mail,
   ShieldCheck,
+  Lock,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -317,10 +318,16 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
     <div className="mx-auto flex max-w-xl flex-col gap-6">
       {showBrick ? (
         <div className={CARD_CLASSES}>
-          <h2 className="mb-6 flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-[0.08em] text-white">
-            <CreditCard className="h-4 w-4 text-brand-green" aria-hidden="true" />
-            Pagamento
-          </h2>
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-[0.08em] text-white">
+              <CreditCard className="h-4 w-4 text-brand-green" aria-hidden="true" />
+              Pagamento
+            </h2>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/30 bg-brand-green/10 px-3 py-1 font-body text-xs font-semibold text-brand-green">
+              <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+              Ambiente seguro
+            </span>
+          </div>
           <Payment
             initialization={{ amount: valorCobrado, payer: { email } }}
             customization={{
@@ -348,9 +355,12 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
             onSubmit={handleSubmit}
             onError={handleError}
           />
-          <div className="mt-5 flex items-center justify-center gap-2 border-t border-white/10 pt-5 font-body text-sm text-white/60">
-            <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-green" aria-hidden="true" />
-            <p>Você está em um ambiente seguro do Mercado Pago.</p>
+          <div className="mt-5 flex items-start justify-center gap-2 border-t border-white/10 pt-5 font-body text-sm text-white/60">
+            <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-green" aria-hidden="true" />
+            <p className="max-w-sm text-center">
+              Seus dados são criptografados e processados diretamente pelo Mercado Pago — não
+              armazenamos as informações do seu cartão.
+            </p>
           </div>
         </div>
       ) : null}
