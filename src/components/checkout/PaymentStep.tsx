@@ -11,6 +11,7 @@ import {
   CreditCard,
   GraduationCap,
   Mail,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -347,6 +348,10 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
             onSubmit={handleSubmit}
             onError={handleError}
           />
+          <div className="mt-5 flex items-center justify-center gap-2 border-t border-white/10 pt-5 font-body text-sm text-white/60">
+            <ShieldCheck className="h-4 w-4 flex-shrink-0 text-brand-green" aria-hidden="true" />
+            <p>Você está em um ambiente seguro do Mercado Pago.</p>
+          </div>
         </div>
       ) : null}
 
