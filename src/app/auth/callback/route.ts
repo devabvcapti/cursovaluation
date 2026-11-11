@@ -23,9 +23,15 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
 
   if (code) {
+    // Timed: suspected cause of the Hostinger 500 is LiteSpeed's reverse
+    // proxy timing out this upstream request before this real network call
+    // to Supabase/Microsoft resolves, returning its own generic 500 with
+    // nothing logged here at all — this line proves or disproves that.
+    const startedAt = Date.now();
     try {
       const supabase = await getSupabaseServerClient();
       const { error } = await supabase.auth.exchangeCodeForSession(code);
+      console.error(`[auth/callback] exchangeCodeForSession took ${Date.now() - startedAt}ms`);
       if (error) {
         console.error("[auth/callback] exchangeCodeForSession returned an error:", error.message);
       }
@@ -34,8 +40,7 @@ export async function GET(request: Request) {
       // `src/proxy.ts` sends the visitor back to /admin/login as "not signed
       // in", same as any other failed login. Logged so a real cause (e.g. a
       // misconfigured env var) is diagnosable instead of a silent 500.
-      console.error(
-        "[auth/callback] exchangeCodeForSession threw:",
+      console.error(`[auth/callback] exchangeCodeForSession threw after ${Date.now() - startedAt}ms:`,
         error instanceof Error ? error.message : String(error),
       );
     }
