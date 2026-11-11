@@ -59,4 +59,32 @@ describe("GET /auth/callback", () => {
 
     expect(response.headers.get("location")).toBe("https://educacaoexecutiva.abvcap.com.br/admin/cupons");
   });
+
+  it("logs and still redirects when exchangeCodeForSession returns an error", async () => {
+    exchangeCodeForSessionMock.mockResolvedValue({ data: {}, error: { message: "invalid grant" } });
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { GET } = await import("./route");
+
+    const response = await GET(new Request("http://localhost/auth/callback?code=abc123"));
+
+    expect(response.headers.get("location")).toBe("http://localhost/admin/cupons");
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("exchangeCodeForSession"), "invalid grant");
+    errorSpy.mockRestore();
+  });
+
+  it("logs and still redirects (never throws) when exchangeCodeForSession itself throws", async () => {
+    exchangeCodeForSessionMock.mockRejectedValue(new Error("both auth code and code verifier should be non-empty"));
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { GET } = await import("./route");
+
+    const response = await GET(new Request("http://localhost/auth/callback?code=abc123"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost/admin/cupons");
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining("exchangeCodeForSession"),
+      "both auth code and code verifier should be non-empty",
+    );
+    errorSpy.mockRestore();
+  });
 });

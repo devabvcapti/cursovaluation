@@ -23,8 +23,22 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
 
   if (code) {
-    const supabase = await getSupabaseServerClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    try {
+      const supabase = await getSupabaseServerClient();
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (error) {
+        console.error("[auth/callback] exchangeCodeForSession returned an error:", error.message);
+      }
+    } catch (error) {
+      // Never block the redirect over this — an unexchanged code just means
+      // `src/proxy.ts` sends the visitor back to /admin/login as "not signed
+      // in", same as any other failed login. Logged so a real cause (e.g. a
+      // misconfigured env var) is diagnosable instead of a silent 500.
+      console.error(
+        "[auth/callback] exchangeCodeForSession threw:",
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
