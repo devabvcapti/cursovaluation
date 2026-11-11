@@ -8,6 +8,15 @@ import { getSupabaseServerClient } from "@/lib/supabase/server-client";
  * cookie via `getSupabaseServerClient`'s cookie adapter, then hands off to
  * `/admin/cupons` — `src/proxy.ts` is what actually decides whether the
  * signed-in account is allowed in.
+ *
+ * The redirect prefers `NEXT_PUBLIC_SITE_URL` over the request's own
+ * `origin`: behind a reverse proxy that doesn't forward the real Host (seen
+ * on Hostinger — confirmed `origin` there resolves to the Next.js server's
+ * own bind address, `http://0.0.0.0:3000`, not the public domain), using
+ * `origin` sends the browser to a redirect it can never reach, which it
+ * renders as a generic 500. Falls back to `origin` when the env var isn't
+ * set (local dev, and any host — e.g. Vercel — that already reports the
+ * real public host correctly).
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -18,5 +27,6 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  return NextResponse.redirect(`${origin}/admin/cupons`);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin;
+  return NextResponse.redirect(`${siteUrl}/admin/cupons`);
 }

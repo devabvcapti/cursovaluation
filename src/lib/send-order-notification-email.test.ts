@@ -89,6 +89,15 @@ describe("sendOrderNotificationEmail", () => {
     );
   });
 
+  it("falls back to the default recipient when LEAD_NOTIFICATION_EMAIL is malformed", async () => {
+    process.env.LEAD_NOTIFICATION_EMAIL = "not-an-email, also-not-one@";
+    sendMock.mockResolvedValue({ data: { id: "1" }, error: null });
+    const { sendOrderNotificationEmail } = await import("./send-order-notification-email");
+    const result = await sendOrderNotificationEmail(buildPedido());
+    expect(result.ok).toBe(true);
+    expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({ to: ["ti@abvcap.com.br"] }));
+  });
+
   it("returns ok:false when Resend reports an error", async () => {
     sendMock.mockResolvedValue({ data: null, error: { message: "domain not verified" } });
     const { sendOrderNotificationEmail } = await import("./send-order-notification-email");

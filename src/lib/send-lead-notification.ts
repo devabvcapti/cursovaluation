@@ -19,6 +19,9 @@ export interface LeadNotificationPayload {
 const FROM_ADDRESS = "ABVCAP Leads <contato@resend.abvcap.com.br>";
 const DEFAULT_RECIPIENT = "ti@abvcap.com.br";
 
+// Same permissive pattern as `validate-lead.ts`'s EMAIL_PATTERN.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const ORIGEM_CONFIG: Record<LeadOrigem, { tag: string; label: string; subject: string }> = {
   ementa: {
     tag: "LEAD",
@@ -32,8 +35,16 @@ const ORIGEM_CONFIG: Record<LeadOrigem, { tag: string; label: string; subject: s
   },
 };
 
+/**
+ * Falls back to the default recipient for anything that isn't a single,
+ * well-formed address — a malformed `LEAD_NOTIFICATION_EMAIL` (stray
+ * quotes/whitespace, multiple comma-separated addresses, etc.) would
+ * otherwise make Resend reject the whole send with "Invalid `to` field",
+ * silently dropping every lead notification instead of just misrouting one.
+ */
 function getRecipient(): string {
-  return process.env.LEAD_NOTIFICATION_EMAIL || DEFAULT_RECIPIENT;
+  const configured = process.env.LEAD_NOTIFICATION_EMAIL?.trim();
+  return configured && EMAIL_PATTERN.test(configured) ? configured : DEFAULT_RECIPIENT;
 }
 
 /**

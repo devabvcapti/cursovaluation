@@ -4,8 +4,19 @@ import type { PedidoRow } from "@/lib/supabase/types";
 const FROM_ADDRESS = "ABVCAP <contato@resend.abvcap.com.br>";
 const DEFAULT_RECIPIENT = "ti@abvcap.com.br";
 
+// Same permissive pattern as `validate-lead.ts`'s EMAIL_PATTERN.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Falls back to the default recipient for anything that isn't a single,
+ * well-formed address — a malformed `LEAD_NOTIFICATION_EMAIL` (stray
+ * quotes/whitespace, multiple comma-separated addresses, etc.) would
+ * otherwise make Resend reject the whole send with "Invalid `to` field",
+ * silently dropping the paid-order alert instead of just misrouting it.
+ */
 function getRecipient(): string {
-  return process.env.LEAD_NOTIFICATION_EMAIL || DEFAULT_RECIPIENT;
+  const configured = process.env.LEAD_NOTIFICATION_EMAIL?.trim();
+  return configured && EMAIL_PATTERN.test(configured) ? configured : DEFAULT_RECIPIENT;
 }
 
 function buildEmailBody(pedido: PedidoRow): string {
