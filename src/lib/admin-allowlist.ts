@@ -1,6 +1,6 @@
 /**
  * Only these accounts may manage `/admin/cupons`, regardless of whether
- * Microsoft SSO lets them sign in. Decided 2026-11-04: 7 ABVCAP staff
+ * Supabase Auth lets them sign in. Decided 2026-11-04: 7 ABVCAP staff
  * accounts; a shared Supabase project with other ABVCAP systems means other
  * accounts (e.g. an external events-production domain) can authenticate
  * successfully but must still be denied admin access here.

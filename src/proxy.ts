@@ -10,11 +10,11 @@ import { isAllowedAdminEmail } from "@/lib/admin-allowlist";
  * Route Handler counterpart). `/admin/login` itself is exempt so there's
  * always a way to reach the sign-in form.
  *
- * A successful Microsoft SSO sign-in is not enough on its own: this Supabase
- * project is shared with other ABVCAP systems, so anyone in ABVCAP's tenant
- * (or any other account the project already has) can authenticate. Only the
- * 7 accounts on `admin-allowlist.ts` may actually reach `/admin/*` — anyone
- * else is sent back to `/admin/login?denied=1` even though they're signed in.
+ * A successful sign-in is not enough on its own: this Supabase project is
+ * shared with other ABVCAP systems, so any account that exists in it can
+ * authenticate. Only the 7 accounts on `admin-allowlist.ts` may actually
+ * reach `/admin/*` — anyone else is sent back to `/admin/login?denied=1`
+ * even though they're signed in.
  */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -43,10 +43,10 @@ export async function proxy(request: NextRequest) {
   const isAdminPath = request.nextUrl.pathname.startsWith("/admin");
   const isLoginPath = request.nextUrl.pathname === "/admin/login";
 
-  // Same Hostinger reverse-proxy gotcha as `src/app/auth/callback/route.ts`:
-  // `request.url`'s origin can resolve to the Next.js server's own bind
-  // address (http://0.0.0.0:3000) instead of the public domain, sending the
-  // browser to a redirect it can never reach (rendered as a generic 500).
+  // Hostinger reverse-proxy gotcha: `request.url`'s origin can resolve to
+  // the Next.js server's own bind address (http://0.0.0.0:3000) instead of
+  // the public domain, sending the browser to a redirect it can never reach
+  // (rendered as a generic 500).
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
 
   if (isAdminPath && !isLoginPath && !user) {

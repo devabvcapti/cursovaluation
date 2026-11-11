@@ -3,58 +3,69 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LoginPage from "./page";
 
-const signInWithOAuthMock = vi.fn();
+const signInWithPasswordMock = vi.fn();
 vi.mock("@/lib/supabase/browser-client", () => ({
   getSupabaseBrowserClient: () => ({
-    auth: { signInWithOAuth: signInWithOAuthMock },
+    auth: { signInWithPassword: signInWithPasswordMock },
   }),
 }));
 
 describe("admin login page", () => {
   const originalLocation = window.location;
 
+  function stubLocation(url: string) {
+    // `href`/`search`/etc. are getters on URL's prototype, not own
+    // properties — spreading the instance into a plain object would lose
+    // them (and break next/image, which reads `window.location.href`
+    // internally). Mutate the real instance instead so they stay intact.
+    const location = new URL(url) as unknown as Location;
+    (location as unknown as { assign: typeof vi.fn }).assign = vi.fn();
+    Object.defineProperty(window, "location", { configurable: true, value: location });
+  }
+
   beforeEach(() => {
-    signInWithOAuthMock.mockReset();
-    // `signInWithOAuth` reads `window.location.origin`/`search` — give the
-    // test full control over both without a real navigation.
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: new URL("http://localhost/admin/login"),
-    });
+    signInWithPasswordMock.mockReset();
+    // The component reads `window.location.search` and navigates via
+    // `window.location.assign` on success — give the test full control over
+    // both without a real navigation.
+    stubLocation("http://localhost/admin/login");
   });
 
   afterEach(() => {
     Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
   });
 
-  it("starts Microsoft sign-in with the callback redirect on click", async () => {
-    signInWithOAuthMock.mockResolvedValue({ error: null });
+  it("signs in with e-mail/senha and navigates to /admin/cupons on success", async () => {
+    signInWithPasswordMock.mockResolvedValue({ error: null });
     const user = userEvent.setup();
     render(<LoginPage />);
 
-    await user.click(screen.getByRole("button", { name: /entrar com microsoft/i }));
+    await user.type(screen.getByLabelText(/e-mail/i), "ti@abvcap.com.br");
+    await user.type(screen.getByLabelText(/senha/i), "correct-horse-battery-staple");
+    await user.click(screen.getByRole("button", { name: /entrar/i }));
 
-    expect(signInWithOAuthMock).toHaveBeenCalledWith({
-      provider: "azure",
-      options: { scopes: "email", redirectTo: "http://localhost/auth/callback" },
+    expect(signInWithPasswordMock).toHaveBeenCalledWith({
+      email: "ti@abvcap.com.br",
+      password: "correct-horse-battery-staple",
     });
+    expect(window.location.assign).toHaveBeenCalledWith("/admin/cupons");
   });
 
-  it("shows an inline error and does not treat it as success when signInWithOAuth errors", async () => {
-    signInWithOAuthMock.mockResolvedValue({ error: { message: "Provedor Azure não configurado." } });
+  it("shows an inline error and does not navigate when signInWithPassword errors", async () => {
+    signInWithPasswordMock.mockResolvedValue({ error: { message: "Invalid login credentials" } });
     const user = userEvent.setup();
     render(<LoginPage />);
 
-    await user.click(screen.getByRole("button", { name: /entrar com microsoft/i }));
+    await user.type(screen.getByLabelText(/e-mail/i), "ti@abvcap.com.br");
+    await user.type(screen.getByLabelText(/senha/i), "wrong-password");
+    await user.click(screen.getByRole("button", { name: /entrar/i }));
 
-    expect(await screen.findByText("Provedor Azure não configurado.")).toBeInTheDocument();
+    expect(await screen.findByText("Invalid login credentials")).toBeInTheDocument();
+    expect(window.location.assign).not.toHaveBeenCalled();
   });
 
   it("shows the access-denied message when redirected back with ?denied=1", async () => {
-    Object.defineProperty(window, "location", {
-      configurable: true,
-      value: new URL("http://localhost/admin/login?denied=1"),
-    });
+    stubLocation("http://localhost/admin/login?denied=1");
 
     render(<LoginPage />);
 
