@@ -18,6 +18,8 @@ const PRICE_CLASSES = "mt-1 font-heading text-4xl font-light text-white md:text-
 
 const EARLY_BIRD_CLASSES = "mt-2 font-body text-sm text-white/70";
 
+const INSTALLMENTS_CLASSES = "mt-1 font-body text-sm font-semibold text-brand-green";
+
 const DETAILS_CLASSES =
   "mt-10 flex flex-col items-center gap-6 border-t border-white/15 pt-10 text-center sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-10 sm:gap-y-6 sm:text-left";
 
@@ -80,6 +82,7 @@ function PricingCard({ card, earlyBirdDeadline }: { card: PricingCard; earlyBird
       <p className={FULL_PRICE_CLASSES}>{formatInvestment(card.fullPrice)}</p>
       <p className={PRICE_CLASSES}>{formatInvestment(card.earlyBirdPrice)}</p>
       <p className={EARLY_BIRD_CLASSES}>Early bird até {earlyBirdDeadline}</p>
+      <p className={INSTALLMENTS_CLASSES}>ou em até 3x sem juros no cartão</p>
     </div>
   );
 }

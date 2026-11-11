@@ -24,6 +24,11 @@ describe("Investment", () => {
     expect(screen.getAllByText(new RegExp(deadline))).toHaveLength(2);
   });
 
+  it("shows the 3x-sem-juros note on both cards", () => {
+    render(<Investment />);
+    expect(screen.getAllByText(/3x sem juros/i)).toHaveLength(2);
+  });
+
   it("shows the course location", () => {
     render(<Investment />);
     expect(screen.getByText("Local")).toBeInTheDocument();
