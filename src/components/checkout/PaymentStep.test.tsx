@@ -268,4 +268,42 @@ describe("PaymentStep", () => {
     expect(await screen.findByText(/recusad/i)).toBeInTheDocument();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
+
+  describe("a 100%-off pedido (valorCobrado = 0)", () => {
+    // Reproduces a real bug: a 100% cupom zeroes valorCobrado, and the real
+    // Mercado Pago Payment Brick can't initialize with a 0 amount — it just
+    // hangs showing its loading skeletons forever, with no way to continue.
+    const FREE_PROPS = { ...PROPS, valorCobrado: 0 };
+
+    it("never renders the Payment Brick", async () => {
+      vi.stubGlobal("fetch", vi.fn(() => jsonResponse({ status: "approved" })));
+      render(<PaymentStep {...FREE_PROPS} />);
+
+      await flushMicrotasks();
+      expect(screen.queryByRole("button", { name: "submit-brick" })).not.toBeInTheDocument();
+    });
+
+    it("automatically confirms the free pedido via /api/checkout/pagamento and shows the approved message", async () => {
+      const fetchMock = vi.fn((_url?: string, _init?: RequestInit) => jsonResponse({ status: "approved" }));
+      vi.stubGlobal("fetch", fetchMock);
+      render(<PaymentStep {...FREE_PROPS} />);
+
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledWith(
+          "/api/checkout/pagamento",
+          expect.objectContaining({ method: "POST" }),
+        );
+      });
+      expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toEqual({ pedidoId: "pedido-1" });
+
+      expect(await screen.findByText(/aprovado/i)).toBeInTheDocument();
+    });
+
+    it("shows a retryable error when confirming the free pedido fails", async () => {
+      vi.stubGlobal("fetch", vi.fn(() => jsonResponse({}, false, 502)));
+      render(<PaymentStep {...FREE_PROPS} />);
+
+      expect(await screen.findByText(/não foi possível confirmar sua inscrição/i)).toBeInTheDocument();
+    });
+  });
 });

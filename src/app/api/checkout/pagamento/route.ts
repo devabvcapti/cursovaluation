@@ -67,6 +67,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "approved" }, { status: 200 });
   }
 
+  // A 100%-off cupom can zero out valor_cobrado — Mercado Pago's Payment
+  // Brick cannot initialize with a 0 amount (it hangs on the frontend, never
+  // rendering), so there's nothing to actually charge here. Skip Mercado
+  // Pago entirely and finalize through the same `applyPedidoStatus` path a
+  // real charge uses, so the cupom increment and both order emails still
+  // fire exactly as they would for a paid order.
+  if (pedidoRow.valor_cobrado <= 0) {
+    await applyPedidoStatus(pedidoRow, "approved", { payment_method: "free" });
+    return NextResponse.json({ status: "approved" }, { status: 200 });
+  }
+
   const result = await createMpPayment({
     pedidoId,
     transactionAmount: pedidoRow.valor_cobrado,

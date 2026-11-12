@@ -149,6 +149,41 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
   // Always clear any running poll when the component unmounts.
   useEffect(() => stopPolling, []);
 
+  // A 100%-off cupom zeroes valor_cobrado — the Payment Brick can't
+  // initialize with a 0 amount (it hangs showing only its loading
+  // skeletons, never rendering), so there's nothing for the buyer to pay or
+  // submit. Finalize the (already-free) pedido automatically instead of
+  // ever mounting the Brick.
+  useEffect(() => {
+    if (valorCobrado > 0 || submitLockRef.current) {
+      return;
+    }
+    submitLockRef.current = true;
+    setStatus("submitting");
+
+    fetch("/api/checkout/pagamento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pedidoId }),
+    })
+      .then(async (response) => {
+        const body = response.ok ? ((await response.json()) as PagamentoResponse) : null;
+        if (body?.status === "approved") {
+          setStatus("approved");
+          return;
+        }
+        submitLockRef.current = false;
+        setStatus("error");
+        setErrorMessage("Não foi possível confirmar sua inscrição agora. Tente novamente.");
+      })
+      .catch(() => {
+        submitLockRef.current = false;
+        setStatus("error");
+        setErrorMessage("Não foi possível confirmar sua inscrição agora. Tente novamente.");
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valorCobrado, pedidoId]);
+
   function startPolling() {
     stopPolling();
     pollAttemptsRef.current = 0;
@@ -253,8 +288,11 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
   }
 
   // The Brick is only offered while a (re)try is legitimate: never after
-  // approval, and never while a Pix for this pedido is outstanding.
+  // approval, never while a Pix for this pedido is outstanding, and never
+  // for a free (100%-off) pedido — Mercado Pago can't initialize a Brick
+  // with a 0 amount.
   const showBrick =
+    valorCobrado > 0 &&
     status !== "approved" &&
     status !== "pix_waiting" &&
     status !== "pix_timeout" &&
@@ -316,6 +354,12 @@ export function PaymentStep({ pedidoId, valorCobrado, email }: PaymentStepProps)
 
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
+      {valorCobrado <= 0 && status === "submitting" ? (
+        <StatusCard icon={Clock} tone="info" role="status">
+          Confirmando sua inscrição gratuita...
+        </StatusCard>
+      ) : null}
+
       {showBrick ? (
         <div className={CARD_CLASSES}>
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">

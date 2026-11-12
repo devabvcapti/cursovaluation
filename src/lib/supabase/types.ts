@@ -1,5 +1,5 @@
 export type PedidoStatus = "pending" | "approved" | "rejected" | "cancelled";
-export type PaymentMethod = "credit_card" | "pix";
+export type PaymentMethod = "credit_card" | "pix" | "free";
 
 export interface AssociadoRow {
   id: string;

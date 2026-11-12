@@ -272,6 +272,23 @@ describe("POST /api/checkout/pagamento", () => {
     },
   );
 
+  it("skips Mercado Pago entirely for a 100%-off pedido (valor_cobrado 0), finalizing it as approved via applyPedidoStatus", async () => {
+    const freeRow = { ...pedidoRow, valor_cobrado: 0, cupom_codigo: "GRATIS100" };
+    maybeSingleMock.mockResolvedValue({ data: freeRow, error: null });
+
+    const { POST } = await import("./route");
+    const response = await POST(buildRequest({ pedidoId: pedidoRow.id }));
+
+    expect(createMpPaymentMock).not.toHaveBeenCalled();
+    expect(updateMock).toHaveBeenCalledWith({ status: "approved", payment_method: "free" });
+    expect(incrementCupomUsoMock).toHaveBeenCalledWith("GRATIS100");
+    expect(sendOrderConfirmationEmailMock).toHaveBeenCalledWith(freeRow);
+    expect(sendOrderNotificationEmailMock).toHaveBeenCalledWith(freeRow);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: "approved" });
+  });
+
   it("returns 502 and leaves the pedido's status untouched when createMpPayment fails", async () => {
     maybeSingleMock.mockResolvedValue({ data: pedidoRow, error: null });
     createMpPaymentMock.mockResolvedValue({
