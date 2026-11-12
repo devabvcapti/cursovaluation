@@ -28,6 +28,7 @@ const TOGGLE_BUTTON_CLASSES = cn(
 export function CupomList({ initialCupons }: CupomListProps) {
   const [cupons, setCupons] = useState<CupomRow[]>(initialCupons);
   const [togglingCodigo, setTogglingCodigo] = useState<string | null>(null);
+  const [toggleError, setToggleError] = useState<string | null>(null);
 
   function handleCreated(row: CupomRow) {
     setCupons((current) => [row, ...current]);
@@ -35,6 +36,7 @@ export function CupomList({ initialCupons }: CupomListProps) {
 
   async function handleToggle(row: CupomRow) {
     setTogglingCodigo(row.codigo);
+    setToggleError(null);
     try {
       const response = await fetch(`/api/admin/cupons/${row.codigo}`, {
         method: "PATCH",
@@ -43,6 +45,13 @@ export function CupomList({ initialCupons }: CupomListProps) {
       });
 
       if (!response.ok) {
+        // Previously failed silently here — the button appeared to do
+        // nothing on, e.g., an expired session (401) or a DB error (502),
+        // with no way to tell why. Surface whatever the route reported.
+        const body = (await response.json().catch(() => null)) as { errors?: Record<string, string> } | null;
+        setToggleError(
+          body?.errors?.geral ?? body?.errors?.ativo ?? "Não foi possível atualizar o cupom agora.",
+        );
         return;
       }
 
@@ -50,6 +59,8 @@ export function CupomList({ initialCupons }: CupomListProps) {
       setCupons((current) =>
         current.map((cupom) => (cupom.codigo === updated.codigo ? updated : cupom)),
       );
+    } catch {
+      setToggleError("Não foi possível atualizar o cupom agora.");
     } finally {
       setTogglingCodigo(null);
     }
@@ -58,6 +69,12 @@ export function CupomList({ initialCupons }: CupomListProps) {
   return (
     <div>
       <CupomForm onCreated={handleCreated} />
+
+      {toggleError ? (
+        <p role="alert" className="mt-4 font-body text-sm text-red-600">
+          {toggleError}
+        </p>
+      ) : null}
 
       <table className="mt-10 w-full border-collapse text-left">
         <thead>
