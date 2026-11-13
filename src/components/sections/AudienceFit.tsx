@@ -6,6 +6,8 @@ const CONTENT_CLASSES = "relative mx-auto w-full max-w-6xl px-6 lg:px-10";
 
 const HEADING_CLASSES = "font-heading text-4xl font-light text-brand-navy md:text-5xl";
 
+const INTRO_CLASSES = "mt-6 max-w-3xl font-body text-base leading-relaxed text-brand-navy/75 md:text-lg";
+
 const GRID_CLASSES = "mt-14 grid grid-cols-1 gap-6 md:grid-cols-2";
 
 const CARD_CLASSES =
@@ -24,6 +26,7 @@ export function AudienceFit() {
     <Section tone="white" id="para-quem">
       <ScrollReveal className={CONTENT_CLASSES}>
         <h2 className={HEADING_CLASSES}>Para quem é este programa</h2>
+        <p className={INTRO_CLASSES}>{courseContent.audienceIntro}</p>
         <div className={GRID_CLASSES}>
           {courseContent.audienceProfiles.map((profile) => (
             <article key={profile.title} data-testid="audience-profile" className={CARD_CLASSES}>

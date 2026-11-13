@@ -1,4 +1,4 @@
-import { Table2, TrendingUp, Landmark, Building2, Sparkles, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Table2, Building2, Sparkles, type LucideIcon } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { Section } from "@/components/ui/Section";
 import { courseContent } from "@/content/curso";
@@ -21,7 +21,7 @@ const BLOCK_BODY_CLASSES = "mt-4 font-body text-base leading-relaxed text-white/
 
 // Icons, in the same order as `courseContent.methodology` — presentation
 // detail kept out of the content model (which stays plain title/body data).
-const ICONS: LucideIcon[] = [Table2, TrendingUp, Landmark, Building2, Sparkles, ShieldCheck];
+const ICONS: LucideIcon[] = [Table2, Building2, Sparkles];
 
 /**
  * "Metodologia" band (anchor id kept for nav compatibility): one static

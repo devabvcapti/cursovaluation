@@ -13,6 +13,7 @@ export interface CourseContent {
     syllabusCtaLabel: string;
   };
   authorityStats: { value: number; suffix: string; label: string; verified: boolean }[];
+  audienceIntro: string;
   audienceProfiles: { title: string; pain: string }[];
   learningOutcomes: string[];
   curriculumModules: { title: string; summary: string; lessons: string[] }[];
@@ -65,9 +66,12 @@ export const courseContent: CourseContent = {
   },
   hero: {
     eyebrow: "Aprenda com quem faz",
-    headlineLines: ["Valuation:", "o método por trás", "das decisões que movem capital."],
+    headlineLines: [
+      "Modelagem Financeira e Valuation:",
+      "A abordagem de private equity aplicada a um caso real, do valuation ao closing.",
+    ],
     subheadline:
-      "Formação presencial de avaliação de empresas para estudantes e profissionais que atuam, ou querem atuar, em Private Equity, Venture Capital, M&A, investment banking e finanças corporativas.",
+      "Da primeira linha de receita à recomendação ao comitê de investimento. Em 13 encontros presenciais, o aluno terá a oportunidade de construir o modelo financeiro de uma companhia real e estruturar a transação sob a ótica de private equity, utilizando a IA como potencializadora da análise.",
     checkoutUrl: "/inscricao",
     syllabusCtaLabel: "Baixar ementa completa",
   },
@@ -93,22 +97,24 @@ export const courseContent: CourseContent = {
     },
   ],
 
+  audienceIntro:
+    "Para profissionais e estudantes que atuam ou desejam atuar no mercado financeiro, em especial em private equity, venture capital, investment banking e M&A. O curso pressupõe base em contabilidade e finanças.",
   audienceProfiles: [
     {
-      title: "Investidores de Private Equity e Venture Capital",
-      pain: "Sua tese de investimento depende de uma avaliação defensável do ativo, da entrada à saída — e o retorno do fundo começa no preço que você paga.",
+      title: "Private equity e venture capital",
+      pain: "Analistas e associados de gestoras que avaliam empresas e estruturam investimentos.",
     },
     {
-      title: "Profissionais de M&A e Investment Banking",
-      pain: "Você estrutura e negocia transações sob pressão de tempo e precisa defender premissas de valuation diante de clientes, comitês e contrapartes — com rigor técnico que resista a questionamento.",
+      title: "Investment banking e M&A",
+      pain: "Profissionais que assessoram transações e precisam dominar a modelagem e o valuation.",
     },
     {
-      title: "CFOs e Controllers",
-      pain: "Você precisa avaliar aquisições, cisões, aportes e laudos societários internamente, sem depender exclusivamente de consultorias externas para decisões estratégicas.",
+      title: "CFOs e controllers",
+      pain: "Executivos de finanças que lidam com investidores, captações e processos de venda.",
     },
     {
-      title: "Consultores de Gestão",
-      pain: "Você assessora clientes em M&A e precisa compreender a lógica financeira por trás do valuation para negociar cláusulas, earn-outs e garantias com propriedade.",
+      title: "Consultores de gestão",
+      pain: "Profissionais de consultoria que apoiam decisões de investimento, reestruturações e transações.",
     },
   ],
 
@@ -172,28 +178,16 @@ export const courseContent: CourseContent = {
 
   methodology: [
     {
-      title: "Você constrói o modelo inteiro, do zero",
-      body: "Nos cursos de referência do mercado, a planilha é pré-requisito ou fica de fora. Aqui ela é o centro do trabalho.",
+      title: "Do valuation ao deal",
+      body: "Valuation, estruturação da transação, cálculo de TIR e MOIC, análise das fontes de valor e recomendação ao comitê de investimento.",
     },
     {
-      title: "Não para no valor da empresa",
-      body: "Você monta o deal, calcula TIR e MOIC, decompõe de onde vem o retorno e defende uma recomendação ao comitê — etapa que nenhum curso comparável cobre.",
+      title: "Caso real",
+      body: "Uma companhia aberta brasileira, analisada do início ao fim, com base em fontes primárias.",
     },
     {
-      title: "Alavancagem à brasileira",
-      body: "Em vez do LBO americano, o instrumento que de fato viabiliza alavancagem em deal no Brasil: o seller's finance.",
-    },
-    {
-      title: "Uma companhia aberta real como caso",
-      body: "Com fonte primária de verdade — RI, planilha interativa, prospecto, calls de resultado. Você consegue conferir, aprofundar e continuar sozinho depois do curso.",
-    },
-    {
-      title: "Primeiro na unha, depois a ferramenta",
-      body: "A aula de IA vem logo depois de fechar o valuation com as próprias mãos — você aplica a IA a um modelo que você mesmo construiu e entende.",
-    },
-    {
-      title: "Chancela e curadoria ABVCAP",
-      body: "Conteúdo, corpo docente e caso são curados sob a supervisão institucional da ABVCAP, associação de referência do mercado de Private Equity e Venture Capital no Brasil.",
+      title: "IA aplicada",
+      body: "Uso de inteligência artificial como potencializador das análises.",
     },
   ],
 

@@ -2,7 +2,6 @@
 
 import { useRef, useState, type CSSProperties } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { AnimatedTextCycle } from "@/components/ui/AnimatedTextCycle";
 import { BandeiraShape } from "@/components/ui/BandeiraShape";
 import { Button } from "@/components/ui/Button";
 import { LeadCaptureForm } from "@/components/ui/LeadCaptureForm";
@@ -86,13 +85,19 @@ const EYEBROW_CLASSES = cn(
   "font-body text-xs font-bold uppercase tracking-[0.18em] text-white/70",
 );
 
+// -20%, then -25%, then +15% on top of that (2026-11-13, per user request).
+// `max-w` widened from the original 15ch so line 1 ("Modelagem Financeira e
+// Valuation:", ~34 characters, forced onto a single line via
+// `whitespace-nowrap` below) fits without wrapping — `ch` scales with the
+// h1's own font-size, so this stays correct at every breakpoint, not just
+// the one it was tuned against.
 const H1_CLASSES = cn(
-  "max-w-[15ch] font-heading font-light",
-  "text-[2.375rem] leading-[1.04] tracking-[-0.02em]",
-  "sm:text-6xl md:text-7xl lg:text-[88px] lg:leading-[0.98] xl:text-[96px]",
+  "max-w-[38ch] font-heading font-light",
+  "text-[1.639rem] leading-[1.04] tracking-[-0.02em]",
+  "sm:text-[2.588rem] md:text-[3.105rem] lg:text-[60.72px] lg:leading-[0.98] xl:text-[66.24px]",
 );
 
-// The opening line ("Valuation:") is the course's name — the one accent.
+// The opening line is the course's name — the one accent.
 function lineColorClass(index: number) {
   return index === 0 ? "text-brand-green" : "text-white";
 }
@@ -102,7 +107,7 @@ function escapeRegExp(value: string): string {
 }
 
 // A few words in the white headline lines get the brand-green accent too.
-const HIGHLIGHT_WORDS = ["método", "decisões", "capital"];
+const HIGHLIGHT_WORDS = ["private equity", "valuation", "closing"];
 const HIGHLIGHT_PATTERN = new RegExp(`(${HIGHLIGHT_WORDS.map(escapeRegExp).join("|")})`, "g");
 
 function renderHighlighted(text: string) {
@@ -118,15 +123,6 @@ function renderHighlighted(text: string) {
       ),
     );
 }
-
-// Experiment (2026-10-21): cycles the opening word instead of a static
-// "Valuation" — easy to drop by reverting this constant/usage pair. First
-// word matches `hero.headlineLines[0]` so the reduced-motion/initial
-// render and the <title>/meta description agree. Kept short on purpose —
-// the full course name ("Modelagem Financeira e Valuation") overflows this
-// single-line slot at narrower widths; the full name is used everywhere
-// else (emails, WhatsApp, legal pages).
-const HEADLINE_CYCLE_WORDS = ["Valuation", "M&A", "Governança", "Estruturação"];
 
 const SUBHEADLINE_CLASSES = "max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg";
 
@@ -253,18 +249,14 @@ export function Hero() {
               <span key={line} className="-my-[0.08em] block overflow-hidden py-[0.08em]">
                 <span
                   data-testid="hero-headline-line"
-                  className={cn("hero-enter-line block", lineColorClass(index))}
+                  className={cn(
+                    "hero-enter-line block",
+                    lineColorClass(index),
+                    index === 0 && "whitespace-nowrap",
+                  )}
                   style={enterDelay(SEQUENCE_DELAY_S + LINE_STAGGER_S * index)}
                 >
-                  {index === 0 ? (
-                    <>
-                      <AnimatedTextCycle words={HEADLINE_CYCLE_WORDS} />:{" "}
-                    </>
-                  ) : (
-                    <>
-                      {renderHighlighted(line)}{" "}
-                    </>
-                  )}
+                  {renderHighlighted(line)}{" "}
                 </span>
               </span>
             ))}
